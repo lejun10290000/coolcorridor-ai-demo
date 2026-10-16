@@ -20,6 +20,7 @@ const trunkMaterial = new THREE.MeshStandardMaterial({ color: '#544133', roughne
 const foliageMaterials = ['#355e42', '#426d4b', '#55774b', '#294c3e'].map(color => new THREE.MeshStandardMaterial({ color, roughness: 0.95 }))
 const routeColors = ['#70e8bc', '#f9be66', '#f0766b']
 type WindowInstance = { x: number; y: number; z: number; w: number; h: number; d: number }
+type TreeInstance = { x: number; z: number; scale: number; materialIndex: number; index: number }
 const unitBox = new THREE.BoxGeometry(1, 1, 1)
 const trunkGeometry = new THREE.CylinderGeometry(0.12, 0.2, 2.35, 7)
 const crownGeometries = [1.02, 1.06, 0.9].map(radius => new THREE.IcosahedronGeometry(radius, 1))
@@ -64,24 +65,39 @@ function makeBuilding(parent: THREE.Object3D, x: number, z: number, w: number, d
   box(group, w * 0.22, 0.5, d * 0.25, roofMaterial, -w * 0.22, h + 0.4, 0, true)
 }
 
-function makeTree(parent: THREE.Object3D, x: number, z: number, scale: number, index: number) {
-  const tree = new THREE.Group()
-  tree.position.set(x, 0, z)
-  tree.scale.setScalar(scale)
-  parent.add(tree)
-  const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial)
-  trunk.position.y = 1.28
-  trunk.castShadow = true
-  tree.add(trunk)
-  const material = foliageMaterials[index % foliageMaterials.length]
-  ;[[-0.42, 3.0, 0], [0.5, 3.25, 0.22], [0.05, 3.65, -0.2]].forEach(([cx, cy, cz], crownIndex) => {
-    const crown = new THREE.Mesh(crownGeometries[crownIndex], material)
-    crown.position.set(cx, cy, cz)
-    crown.castShadow = true
-    crown.receiveShadow = true
-    tree.add(crown)
+function makeTreeInstances(parent: THREE.Object3D, records: TreeInstance[]) {
+  const trunks = new THREE.InstancedMesh(trunkGeometry, trunkMaterial, records.length)
+  const crowns = foliageMaterials.map((material, materialIndex) => {
+    const count = records.filter(record => record.materialIndex === materialIndex).length
+    return crownGeometries.map(geometry => new THREE.InstancedMesh(geometry, material, count))
   })
-  return tree
+  trunks.castShadow = true
+  parent.add(trunks)
+  crowns.flat().forEach(mesh => { mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh) })
+  const instance = new THREE.Object3D()
+  const crownOffsets = [[-0.42, 3.0, 0], [0.5, 3.25, 0.22], [0.05, 3.65, -0.2]]
+  const setQuality = (quality: LandingQuality) => {
+    const materialCounts = foliageMaterials.map(() => 0)
+    records.forEach((record, trunkIndex) => {
+      const scale = quality === 'high' || record.index % 2 === 0 ? record.scale : 0
+      instance.position.set(record.x, 1.28 * record.scale, record.z)
+      instance.scale.setScalar(scale)
+      instance.updateMatrix()
+      trunks.setMatrixAt(trunkIndex, instance.matrix)
+      const crownIndex = materialCounts[record.materialIndex]++
+      crownOffsets.forEach(([x, y, z], offsetIndex) => {
+        instance.position.set(record.x + x * record.scale, y * record.scale, record.z + z * record.scale)
+        instance.updateMatrix()
+        crowns[record.materialIndex][offsetIndex].setMatrixAt(crownIndex, instance.matrix)
+      })
+    })
+    ;[trunks, ...crowns.flat()].forEach(mesh => {
+      mesh.instanceMatrix.needsUpdate = true
+      mesh.computeBoundingSphere()
+    })
+  }
+  setQuality('high')
+  return setQuality
 }
 
 function ribbon(curve: THREE.CatmullRomCurve3, width: number, height: number, material: THREE.Material) {
@@ -173,7 +189,7 @@ export function createTownshipWorld(): TownshipWorld {
   windowMesh.instanceMatrix.needsUpdate = true
   windowMesh.computeBoundingSphere()
   world.add(windowMesh)
-  const trees: THREE.Group[] = []
+  const trees: TreeInstance[] = []
   for (let i = 0; i < 40; i++) {
     const t = (i + 0.4) / 41
     const p = mainPath.getPoint(t)
@@ -182,13 +198,14 @@ export function createTownshipWorld(): TownshipWorld {
     const side = i % 2 ? 1 : -1
     const distance = 3.7 + rng() * 1.5
     const point = p.clone().addScaledVector(normal, side * distance)
-    trees.push(makeTree(world, point.x, point.z, 0.8 + rng() * 0.32, i))
+    trees.push({ x: point.x, z: point.z, scale: 0.8 + rng() * 0.32, materialIndex: i % foliageMaterials.length, index: i })
   }
   for (let i = 0; i < 28; i++) {
     const x = -27 + rng() * 54
     const z = (i % 2 ? 18 : -18) + (rng() - 0.5) * 6
-    trees.push(makeTree(world, x, z, 0.55 + rng() * 0.3, i + 41))
+    trees.push({ x, z, scale: 0.55 + rng() * 0.3, materialIndex: (i + 41) % foliageMaterials.length, index: i + 40 })
   }
+  const setTreeQuality = makeTreeInstances(world, trees)
   const shelter = new THREE.Group()
   shelter.position.set(8, 0, 0)
   world.add(shelter)
@@ -254,18 +271,23 @@ export function createTownshipWorld(): TownshipWorld {
       routeMaterials.forEach((material, index) => { material.opacity = (chapter === 2 ? 0.95 : 0.68) + Math.sin(seconds * 1.4 - index) * 0.08 })
       routeHaloMaterials.forEach((material, index) => { material.opacity = (chapter === 2 ? 0.3 : 0.2) + Math.sin(seconds * 1.4 - index) * 0.05 })
       routeGlow.intensity = chapter === 2 ? 6 : 3.5
-      trees.forEach((tree, index) => { tree.rotation.z = Math.sin(seconds * 0.42 + index * 0.6) * 0.012 })
       violet.intensity = chapter === 2 ? 32 : 19
     },
     setQuality(quality) {
       sun.castShadow = quality === 'high'
-      trees.forEach((tree, index) => { tree.visible = quality === 'high' || index % 2 === 0 })
+      setTreeQuality(quality)
     },
     dispose() {
       const geometries = new Set<THREE.BufferGeometry>()
-      scene.traverse(object => { if (object instanceof THREE.Mesh) geometries.add(object.geometry) })
+      const materials = new Set<THREE.Material>()
+      scene.traverse(object => {
+        if (!(object instanceof THREE.Mesh)) return
+        geometries.add(object.geometry)
+        const meshMaterials = Array.isArray(object.material) ? object.material : [object.material]
+        meshMaterials.forEach(material => materials.add(material))
+      })
       geometries.forEach(geometry => geometry.dispose())
-      ;[ground, pathSurface, pathEdge, roofMaterial, glassMaterial, trunkMaterial, lane, lawn, ...buildingMaterials, ...foliageMaterials, ...routeMaterials, ...routeHaloMaterials].forEach(material => material.dispose())
+      materials.forEach(material => material.dispose())
     },
   }
 }

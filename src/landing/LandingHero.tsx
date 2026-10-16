@@ -41,18 +41,31 @@ export function LandingHero({ onEnter }: { onEnter: (mode: 'resident' | 'develop
   const reducedMotion = useReducedMotion()
   const [chapter, setChapter] = useState<LandingChapter>(0)
   const [paused, setPaused] = useState(reducedMotion)
+  const [orbitTourToken, setOrbitTourToken] = useState(0)
+  const [tourActive, setTourActive] = useState(false)
   const [quality, setQuality] = useState<LandingQuality>(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 840px)').matches ? 'balanced' : 'high')
   useEffect(() => { if (reducedMotion) setPaused(true) }, [reducedMotion])
   useEffect(() => {
-    if (paused || reducedMotion) return
+    if (paused || reducedMotion || tourActive) return
     const timer = window.setInterval(() => setChapter(value => ((value + 1) % 3) as LandingChapter), 12000)
     return () => window.clearInterval(timer)
-  }, [paused, reducedMotion, chapter])
+  }, [paused, reducedMotion, chapter, tourActive])
+  useEffect(() => {
+    if (orbitTourToken === 0) return
+    const timer = window.setTimeout(() => setTourActive(false), 11000)
+    return () => window.clearTimeout(timer)
+  }, [orbitTourToken])
   const selectChapter = (value: LandingChapter) => setChapter(value)
+  const startOrbitTour = () => {
+    setChapter(0)
+    setPaused(false)
+    setTourActive(true)
+    setOrbitTourToken(value => value + 1)
+  }
 
   return <main className={`cinematic-home ${paused ? 'is-paused' : ''}`}>
     <div className="world-layer">
-      <Suspense fallback={<div className="scene-loading">Preparing the future township…</div>}><CinematicTownshipScene key={quality === 'fallback' ? 'fallback' : 'webgl'} chapter={chapter} paused={paused} quality={quality} onUnavailable={() => setQuality('fallback')} /></Suspense>
+      <Suspense fallback={<div className="scene-loading">Preparing the future township…</div>}><CinematicTownshipScene key={quality === 'fallback' ? 'fallback' : 'webgl'} chapter={chapter} paused={paused} quality={quality} orbitTourToken={orbitTourToken} onUnavailable={() => setQuality('fallback')} /></Suspense>
       <div className="world-grade" />
       <div className="world-vignette" />
     </div>
@@ -82,6 +95,7 @@ export function LandingHero({ onEnter }: { onEnter: (mode: 'resident' | 'develop
       <div className="chapter-nav" aria-label="Cinematic chapters">{chapters.map((item, index) => <button key={item.number} type="button" className={chapter === index ? 'active' : ''} onClick={() => selectChapter(index as LandingChapter)} aria-pressed={chapter === index}><span>{item.number}</span> {item.title}</button>)}</div>
       <div className="motion-controls">
         <span className="orbit-hint">{quality === 'fallback' ? 'STATIC PREVIEW · 3D UNAVAILABLE' : 'DRAG WORLD TO ORBIT 360°'}</span>
+        <button type="button" className="orbit-tour" onClick={startOrbitTour} disabled={quality === 'fallback' || reducedMotion} aria-label="Play a ten-second 360-degree camera orbit">↻ 360° tour</button>
         <button type="button" onClick={() => setPaused(value => !value)} aria-pressed={paused} aria-label={paused ? 'Play cinematic motion' : 'Pause cinematic motion'}>{paused ? '▶ Play' : 'Ⅱ Pause'}</button>
         <label className="quality-control">Quality <select value={quality} onChange={event => setQuality(event.target.value as LandingQuality)} aria-label="Visual quality"><option value="high">High</option><option value="balanced">Balanced</option><option value="fallback">Fallback</option></select></label>
       </div>
