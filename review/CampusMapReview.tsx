@@ -19,7 +19,7 @@ function Review() {
   const plan = optimise(candidates, budget, [])
   const selectedSites = candidates.filter(c => plan.ids.includes(c.intervention_id))
   const routeIds = route === 'shortest' ? ['DEMO-S01','DEMO-S02'] : ['DEMO-S03']
-  return <main className="map-review"><header><b>Campus map component review</b><p>Pending Builder 1 approval and application integration. This standalone page tests the proposed component; the main app remains unchanged.</p></header>
+  return <main className="map-review"><header><b>Campus map component review</b><p>Standalone component test harness. The integrated Resident and Developer application is at the site's root page.</p></header>
     <nav aria-label="Review mode"><button onClick={() => setMode('resident')} aria-pressed={mode === 'resident'}>Resident review</button><button onClick={() => setMode('developer')} aria-pressed={mode === 'developer'}>Developer review</button><button onClick={() => setRecenter(r => r+1)}>Recenter map</button></nav>
     <h1>{mode === 'resident' ? 'Resident' : 'Developer'} map review</h1>
     <p>DEMO: Main Gate → Klinik UTM. Display paths are illustrative; connections and crossings require survey.</p>

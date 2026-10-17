@@ -24,6 +24,21 @@ export const segmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fr
 export const shadeColours = { mostly_exposed: '#C4473A', mixed: '#BD8B16', mostly_shaded: '#35745A', unknown: '#707580' }
 export const shadeLabels = { mostly_exposed: 'Mostly exposed', mixed: 'Mixed shade', mostly_shaded: 'Mostly shaded', unknown: 'Unknown / needs survey' }
 export const svgPoints = (geometry: MapDisplayPoint[]) => geometry.map(p => `${p.x},${p.y}`).join(' ')
+/** Pixel-space hit testing also handles SVG strokes that lose DOM focus during a tap. */
+export function nearestDisplaySegment(point: MapDisplayPoint, ids: string[], tolerance = 23): string | null {
+  let best: string | null = null, distance = tolerance
+  for (const id of ids) {
+    const geometry = segmentDisplays[id]?.map_display_geometry ?? []
+    for (let i = 1; i < geometry.length; i++) {
+      const a = geometry[i-1], b = geometry[i], dx = b.x-a.x, dy = b.y-a.y
+      const lengthSquared = dx*dx+dy*dy
+      const t = lengthSquared ? Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.y-a.y)*dy)/lengthSquared)) : 0
+      const d = Math.hypot(point.x-a.x-t*dx,point.y-a.y-t*dy)
+      if (d < distance) { distance = d; best = id }
+    }
+  }
+  return best
+}
 /** Halfway along the display polyline, not a surveyed installation location. */
 export function displayMidpoint(geometry: MapDisplayPoint[]): MapDisplayPoint | null {
   if (!geometry.length) return null

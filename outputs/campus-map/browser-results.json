@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "scope": "Standalone component production review build. Main app integration pending Builder 1 approval.",
+  "scope": "Standalone component production review build. Integrated application checks are recorded separately in integrated/browser-results.json.",
   "checks": [
     "route segment ID/highlight agreement",
     "keyboard, mouse and mobile touch segment selection",

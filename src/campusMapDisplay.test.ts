@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { segments } from './fixtures'
-import { campusMap, displayMidpoint, segmentDisplays } from './campusMapDisplay'
+import { campusMap, displayMidpoint, nearestDisplaySegment, segmentDisplays } from './campusMapDisplay'
 
 describe('campus image display geometry contract', () => {
   it('covers the existing shared segment IDs with explicit pixel-only fixture provenance', () => {
@@ -34,5 +34,10 @@ describe('campus image display geometry contract', () => {
   })
   it('keeps a stable anchor for a degenerate point without dividing by zero', () => {
     expect(displayMidpoint([{x:2,y:3},{x:2,y:3}])).toEqual({x:2,y:3})
+  })
+  it('selects only a nearby available pixel segment and rejects blank map space', () => {
+    expect(nearestDisplaySegment({x:1010,y:540},['DEMO-S01','DEMO-S04'])).toBe('DEMO-S04')
+    expect(nearestDisplaySegment({x:1010,y:540},['DEMO-S01'])).toBeNull()
+    expect(nearestDisplaySegment({x:0,y:0},Object.keys(segmentDisplays))).toBeNull()
   })
 })

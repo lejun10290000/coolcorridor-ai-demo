@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { useEffect, useId, useRef, useState } from 'react'
 import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './types'
-import { campusMap, displayMidpoint, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
+import { campusMap, displayMidpoint, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
 import './campus-map.css'
 
 export interface CampusImageMapProps {
@@ -13,8 +13,10 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
   const labelId = useId()
   const viewport = useRef<HTMLDivElement>(null)
   const scene = useRef<HTMLDivElement>(null)
+  const overlay = useRef<SVGSVGElement>(null)
   const drag = useRef<{ x: number; y: number; px: number; py: number; moved: boolean } | null>(null)
   const suppressClick = useRef(false)
+  const pressedSegment = useRef<string | null>(null)
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [imageState, setImageState] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -33,6 +35,12 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
   }
   const changeZoom = (delta: number) => { setZoom(z => Math.max(1, Math.min(3, z + delta))); setPan({ x: 0, y: 0 }) }
   const choose = (id: string) => { if (!suppressClick.current) onSelect(id) }
+  function hitSegment(clientX: number, clientY: number) {
+    const matrix = overlay.current?.getScreenCTM()
+    if (!matrix) return null
+    const p = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse())
+    return nearestDisplaySegment(p, segments.map(s => s.segment_id))
+  }
   const missing = segments.filter(s => !segmentDisplays[s.segment_id])
   return <section className="campus-map" aria-labelledby={labelId}>
     <div className="campus-map-toolbar"><strong id={labelId}>UTM KL campus illustration</strong><div className="campus-map-controls">
@@ -49,28 +57,28 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         if (e.key === 'Home') { e.preventDefault(); reset() }
         else if (keys[e.key] && zoom > 1) { e.preventDefault(); move(pan.x + keys[e.key][0], pan.y + keys[e.key][1]) }
       }}
-      onPointerDown={e => { if (e.button !== 0 || zoom === 1) return; suppressClick.current = false; drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false } }}
+      onPointerDown={e => { pressedSegment.current = (e.target as Element).closest('[data-segment-id]')?.getAttribute('data-segment-id') ?? hitSegment(e.clientX,e.clientY); if (e.pointerType === 'mouse') e.preventDefault(); if (e.button !== 0 || zoom === 1) return; suppressClick.current = false; drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false } }}
       onPointerMove={e => {
         const d = drag.current
         if (!d) return
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { d.moved = true; suppressClick.current = true; e.currentTarget.setPointerCapture(e.pointerId) }
         if (d.moved) move(d.px + e.clientX - d.x, d.py + e.clientY - d.y)
       }}
-      onPointerUp={e => { if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
-      onPointerCancel={() => { drag.current = null; suppressClick.current = false }}
+      onPointerUp={e => { const id = pressedSegment.current ?? hitSegment(e.clientX,e.clientY); if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
+      onPointerCancel={() => { pressedSegment.current = null; drag.current = null; suppressClick.current = false }}
       style={{ touchAction: zoom > 1 ? 'none' : 'pan-y', cursor: zoom > 1 ? 'grab' : 'auto' }}>
       {imageState === 'loading' && <p className="campus-map-message" role="status">Loading supplied campus image…</p>}
       {imageState === 'error' && <div className="campus-map-message" role="alert"><p>Campus image could not load. Map overlays are hidden.</p><button type="button" onClick={() => { setImageState('loading'); setRetry(r => r+1) }}>Retry campus image</button></div>}
       <div className="campus-map-scene" ref={scene} style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, visibility: imageState === 'ready' ? 'visible' : 'hidden' }}>
         <img key={retry} src={`${import.meta.env.BASE_URL}${campusMap.asset}${retry ? `?retry=${retry}` : ''}`} alt="Operator-supplied UTM Kuala Lumpur campus illustration" width={campusMap.width} height={campusMap.height} draggable={false} onLoad={() => setImageState('ready')} onError={() => setImageState('error')} />
-        {imageState === 'ready' && <svg className="campus-map-overlay" viewBox={`0 0 ${campusMap.width} ${campusMap.height}`} aria-label="Illustrative walkway segments and endpoints">
+        {imageState === 'ready' && <svg ref={overlay} className="campus-map-overlay" viewBox={`0 0 ${campusMap.width} ${campusMap.height}`} aria-label="Illustrative walkway segments and endpoints">
           {segments.map(s => {
             const display = segmentDisplays[s.segment_id]
             if (!display) return null
             const p = svgPoints(display.map_display_geometry)
             const routeSelected = routeIds.includes(s.segment_id)
             const label = `${s.segment_id}: ${s.name}. ${shadeLabels[s.shade_label]}. ${s.shade_data_status === 'unknown' ? 'UNKNOWN' : 'DEMO'}. Pending field verification.`
-            return <g key={s.segment_id} data-segment-id={s.segment_id} data-route-selected={routeSelected} className="campus-segment" role="button" tabIndex={0} aria-label={label} aria-pressed={selected === s.segment_id} onPointerUp={() => choose(s.segment_id)} onClick={e => { if (e.detail === 0) choose(s.segment_id) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(s.segment_id) } }}>
+            return <g key={s.segment_id} data-segment-id={s.segment_id} data-route-selected={routeSelected} className="campus-segment" role="button" tabIndex={0} aria-label={label} aria-pressed={selected === s.segment_id} onPointerDown={e => { if (e.button === 0) pressedSegment.current = s.segment_id }} onClick={e => { if (e.detail === 0) choose(s.segment_id) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(s.segment_id) } }}>
               <title>{label}</title>
               <polyline className="campus-line" points={p} stroke="#fff" strokeWidth="24" />
               {routeSelected && <polyline className="campus-line campus-route-outline" points={p} stroke="#55255b" strokeWidth="20" />}

@@ -16,4 +16,6 @@ The initial app uses a local service/fixture seam. Builders replace these functi
 | Reports | `POST /api/feedback` + review | report / review status | `ResidentReport`; new reports always `submitted` |
 | Lifecycle | `POST /api/interventions/:id/status` | next status, actor, note | status event; 409 invalid transition |
 
-All coordinates are WGS84 `[longitude, latitude]`; Malaysia-local timestamps include `+08:00`.
+Geographic `WalkwaySegment.geometry` coordinates are WGS84 `[longitude, latitude]`; `[]` currently means geographic geometry is unavailable. Malaysia-local timestamps include `+08:00`.
+
+The local display sidecar in `src/campusMapDisplay.ts` uses a separate `map_display_geometry: MapDisplayPoint[]` contract in intrinsic 1290 × 1640 image pixels, keyed by stable segment IDs with `demo_fixture` provenance. It is not GeoJSON and is not returned as geographic route geometry. No endpoints or existing shared TypeScript interfaces changed for the image-map integration.

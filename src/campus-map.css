@@ -10,5 +10,5 @@
 .campus-map-message{position:absolute;inset:20px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center;z-index:1}.campus-map-message button{align-self:center}
 .campus-map-legend{display:flex;gap:9px 14px;flex-wrap:wrap;padding:12px 14px 4px;font-size:.76rem;line-height:1.4}.campus-map-legend span{display:inline-flex;align-items:center;gap:6px}.campus-map-legend i{width:14px;height:8px;display:inline-block;flex-shrink:0;border-radius:3px}.campus-map-legend .campus-route-key{background:#fff;border:3px solid #55255b;height:12px}
 .campus-map-note,.campus-map-source{font-size:.75rem;line-height:1.5;margin:8px 14px 12px;color:#625867}.campus-map-source{border-top:1px solid #e3dde2;padding-top:9px;font-size:.7rem}
-.campus-map :focus-visible{outline:3px solid #55255b;outline-offset:2px}.campus-map-viewport:focus-visible{outline-offset:-3px}
+.campus-map-controls button:focus-visible,.campus-map-message button:focus-visible,.campus-map-viewport:focus-visible{outline:3px solid #55255b;outline-offset:2px}.campus-map-viewport:focus-visible{outline-offset:-3px}
 @media(max-width:620px){.campus-map-viewport{--map-height:480px}.campus-map-toolbar{padding:10px}.campus-map-controls{width:100%;justify-content:flex-end}.campus-map-caution{font-size:.72rem}}
