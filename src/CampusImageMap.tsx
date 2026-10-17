@@ -4,6 +4,7 @@ import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './ty
 import { campusMap, displayMidpoint, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
 import { dataStatusText } from './workflow/model'
 import './campus-map.css'
+import { SelectedRouteOverlay } from './routing/SelectedRouteOverlay'
 
 export interface CampusImageMapProps {
   segments: WalkwaySegment[]; selected?: string; onSelect: (id: string) => void
@@ -82,12 +83,12 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             return <g key={s.segment_id} data-segment-id={s.segment_id} data-route-selected={routeSelected} className="campus-segment" role="button" tabIndex={0} aria-label={label} aria-pressed={selected === s.segment_id} onPointerDown={e => { if (e.button === 0) pressedSegment.current = s.segment_id }} onClick={e => { if (e.detail === 0) choose(s.segment_id) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(s.segment_id) } }}>
               <title>{label}</title>
               <polyline className="campus-line" points={p} stroke="#fff" strokeWidth="24" />
-              {routeSelected && <polyline className="campus-line campus-route-outline" points={p} stroke="#55255b" strokeWidth="20" />}
               {selected === s.segment_id && <polyline className="campus-line campus-selection" points={p} stroke="#17131b" strokeWidth="25" strokeDasharray="3 10" />}
               <polyline className="campus-line campus-shade-stroke" points={p} stroke={shadeColours[s.shade_label]} strokeWidth="11" strokeDasharray="20 9" />
               <polyline className="campus-hit-area" points={p} strokeWidth="46" />
             </g>
           })}
+          <SelectedRouteOverlay segments={segments} routeIds={routeIds}/>
           {candidates.flatMap(c => c.segment_ids.map(id => {
             const p = displayMidpoint(segmentDisplays[id]?.map_display_geometry ?? [])
             return p && segments.some(s => s.segment_id === id) ? <g key={`${c.intervention_id}-${id}`} className="campus-candidate" data-intervention-id={c.intervention_id} data-scenario={scenario} role="button" tabIndex={0} aria-label={`${scenario ? 'SIMULATED' : 'DEMO candidate'} ${c.intervention_id}: ${c.type}, ${id}`} onClick={() => choose(id)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(id) } }} transform={`translate(${p.x},${p.y})`}>
@@ -105,7 +106,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         </svg>}
       </div>
     </div>
-    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple outline: selected route</span><span>Black dots: selected segment · dashed: uncertain DEMO path</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
+    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Black dots: selected segment · dashed: uncertain DEMO path</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
     <p className="campus-map-note">A: Pintu Masuk Utama → B: Klinik UTM. Connections and crossings need survey. Zoom to read labels; drag or use arrow keys when zoomed. Select any segment with click, tap, Enter or Space.</p>
     {missing.length > 0 && <p role="status">No image-display geometry for {missing.map(s => s.segment_id).join(', ')}. These segments are not drawn.</p>}
     {candidates.length === 0 && <p className="campus-map-note">No selected intervention sites.</p>}

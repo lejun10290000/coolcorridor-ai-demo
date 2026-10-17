@@ -40,7 +40,7 @@ Shared types are in `src/types.ts`, fixtures in `src/fixtures.ts`, domain algori
 
 Select a route card to outline its segment IDs in purple while retaining the shade colours. Select a segment by click/tap or Enter/Space to update the evidence inspector. Zoom from 100% to 300%, drag or use arrow keys when zoomed, and reset with Full map, Recenter or Home. Image-load errors hide overlays and offer a local retry; there is no online fallback.
 
-Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geometry (currently unavailable). Both modes share the same image, segment IDs and display data. All paths and crossings require field checks. Legacy route distance/time fixtures are labelled DEMO and do not establish a shortest route. No route calculation, image inference or shade measurement was added by the map workstream.
+Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geometry (currently unavailable). Both modes share the same image, segment IDs and display data. All paths and crossings require field checks. The normal Resident entry calculates Shortest route and Most shaded practical route from the current published snapshot. The practical path minimises exposure-ranking cost within 25% of shortest distance; route metrics use legacy DEMO metre fixtures, never image pixels. Initial both objectives select S03/190 m. These are algorithm demonstrations, not surveyed navigation. Image inference and shade measurement remain unavailable.
 
 See [map handoff, tests and source notes](docs/CAMPUS_MAP_HANDOFF.md) and [data dictionary](docs/DATA_DICTIONARY.md). The optional standalone review at `/review/campus-map.html` is available with the dev server; it is a test harness, not the operational app.
 
@@ -69,3 +69,13 @@ node review/check-developer-workflow.cjs
 ```
 
 Set `PLAYWRIGHT_MODULE` / `CHROME_PATH` if they are outside the default lookup locations; `WORKFLOW_APP_URL` defaults to `http://127.0.0.1:4180`. The older `review/check-campus-app.cjs` entry delegates to this workflow runner and retains port 4174 (or `CAMPUS_APP_URL`) for compatibility. No app dependency installation changes are required.
+
+## Calculated Resident routing
+
+[Builder 1 approved the v4 App/map/documentation scope](https://github.com/lejun10290000/coolcorridor-ai-demo/pull/6#issuecomment-6234657305). Open the ordinary app URL, enter Resident, and choose **Shortest route** or **Most shaded practical route**. Both cards remain when paths coincide. The selected route text, card IDs/version and final purple casing follow the same calculated result; white halo and shade-coloured centre preserve selection and evidence at full-map zoom.
+
+Shortest uses distance alone, then stable IDs. Practical searches all loop-free paths no longer than shortest ×1.25, minimises ranking cost, then distance and stable IDs. Unknown weighs1×length and stays grey/Unknown, with separate unknown coverage/penalty; mixed0.5 is an assumption, not measured shade fraction. If no permitted path improves the shortest score, both cards show shortest with a reason. The small DEMO enumeration needs replacement before a large surveyed network.
+
+Only current published snapshots drive Resident routes. Publication automatically recalculates the open Resident view, including another tab on the **same origin/profile**; scenarios and historical Developer views cannot change it. Publishing DEMO S03 as exposed gives shortestS03/190m and practicalS01+S02/198m, a4.2% detour. A genuine field record requires a different trimmed/case-folded reviewer alias after under_review; aliases are not authentication. Data never synchronises to another device/profile/person. Full/blocked storage is session-only with a warning.
+
+See [current routing handoff and exact normal-entry acceptance commands](docs/DYNAMIC_ROUTING_HANDOFF.md). The separate review pages are optional test harnesses; users do not need them for calculated routing. No GPS, online tiles, backend or dependencies were added.

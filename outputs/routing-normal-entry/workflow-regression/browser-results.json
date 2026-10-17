@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "scope": "Developer shade-update workflow at http://127.0.0.1:4182/; synthetic DEMO inputs only, no genuine field data collected",
+  "checks": [
+    "Resident reports start submitted and Developer review is segment-filtered",
+    "report verification requires distinct review",
+    "eligible checkboxes differ from calculated portfolio",
+    "budget changes mark plan stale and hide old map sites",
+    "integer budget validation, RM20k/RM10k/zero and exclusions",
+    "explicit scenario projection affects only copied overlay",
+    "installation is sequential; submission/verification do not change current shade",
+    "publish creates immutable new snapshot and keeps DEMO provenance",
+    "both modes show identical published label/time/version",
+    "historical baseline remains available and immutable",
+    "local state survives browser refresh",
+    "unattested field record rejected",
+    "unknown remains grey",
+    "desktop/mobile image-overlay alignment, zoom/pan and no overflow",
+    "corrupt storage recovery disclosed",
+    "storage quota failure retains successive actions in-session with a warning",
+    "zero external requests and browser page errors in observed run"
+  ],
+  "currentVersion": "demo-baseline-2026-10-17-v000001",
+  "externalRequests": [],
+  "browserErrors": []
+}

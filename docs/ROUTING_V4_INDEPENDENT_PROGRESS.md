@@ -1,3 +1,5 @@
+> Historical independent-work checkpoint. Builder 1 subsequently agreed in PR #6 issuecomment-6234657305. See DYNAMIC_ROUTING_HANDOFF.md for the completed normal-entry integration and current validation.
+
 # Routing v4 independent progress and remaining integration
 
 The complete operator-supplied v4 brief has been read. Work continues on `feature/dynamic-route-recalculation` / draft PR #6, stacked onto `feature/developer-shade-update-workflow` at `ed9ae4ddc72dc44a8c450077d3f9d7271b2b3438`. The inspected routing head before this update was `bb0e06c4bb98e81db9b6b7640f4b178fa7be8b4e`; a fetch confirmed that local HEAD matched the remote. PR #3, #5 and #6 were open/unmerged. No other builder's work was reset or overwritten.

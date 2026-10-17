@@ -7,7 +7,7 @@ import { compareRoutes } from './compare'
 import { RouteCards } from './RouteCards'
 import './routing.css'
 
-// Prepared independently; App.tsx integration requires Builder 1 agreement on PR #5.
+// Normal app integration agreed by Builder 1 in PR #6, issuecomment-6234657305.
 type Commit = (update: (state: WorkflowState) => WorkflowState) => boolean
 export function CalculatedResident({ back, state, commit, notice }: { back: () => void; state: WorkflowState; commit: Commit; notice: string }) {
   const [selected, setSelected] = useState('DEMO-S01')

@@ -1,4 +1,4 @@
-// Independent review entry. Production App.tsx remains untouched pending owner agreement.
+// Optional review entry; the normal App.tsx also integrates CalculatedResident.
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { LandingHero } from '../src/landing/LandingHero'

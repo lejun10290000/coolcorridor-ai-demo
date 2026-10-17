@@ -21,7 +21,10 @@ const key='coolcorridor-shade-workflow-v1',output=path.resolve(process.env.ROUTI
     assert.equal(await card('shortest').getAttribute('data-route-segments'),'DEMO-S03')
     assert.equal(await card('exposure').getAttribute('data-route-segments'),'DEMO-S03')
     await resident.getByText('Both criteria select the same illustrative path with current data',{exact:true}).waitFor()
+    assert.equal(await resident.locator('[data-route-objective]').count(),2)
+    assert.equal(await resident.getByRole('button',{name:'Compare demo routes',exact:true}).count(),0)
     await resident.locator('.route-comparison').screenshot({path:path.join(output,'01-initial-same-path.png')})
+    await resident.locator('.main-grid').screenshot({path:path.join(output,'01-initial-normal-map.png')})
     const version=await card('shortest').getAttribute('data-route-version')
     await developer.getByRole('button',{name:'Optimise plan',exact:true}).click()
     await developer.getByLabel('Simulated shade projection for DEMO-S03',{exact:true}).selectOption('mostly_exposed')
@@ -72,19 +75,58 @@ const key='coolcorridor-shade-workflow-v1',output=path.resolve(process.env.ROUTI
       for(const id of ids)assert.match(await resident.getByTestId('selected-route').innerText(),new RegExp(id))
       assert.equal(await resident.getByTestId('selected-route').getAttribute('data-route-version'),next)
       // Check the actual stroke, not a separately maintained display label.
-      const actual=await resident.locator('[data-segment-id]').evaluateAll(nodes=>nodes.filter(n=>n.querySelector('.campus-route-outline')).map(n=>n.getAttribute('data-segment-id')).sort())
+      const actual=await resident.locator('[data-route-overlay-id]').evaluateAll(nodes=>nodes.filter(n=>n.querySelector('.campus-route-outline')).map(n=>n.getAttribute('data-route-overlay-id')).sort())
+      assert.equal(await resident.locator('.campus-active-route').evaluate(g=>Array.from(g.parentNode.querySelectorAll('.campus-segment')).every(n=>!!(n.compareDocumentPosition(g)&Node.DOCUMENT_POSITION_FOLLOWING))),true)
+      for(const id of ids){
+        const overlay=resident.locator(`[data-route-overlay-id="${id}"]`)
+        assert.equal(await overlay.getAttribute('data-route-version'),next)
+        assert.equal(await overlay.locator('.campus-route-centre').getAttribute('stroke'),await resident.locator(`[data-segment-id="${id}"] .campus-shade-stroke`).getAttribute('stroke'))
+      }
+      await resident.locator('.main-grid').screenshot({path:path.join(output,`03-normal-map-${objective}.png`)})
       assert.deepEqual(actual,ids)
     }
     await resident.locator('.route-comparison').screenshot({path:path.join(output,'03-published-different-objectives.png')})
     for(const [width,height,label] of [[1440,1100,'desktop'],[390,844,'mobile']]){
       await resident.setViewportSize({width,height});assert.equal(await resident.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
+      await resident.getByRole('button',{name:'Full map',exact:true}).click()
+      const align=async()=>{const boxes=await resident.evaluate(()=>['.campus-map-scene img','.campus-map-overlay'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return[r.x,r.y,r.width,r.height]}));assert.deepEqual(boxes[0],boxes[1])}
+      await align()
+      for(const objective of ['shortest','exposure']){
+        await card(objective).click()
+        assert.deepEqual(await resident.locator('[data-route-overlay-id]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-route-overlay-id'))),(await card(objective).getAttribute('data-route-segments')).split(','))
+        await resident.locator('.main-grid').screenshot({path:path.join(output,`04-map-${label}-${objective}.png`)})
+      }
+      // Pointer inspection through the final overlay at a known S01 image-space point.
+      const hit=await resident.locator('.campus-map-overlay').evaluate(svg=>{const p=svg.createSVGPoint();p.x=420;p.y=972;const screen=p.matrixTransform(svg.getScreenCTM());return{x:screen.x,y:screen.y}})
+      await resident.mouse.click(hit.x,hit.y)
+      assert.equal(await resident.locator('.wf-evidence code').innerText(),'DEMO-S01')
+      await resident.getByRole('button',{name:'Zoom in campus map',exact:true}).click()
+      await resident.locator('.campus-map-viewport').focus();await resident.keyboard.press('ArrowLeft');await align()
+      assert.deepEqual(await resident.locator('[data-route-overlay-id]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('data-route-overlay-id'))),['DEMO-S01','DEMO-S02'])
+      await resident.locator('.main-grid').screenshot({path:path.join(output,`04-zoom-pan-${label}.png`)})
+      await resident.keyboard.press('Home');await align()
       await resident.screenshot({path:path.join(output,`04-resident-${label}.png`),fullPage:true})
     }
+    // Historical/scenario view choices must not alter current Resident recommendations.
+    await developer.getByLabel('Baseline dataset',{exact:true}).selectOption(version)
+    assert.equal(await card('exposure').getAttribute('data-route-version'),next)
+    assert.equal(await card('exposure').getAttribute('data-route-segments'),'DEMO-S01,DEMO-S02')
+    await developer.getByLabel('Baseline dataset',{exact:true}).selectOption('current')
+    // Same-tab role switching reads the already published authoritative state, without reload.
+    await developer.getByRole('button',{name:'← Home',exact:true}).click()
+    await developer.getByLabel('Visual quality').selectOption('fallback')
+    await developer.getByRole('button',{name:'Enter Resident Mode',exact:true}).click()
+    assert.equal(await developer.locator('[data-route-objective="exposure"]').getAttribute('data-route-version'),next)
+    assert.equal(await developer.locator('[data-route-objective="exposure"]').getAttribute('data-route-segments'),'DEMO-S01,DEMO-S02')
+    await developer.getByRole('button',{name:'← Home',exact:true}).click()
+    await developer.getByLabel('Visual quality').selectOption('fallback')
+    await developer.getByRole('button',{name:'Enter Developer Mode',exact:true}).click()
     assert.match(await resident.locator('.wf-local').innerText(),/does not synchronise/)
     await resident.reload();await resident.getByLabel('Visual quality').selectOption('fallback');await resident.getByRole('button',{name:'Enter Resident Mode',exact:true}).click()
     assert.equal(await card('exposure').getAttribute('data-route-version'),next)
     // Synthetic field input in isolated browser storage tests the alias rule, not a real survey.
     await developer.getByLabel('Intervention to manage',{exact:true}).selectOption('INT-01')
+    await developer.getByLabel('Lifecycle / publication note',{exact:true}).fill('TEST synthetic separate-reviewer regression')
     for(const name of ['Advance to approved demo','Advance to under construction','Advance to installed pending verification'])await developer.getByRole('button',{name,exact:true}).click()
     await developer.getByRole('button',{name:'Record post-installation shade observation',exact:true}).click()
     await form.getByLabel('Record type',{exact:true}).selectOption('field')
@@ -107,7 +149,7 @@ const key='coolcorridor-shade-workflow-v1',output=path.resolve(process.env.ROUTI
     await fieldRecord.getByRole('button',{name:'Verify shade observation',exact:true}).click()
     assert.equal((await state()).observations.at(-1).review_status,'verified')
     assert.deepEqual(errors,[]);assert.deepEqual(external,[])
-    const result={status:'passed',scope:entry===origin+'/'?'Normal production application entry':'Independent preview only; production integration not demonstrated',entryUrl:entry,checks:['initial shortest 190m; both cards retained with same-path explanation and practical fallback reason','scenario changes do not affect Resident routing','year3333 inline error preserves values and focuses date','submission/verification do not recalculate before publication','same-origin second-tab publish automatically recalculates mounted Resident without reload','published exposure route198m and cost145; shortest190m','actual map route strokes match selected computed segment IDs/status/version; practical detour4.2% within25%','desktop/mobile no horizontal overflow','local-only copy and refresh persistence','field same-alias verification rejected inline; separate alias accepted','zero external requests/browser errors'],publishedVersion:next,browserErrors:errors,externalRequests:external}
+    const result={status:'passed',scope:entry===origin+'/'?'Normal production application entry':'Independent preview only; production integration not demonstrated',entryUrl:entry,checks:['initial shortest 190m; both cards retained with same-path explanation and practical fallback reason','scenario changes do not affect Resident routing','year3333 inline error preserves values and focuses date','submission/verification do not recalculate before publication','same-origin second-tab publish automatically recalculates mounted Resident without reload','published exposure route198m and cost145; shortest190m','actual map route strokes match selected computed segment IDs/status/version; practical detour4.2% within25%','desktop/mobile no overflow; final overlay shade centres, paint order, pointer inspection, zoom/pan/reset/resize alignment','same-tab role switching and historical baseline isolation','local-only copy and refresh persistence','field same-alias verification rejected inline; separate alias accepted','zero external requests/browser errors'],publishedVersion:next,browserErrors:errors,externalRequests:external}
     await fs.writeFile(path.join(output,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2))
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)})
