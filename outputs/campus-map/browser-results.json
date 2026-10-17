@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "scope": "Standalone component production review build. Main app integration pending Builder 1 approval.",
+  "checks": [
+    "route segment ID/highlight agreement",
+    "keyboard, mouse and mobile touch segment selection",
+    "external selection updates SVG state",
+    "grey unknown and DEMO evidence",
+    "image/SVG alignment at desktop, mobile, zoom and pan",
+    "zoom limits and recenter",
+    "candidate changes with RM budget",
+    "scenario does not change baseline shade",
+    "report linked to correct segment",
+    "empty portfolio",
+    "image load failure hides overlays and retry recovers",
+    "no external requests in review page",
+    "no review page exceptions"
+  ],
+  "imageBounds": [
+    {
+      "label": "desktop",
+      "bounds": [
+        281.09375,
+        522.25,
+        597.796875,
+        759.984375
+      ]
+    },
+    {
+      "label": "mobile",
+      "bounds": [
+        15,
+        597.265625,
+        360,
+        457.671875
+      ]
+    }
+  ],
+  "externalRequests": [],
+  "browserErrors": []
+}
