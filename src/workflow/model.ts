@@ -1,5 +1,6 @@
 import { candidates, segments, studyArea } from '../fixtures'
 import { optimise, validTransition } from '../domain'
+import { requireObservationField } from './validationError'
 import type { DataStatus, InterventionCandidate, Lifecycle, ReportStatus, ResidentReport, ShadeLabel, StudyArea, WalkwaySegment } from '../types'
 
 export const shadeLabels: ShadeLabel[] = ['mostly_exposed', 'mixed', 'mostly_shaded', 'unknown']
@@ -8,7 +9,7 @@ export const dataStatusText: Record<DataStatus, string> = { sample_observed: 'OB
 export interface ShadeSource { observation_id: string; method: string; source_note: string; observer_label: string; reviewer_label: string; review_note: string; evidence_reference: string; published_at: string }
 export interface CurrentSegment extends WalkwaySegment { shade_source?: ShadeSource }
 export interface DatasetSnapshot { study_area_id: string; dataset_version: string; parent_dataset_version: string | null; created_at: string; created_by_label: string; segments: CurrentSegment[]; change_summary: string; warnings: string[] }
-export interface ObservationReview { action: 'under_review' | 'verified' | 'rejected'; reviewer_label: string; note: string; timestamp: string; shade_label: ShadeLabel }
+export interface ObservationReview { action: 'under_review' | 'verified' | 'rejected'; reviewer_label: string; note: string; timestamp: string; shade_label: ShadeLabel; review_policy?: 'separate-field-reviewer-v1' }
 export interface ShadeObservation {
   observation_id: string; study_area_id: string; segment_id: string; intervention_id: string
   record_kind: 'demo' | 'field'; data_status: 'demo_fixture' | 'sample_observed'; field_attested: boolean
@@ -63,16 +64,20 @@ export function advanceInstallation(state: WorkflowState, id: string, to: Lifecy
 }
 export function safeEvidenceReference(value: string) { return typeof value === 'string' && value.length <= 500 && !/[<>\x00-\x1f]/.test(value) && !/^(?:javascript|data|file|vbscript):/i.test(value.trim()) }
 export function recordObservation(state: WorkflowState, input: ObservationInput, now: string): WorkflowState {
-  timestamp(now); timestamp(input.observed_at)
-  requireValue(Date.parse(input.observed_at) <= Date.parse(now), 'Observation time cannot be in the future.')
+  timestamp(now)
+  requireObservationField(validLocalTime(input.observed_at),'observed_at','Choose a valid observation date and time in Malaysia (+08:00).')
+  requireObservationField(Date.parse(input.observed_at) <= Date.parse(now),'observed_at', 'Observation time cannot be in the future.')
   const item=state.items.find(i=>i.intervention_id===input.intervention_id)
-  requireValue(item?.lifecycle==='installed_pending_verification','Record observations only after installation, before verification.')
-  requireValue(item?.segment_ids.includes(input.segment_id) && currentSnapshot(state).segments.some(s=>s.segment_id===input.segment_id),'Choose an existing segment linked to this intervention.')
-  requireValue(shadeLabels.includes(input.shade_label),'Choose a valid shade label.')
-  requireValue(input.record_kind==='demo' || input.record_kind==='field','Choose DEMO or genuine field entry.')
-  requireValue(input.record_kind!=='field' || input.field_attested===true,'Confirm this is a genuine field observation and the segment was checked on site.')
-  actor(input.observer_label); requireValue(text(input.method)&&text(input.source_note)&&text(input.notes),'Method/source and notes/uncertainty are required.')
-  requireValue(safeEvidenceReference(input.evidence_reference),'Use a short safe evidence reference; no embedded images, scripts or file URLs.')
+  requireObservationField(item?.lifecycle==='installed_pending_verification','intervention_id','Record observations only after installation, before verification.')
+  requireObservationField(item?.segment_ids.includes(input.segment_id) && currentSnapshot(state).segments.some(s=>s.segment_id===input.segment_id),'segment_id','Choose an existing segment linked to this intervention.')
+  requireObservationField(shadeLabels.includes(input.shade_label),'shade_label','Choose a valid shade label.')
+  requireObservationField(input.record_kind==='demo' || input.record_kind==='field','record_kind','Choose DEMO or genuine field entry.')
+  requireObservationField(input.record_kind!=='field' || input.field_attested===true,'field_attested','Confirm this is a genuine field observation and the segment was checked on site.')
+  requireObservationField(text(input.observer_label),'observer_label','Enter an observer label (no personal details needed).')
+  requireObservationField(text(input.method),'method','Observation method is required.')
+  requireObservationField(text(input.source_note),'source_note','Observation source / field record reference is required.')
+  requireObservationField(text(input.notes),'notes','Notes and uncertainty are required.')
+  requireObservationField(safeEvidenceReference(input.evidence_reference),'evidence_reference','Use a short safe evidence reference; no embedded images, scripts or file URLs.')
   const observation: ShadeObservation = {...input,field_attested:input.record_kind==='field'&&input.field_attested,observation_id:nextId(state,'OBS'),study_area_id:studyArea.study_area_id,data_status:input.record_kind==='demo'?'demo_fixture':'sample_observed',created_at:now,review_status:'submitted',reviews:[],published_at:null,published_by_label:null,published_dataset_version:null}
   return {...state,revision:state.revision+1,observations:[...state.observations,observation]}
 }
@@ -81,10 +86,13 @@ export function verifiedForIntervention(state: WorkflowState, id: string) {
   return item?.segment_ids.map(segment=>[...state.observations].reverse().find(o=>o.intervention_id===id&&o.segment_id===segment&&o.review_status==='verified')) ?? []
 }
 export function reviewObservation(state: WorkflowState, id: string, action: ObservationReview['action'], reviewer: string, note: string, reviewedLabel: ShadeLabel, now: string): WorkflowState {
-  timestamp(now); actor(reviewer); requireValue(text(note),'A review note is required.'); requireValue(shadeLabels.includes(reviewedLabel),'Choose a valid reviewed label.')
+  timestamp(now)
   const obs=state.observations.find(o=>o.observation_id===id)
+  if(obs?.record_kind==='field'&&action==='verified')requireObservationField(text(reviewer)&&reviewer.trim().toLowerCase()!==obs.observer_label.trim().toLowerCase(),'reviewer_label','Genuine field observations require a separate reviewer label, different from the observer (ignoring case and surrounding spaces).')
+  requireObservationField(text(reviewer),'reviewer_label','Enter a reviewer label (no personal details needed).')
+  requireObservationField(text(note),'review_note','A review note is required.');requireValue(shadeLabels.includes(reviewedLabel),'Choose a valid reviewed label.')
   requireValue(obs && validReportTransition(obs.review_status as ReportStatus,action),'Start a distinct review before verifying; final/rejected/published observations cannot be re-reviewed.')
-  const updated: WorkflowState={...state,revision:state.revision+1,observations:state.observations.map(o=>o.observation_id===id?{...o,review_status:action,reviews:[...o.reviews,{action,reviewer_label:reviewer.trim(),note:note.trim(),timestamp:now,shade_label:reviewedLabel}]}:o)}
+  const updated: WorkflowState={...state,revision:state.revision+1,observations:state.observations.map(o=>o.observation_id===id?{...o,review_status:action,reviews:[...o.reviews,{action,reviewer_label:reviewer.trim(),note:note.trim(),timestamp:now,shade_label:reviewedLabel,review_policy:'separate-field-reviewer-v1'}]}:o)}
   const item=updated.items.find(i=>i.intervention_id===obs!.intervention_id)!
   const verified=verifiedForIntervention(updated,item.intervention_id)
   if(action==='verified'&&item.lifecycle==='installed_pending_verification'&&verified.length>0&&verified.every(Boolean)) {
@@ -98,6 +106,7 @@ export function publishIntervention(state: WorkflowState, id: string, by: string
   const verified=verifiedForIntervention(state,id)
   requireValue(item?.lifecycle==='verified'&&verified.length>0&&verified.every(Boolean),'Publishing requires a verified intervention and one verified observation per linked segment.')
   const observations=verified as ShadeObservation[]
+  observations.forEach(o=>requireObservationField(o.record_kind!=='field'||o.reviews[o.reviews.length-1].reviewer_label.trim().toLowerCase()!==o.observer_label.trim().toLowerCase(),'reviewer_label','Genuine field observations require a separate reviewer before publication. Historical records are preserved; a matching observer/reviewer alias is not independent review.'))
   const baseline=currentSnapshot(state)
   const version=`${studyArea.dataset_version}-v${String(state.snapshots.length).padStart(6,'0')}`
   requireValue(!state.snapshots.some(s=>s.dataset_version===version),'Dataset version already exists.')

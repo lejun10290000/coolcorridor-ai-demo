@@ -19,7 +19,7 @@ export function useWorkflow(){
     }
     window.addEventListener('storage',listener);return()=>window.removeEventListener('storage',listener)
   },[])
-  function commit(update:(s:WorkflowState)=>WorkflowState):boolean{
+  function commit(update:(s:WorkflowState)=>WorkflowState,onFailure?:(error:Error)=>void):boolean{
     try{
       try{
         const raw=localStorage.getItem(storageKey)
@@ -29,7 +29,7 @@ export function useWorkflow(){
       let warning=''
       try{const raw=JSON.stringify(next);localStorage.setItem(storageKey,raw);lastStoredRaw.current=raw}catch{warning='Could not save locally (storage blocked or full). This change is in-session only; do not rely on it after refresh.'}
       reference.current=next;setState(next);setNotice(warning);return true
-    }catch(error){setNotice(error instanceof Error?error.message:'Could not apply this action.');return false}
+    }catch(error){const failure=error instanceof Error?error:new Error('Could not apply this action.');setNotice(failure.message);onFailure?.(failure);return false}
   }
   return{state,commit,notice}
 }

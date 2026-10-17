@@ -1,0 +1,6 @@
+.route-comparison small,.route-comparison p{overflow-wrap:anywhere}
+.route-comparison .cards{align-items:stretch}
+.route-comparison .route-card{min-width:0;white-space:normal}
+.route-comparison .route-card:hover,.route-comparison .route-card:focus-visible{background:#eee6f1;color:#211a25}
+.route-comparison .route-card.selected{background:#f5eff7;color:#211a25}
+.route-comparison .route-card small{color:#51445a}

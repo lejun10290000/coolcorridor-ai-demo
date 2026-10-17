@@ -46,7 +46,7 @@ export function decodeWorkflow(raw:string):WorkflowState {
     assert([o.method,o.source_note,o.observer_label,o.notes].every(v=>string(v)&&v.trim().length>0)&&safeEvidenceReference(o.evidence_reference))
     assert(['submitted','under_review','verified','rejected','published'].includes(o.review_status)&&array(o.reviews))
     let previous='submitted'
-    o.reviews.forEach(r=>{assert(object(r)&&validReportTransition(previous as 'submitted',r.action)&&time(r.timestamp)&&[r.note,r.reviewer_label].every(v=>string(v)&&v.trim())&&shadeLabels.includes(r.shade_label));previous=r.action})
+    o.reviews.forEach(r=>{assert(object(r)&&validReportTransition(previous as 'submitted',r.action)&&time(r.timestamp)&&[r.note,r.reviewer_label].every(v=>string(v)&&v.trim())&&shadeLabels.includes(r.shade_label));if(r.review_policy!==undefined){assert(r.review_policy==='separate-field-reviewer-v1');if(o.record_kind==='field'&&r.action==='verified')assert(r.reviewer_label.trim().toLowerCase()!==o.observer_label.trim().toLowerCase())}previous=r.action})
     assert(previous===(o.review_status==='published'?'verified':o.review_status))
     if(o.review_status==='published')assert(time(o.published_at)&&string(o.published_by_label)&&state.snapshots.some(s=>s.dataset_version===o.published_dataset_version&&s.segments.some(segment=>segment.shade_source?.observation_id===o.observation_id)))
     else assert(o.published_at===null&&o.published_by_label===null&&o.published_dataset_version===null)

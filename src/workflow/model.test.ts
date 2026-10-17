@@ -3,6 +3,7 @@ import { footfall } from '../fixtures'
 import { advanceInstallation, buildScenario, calculatePlan, currentSnapshot, currentStudyArea, initialWorkflow, parseBudget, publishIntervention, recordObservation, reportsForSegment, reviewObservation, reviewReport, submitReport, validLocalTime } from './model'
 import type { ObservationInput, WorkflowState } from './model'
 import { decodeWorkflow, loadWorkflow } from './storage'
+import { ObservationValidationError, observationLocalTimestamp } from './validationError'
 
 const now='2026-10-17T17:00:00+08:00'
 const input:ObservationInput={intervention_id:'INT-01',segment_id:'DEMO-S01',record_kind:'demo',field_attested:false,shade_label:'mostly_shaded',observed_at:'2026-10-17T12:00:00+08:00',method:'DEMO form exercise',source_note:'Fictional exercise only',observer_label:'Demo operator',notes:'Not a field measurement; test input.',evidence_reference:'DEMO-NOTE-1'}
@@ -143,5 +144,46 @@ describe('guarded local persistence',()=>{
     const s=publishIntervention(verified(),'INT-01','Publisher','Publish',now)
     s.snapshots[1].segments[1].shade_label='mostly_shaded'
     expect(loadWorkflow(JSON.stringify(s)).warning).not.toBe('')
+  })
+})
+
+// Synthetic isolated inputs exercise policy; no genuine campus survey is claimed.
+describe('separate field reviewer and actionable validation',()=>{
+  it.each(['Demo operator','  DEMO OPERATOR  ',''])('rejects field verification by observer/blank alias %s',reviewer=>{
+    let s=submitted(true);const id=s.observations[0].observation_id
+    s=reviewObservation(s,id,'under_review','Reviewer','Review started',input.shade_label,now)
+    const before=JSON.stringify(s)
+    try{reviewObservation(s,id,'verified',reviewer,'Reviewed',input.shade_label,now);throw Error('Expected rejection')}
+    catch(error){expect(error).toBeInstanceOf(ObservationValidationError);expect((error as ObservationValidationError).field).toBe('reviewer_label');expect((error as Error).message).toContain('separate reviewer')}
+    expect(JSON.stringify(s)).toBe(before)
+  })
+  it('accepts a distinct reviewer and persists the new policy marker',()=>{
+    const s=verified(true),review=s.observations[0].reviews[s.observations[0].reviews.length-1]
+    expect(review.review_policy).toBe('separate-field-reviewer-v1')
+    expect(decodeWorkflow(JSON.stringify(s))).toEqual(s)
+    const corrupt=structuredClone(s);corrupt.observations[0].reviews[corrupt.observations[0].reviews.length-1].reviewer_label='  DEMO OPERATOR '
+    expect(()=>decodeWorkflow(JSON.stringify(corrupt))).toThrow()
+  })
+  it('retains legacy history but blocks new publication with a matching observer alias',()=>{
+    const s=verified(true)
+    for(const r of s.observations[0].reviews){delete r.review_policy;r.reviewer_label='Demo operator'}
+    expect(decodeWorkflow(JSON.stringify(s))).toEqual(s)
+    expect(()=>publishIntervention(s,'INT-01','Publisher','Legacy record',now)).toThrow(/separate|different|independent/i)
+  })
+  it('still permits DEMO exercises without promoting them to field evidence',()=>{
+    let s=submitted();const id=s.observations[0].observation_id
+    s=reviewObservation(s,id,'under_review','Demo operator','DEMO review',input.shade_label,now)
+    s=reviewObservation(s,id,'verified','Demo operator','DEMO only',input.shade_label,now)
+    s=publishIntervention(s,'INT-01','Publisher','DEMO only',now)
+    expect(currentSnapshot(s).segments[0].shade_data_status).toBe('demo_fixture')
+  })
+  it('rejects year 3333 with the exact field error and leaves state unchanged',()=>{
+    const s=installed(),before=JSON.stringify(s)
+    try{recordObservation(s,{...input,observed_at:observationLocalTimestamp('3333-01-01T12:00')},now);throw Error('Expected rejection')}
+    catch(error){expect(error).toBeInstanceOf(ObservationValidationError);expect((error as ObservationValidationError).field).toBe('observed_at');expect((error as Error).message).toBe('Observation time cannot be in the future.')}
+    expect(JSON.stringify(s)).toBe(before)
+    expect(observationLocalTimestamp('')).toBe('')
+    expect(observationLocalTimestamp('2026-10-17T12:00')).toBe(input.observed_at)
+    expect(observationLocalTimestamp('2026-10-17T12:00:00')).toBe(input.observed_at)
   })
 })
