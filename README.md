@@ -43,3 +43,29 @@ Select a route card to outline its segment IDs in purple while retaining the sha
 Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geometry (currently unavailable). Both modes share the same image, segment IDs and display data. All paths and crossings require field checks. Legacy route distance/time fixtures are labelled DEMO and do not establish a shortest route. No route calculation, image inference or shade measurement was added by the map workstream.
 
 See [map handoff, tests and source notes](docs/CAMPUS_MAP_HANDOFF.md) and [data dictionary](docs/DATA_DICTIONARY.md). The optional standalone review at `/review/campus-map.html` is available with the dev server; it is a test harness, not the operational app.
+
+## Developer shade observations and versioned publication
+
+The Developer inspector now opens reports **filtered to its selected segment**. Resident submission remains in Resident mode; report verification requires a distinct review first. Reports remain separate from footfall.
+
+“Candidates eligible for optimisation” means checked candidates **may** be selected, not that they are in the calculated portfolio. Enter whole RM (0–1,000,000,000; default RM20,000) and click **Optimise plan**. Changing the budget/eligibility marks the plan stale and hides previous site highlights until recalculation. Benefit values are illustrative scores, never measured shade/cooling results.
+
+Use **Baseline / Simulated scenario** and explicit per-segment projection controls to preview hypothetical shade classifications. No projection is assumed by default. Historical snapshots can be viewed without changing the current published dataset.
+
+For an installed prototype intervention: record a documented DEMO or genuinely observed shade entry → start review → verify/reject → explicitly publish. Publishing creates a new immutable snapshot/version shared immediately by Resident and Developer. Raw observations and review/lifecycle history remain inspectable. DEMO entries stay DEMO; an attested field entry is stored as `sample_observed` and its separately reviewed, published assessment as `human_reviewed`. No actual field records have been supplied or collected by this implementation.
+
+State is persisted only in this browser under `coolcorridor-shade-workflow-v1`, with guarded schema validation and visible corruption/storage-failure warnings. It is not a central database, production authentication or tamper-proof audit log. Evidence is a text reference only; no photos are uploaded. No GPS or location permissions are used.
+
+See the [Developer workflow handoff and manual acceptance path](docs/DEVELOPER_SHADE_WORKFLOW.md), [schema/provenance](docs/DATA_DICTIONARY.md), and [browser results/screenshots](outputs/developer-shade-workflow/browser-results.json).
+
+To exercise the production workflow with the optional separately supplied Playwright/Chromium runtime:
+
+```sh
+npm run build
+npm test
+npx vite preview --host 127.0.0.1 --port 4180 --strictPort
+# In another terminal, with Playwright and Chrome available:
+node review/check-developer-workflow.cjs
+```
+
+Set `PLAYWRIGHT_MODULE` / `CHROME_PATH` if they are outside the default lookup locations; `WORKFLOW_APP_URL` defaults to `http://127.0.0.1:4180`. The older `review/check-campus-app.cjs` entry delegates to this workflow runner and retains port 4174 (or `CAMPUS_APP_URL`) for compatibility. No app dependency installation changes are required.

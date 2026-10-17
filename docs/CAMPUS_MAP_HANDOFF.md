@@ -39,7 +39,7 @@ All route and shade overlays remain DEMO / ILLUSTRATIVE. Green source artwork is
 
 Existing route distances/times are retained as labelled legacy DEMO fixtures, not calculated values. A visible comparison warning explains that the 198 m “Shortest” fixture exceeds the 190 m alternative and does not establish shortest-path validity. The map workstream does not implement a new routing algorithm or alter planning metrics to disguise that limitation.
 
-Original labels are small at full-map scale, especially on mobile; use zoom to read them. Field checks and proper route/shade evidence are still required. Lifecycle/report review remain prototype operations. The existing Developer inspector's report button has no report form; resident reports are submitted from Resident mode, as before this map change.
+Original labels are small at full-map scale, especially on mobile; use zoom to read them. Field checks and proper route/shade evidence are still required. Lifecycle/report review remain prototype operations. The later Developer shade workflow replaces the Developer inspector's old inert report button with segment-filtered report review; Resident submission remains in Resident mode. See DEVELOPER_SHADE_WORKFLOW.md.
 
 ## Reproduce
 
@@ -68,7 +68,7 @@ The runner needs Playwright and Chromium supplied separately from app dependenci
 
 The separate component harness is available under `/review/campus-map.html` with the dev server, or build it with `npx vite build --config review/campus-map.vite.config.ts`, serve using `npx vite preview --config review/campus-map.vite.config.ts --host 127.0.0.1 --port 4173 --strictPort`, then run `node review/check-campus-map.cjs`. `MAP_REVIEW_URL` defaults to `http://127.0.0.1:4173`. Production `/` always opens the actual application.
 
-## Validation
+## Original map-integration validation (PR #4)
 
 - `npm ci --fetch-timeout=30000 --fetch-retries=1`: installed the unchanged lockfile. It reported 6 existing audit findings (3 moderate, 1 high, 2 critical). No dependency upgrade or blanket audit fix was made.
 - `npm run build`: passed; existing cinematic bundle still emits Vite's over-500-kB warning.
@@ -79,3 +79,7 @@ The separate component harness is available under `/review/campus-map.html` with
 - Screenshots were opened for visual inspection. These are prototype review evidence, not field validation or a presentation-laptop performance benchmark.
 
 Operator review and merge approval remain outstanding. The PR is not merged automatically.
+
+## Subsequent Developer workflow integration
+
+The static PNG, pixel geometry, map prop contract, shade colours and navigation caveats are preserved. Per-segment accessible provenance labels now distinguish DEMO, UNKNOWN, manually OBSERVED, HUMAN REVIEWED and SIMULATED records. The map disclaimer no longer falsely calls a published manual field record a fictional shade fixture. Projected scenario colours receive copied records only; publication updates the authoritative dataset shared by both modes. See [Developer workflow handoff](DEVELOPER_SHADE_WORKFLOW.md) for the current tests, screenshots and persistence limits. Original map-test screenshots above remain historical evidence of the PR #4 delivery.

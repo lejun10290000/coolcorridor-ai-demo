@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './types'
 import { campusMap, displayMidpoint, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
+import { dataStatusText } from './workflow/model'
 import './campus-map.css'
 
 export interface CampusImageMapProps {
@@ -49,7 +50,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
       <button type="button" aria-label="Zoom in campus map" disabled={zoom === 3} onClick={() => changeZoom(.5)}>+</button>
       <button type="button" onClick={reset}>Full map</button>
     </div></div>
-    <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. Shade colours and paths are DEMO fixtures, not field observations.</p>
+    <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. {scenario ? 'SIMULATED / ASSUMPTION shade overlay.' : 'Shade provenance is recorded per segment; initial records are DEMO.'} Paths remain unverified.</p>
     <div className="campus-map-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Campus map. Zoom with buttons; when zoomed, drag or use arrow keys to pan. Home resets."
       onKeyDown={e => {
         if (e.target !== e.currentTarget) return
@@ -77,7 +78,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             if (!display) return null
             const p = svgPoints(display.map_display_geometry)
             const routeSelected = routeIds.includes(s.segment_id)
-            const label = `${s.segment_id}: ${s.name}. ${shadeLabels[s.shade_label]}. ${s.shade_data_status === 'unknown' ? 'UNKNOWN' : 'DEMO'}. Pending field verification.`
+            const label = `${s.segment_id}: ${s.name}. ${shadeLabels[s.shade_label]}. ${dataStatusText[s.shade_data_status]}. Route geometry pending field verification.`
             return <g key={s.segment_id} data-segment-id={s.segment_id} data-route-selected={routeSelected} className="campus-segment" role="button" tabIndex={0} aria-label={label} aria-pressed={selected === s.segment_id} onPointerDown={e => { if (e.button === 0) pressedSegment.current = s.segment_id }} onClick={e => { if (e.detail === 0) choose(s.segment_id) }} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(s.segment_id) } }}>
               <title>{label}</title>
               <polyline className="campus-line" points={p} stroke="#fff" strokeWidth="24" />
