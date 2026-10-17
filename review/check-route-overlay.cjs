@@ -25,4 +25,3 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
     await fs.writeFile(path.join(output,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2))
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)})
-
