@@ -1,9 +1,9 @@
-// Tests the independent integration preview until App.tsx owner agreement is recorded.
+// Defaults to the normal production entry. Set ROUTING_ENTRY_URL explicitly for isolated preview checks.
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path')
 const origin=process.env.ROUTING_APP_URL||'http://127.0.0.1:4181'
-const entry=process.env.ROUTING_ENTRY_URL||origin+'/review/dynamic-routing.html'
-const key='coolcorridor-shade-workflow-v1',output=path.resolve('outputs/dynamic-route-recalculation')
+const entry=process.env.ROUTING_ENTRY_URL||origin+'/'
+const key='coolcorridor-shade-workflow-v1',output=path.resolve(process.env.ROUTING_OUTPUT_DIR||'outputs/routing-integration-v4')
 ;(async()=>{
   await fs.mkdir(output,{recursive:true})
   const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})
@@ -60,12 +60,17 @@ const key='coolcorridor-shade-workflow-v1',output=path.resolve('outputs/dynamic-
     assert.equal(await card('shortest').getAttribute('data-route-segments'),'DEMO-S03')
     assert.equal(await card('exposure').getAttribute('data-route-segments'),'DEMO-S01,DEMO-S02')
     assert.match(await card('exposure').innerText(),/198 m/)
-    assert.match(await card('exposure').innerText(),/145\.0 m-equivalent/)
+    assert.match(await card('exposure').innerText(),/145\.0 metre-equivalents/)
+    assert.match(await card('exposure').innerText(),/4\.2%/)
+    assert.match(await card('exposure').innerText(),/Maximum detour: 25%/)
     assert.equal(published.snapshots[0].segments[2].shade_label,'mostly_shaded')
     assert.equal(published.snapshots[1].segments[2].shade_data_status,'demo_fixture')
     for(const objective of ['shortest','exposure']){
       await card(objective).click()
       const ids=(await card(objective).getAttribute('data-route-segments')).split(',').sort()
+      assert.match(await resident.getByTestId('selected-route').innerText(),new RegExp(objective==='shortest'?'Selected route: Shortest':'Selected route: Most shaded practical route'))
+      for(const id of ids)assert.match(await resident.getByTestId('selected-route').innerText(),new RegExp(id))
+      assert.equal(await resident.getByTestId('selected-route').getAttribute('data-route-version'),next)
       // Check the actual stroke, not a separately maintained display label.
       const actual=await resident.locator('[data-segment-id]').evaluateAll(nodes=>nodes.filter(n=>n.querySelector('.campus-route-outline')).map(n=>n.getAttribute('data-segment-id')).sort())
       assert.deepEqual(actual,ids)
@@ -102,7 +107,7 @@ const key='coolcorridor-shade-workflow-v1',output=path.resolve('outputs/dynamic-
     await fieldRecord.getByRole('button',{name:'Verify shade observation',exact:true}).click()
     assert.equal((await state()).observations.at(-1).review_status,'verified')
     assert.deepEqual(errors,[]);assert.deepEqual(external,[])
-    const result={status:'passed',scope:'Independent integration preview; production App.tsx pending Builder 1 agreement',checks:['initial shortest 190m; both cards retained with same-path explanation','scenario changes do not affect Resident routing','year3333 inline error preserves values and focuses date','submission/verification do not recalculate before publication','same-origin second-tab publish automatically recalculates mounted Resident without reload','published exposure route198m and cost145; shortest190m','actual map route strokes match selected computed segment IDs','desktop/mobile no horizontal overflow','local-only copy and refresh persistence','field same-alias verification rejected inline; separate alias accepted','zero external requests/browser errors'],publishedVersion:next,browserErrors:errors,externalRequests:external}
+    const result={status:'passed',scope:entry===origin+'/'?'Normal production application entry':'Independent preview only; production integration not demonstrated',entryUrl:entry,checks:['initial shortest 190m; both cards retained with same-path explanation and practical fallback reason','scenario changes do not affect Resident routing','year3333 inline error preserves values and focuses date','submission/verification do not recalculate before publication','same-origin second-tab publish automatically recalculates mounted Resident without reload','published exposure route198m and cost145; shortest190m','actual map route strokes match selected computed segment IDs/status/version; practical detour4.2% within25%','desktop/mobile no horizontal overflow','local-only copy and refresh persistence','field same-alias verification rejected inline; separate alias accepted','zero external requests/browser errors'],publishedVersion:next,browserErrors:errors,externalRequests:external}
     await fs.writeFile(path.join(output,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2))
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)})

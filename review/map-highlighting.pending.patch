@@ -1,0 +1,11 @@
+--- a/src/CampusImageMap.tsx
++++ b/src/CampusImageMap.tsx
+@@ -6,0 +7 @@
++import { SelectedRouteOverlay } from './routing/SelectedRouteOverlay'
+@@ -85 +85,0 @@
+-              {routeSelected && <polyline className="campus-line campus-route-outline" points={p} stroke="#55255b" strokeWidth="20" />}
+@@ -90,0 +91 @@
++          <SelectedRouteOverlay segments={segments} routeIds={routeIds}/>
+@@ -108 +109 @@
+-    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple outline: selected route</span><span>Black dots: selected segment · dashed: uncertain DEMO path</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
++    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Black dots: selected segment · dashed: uncertain DEMO path</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
