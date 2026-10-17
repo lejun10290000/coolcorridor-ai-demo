@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "scope": "Integrated production application at /",
+  "checks": [
+    "Home role portals and fallback",
+    "Resident route card/highlight IDs",
+    "DEMO comparison labels",
+    "all four segments select inspector",
+    "pointer segment selection",
+    "unknown shade/timestamp",
+    "resident pending report shown in Developer",
+    "1440px/390px Resident and Developer image/SVG alignment; no overflow",
+    "zoom pan recenter",
+    "Developer priority selects matching segment",
+    "budget marker recomputation and zero-budget empty plan",
+    "scenario toggle preserves baseline shade",
+    "report review and lifecycle remain usable",
+    "image load failure and recovery",
+    "no external requests or browser exceptions in observed run"
+  ],
+  "externalRequests": [],
+  "browserErrors": []
+}
