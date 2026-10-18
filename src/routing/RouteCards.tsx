@@ -1,9 +1,9 @@
 import type { RouteComparison } from './compare'
 import { formatWalkingTime } from './compare'
 
-export function RouteCards({comparison,selected,onSelect}:{comparison:RouteComparison;selected:'shortest'|'exposure';onSelect:(objective:'shortest'|'exposure')=>void}){
+export function RouteCards({comparison,selected,onSelect,fromLabel,toLabel}:{comparison:RouteComparison;selected:'shortest'|'exposure';onSelect:(objective:'shortest'|'exposure')=>void;fromLabel?:string;toLabel?:string}){
   const cards=[{key:'shortest' as const,title:'Shortest route',route:comparison.shortest},{key:'exposure' as const,title:'Most shaded practical route',route:comparison.exposure}]
-  return <section className="route-comparison" aria-label="Calculated route comparison"><h2>Choose a walking route</h2><p role="status" data-testid="routing-version">Route comparison updated for dataset {comparison.dataset_version}. Recalculated automatically from the current published snapshot.</p>
+  return <section className="route-comparison" aria-label="Calculated route comparison"><h2>Choose a walking route</h2>{fromLabel&&toLabel&&<p className="selected-route-pair">{fromLabel} → {toLabel}</p>}<p role="status" data-testid="routing-version">Route comparison updated for dataset {comparison.dataset_version}. Recalculated automatically from the current published snapshot.</p>
     {comparison.identical_path&&<p className="notice">Both criteria select the same illustrative path with current data</p>}
     {comparison.shortest&&!comparison.exposure_improves_on_shortest&&<p>No better-ranked alternative was found within the 25% detour cap. The most shaded practical route uses the shortest path.</p>}
     <p className="warning">DEMO / ILLUSTRATIVE graph and metre lengths — NOT FOR NAVIGATION. Exposure-ranking cost is algorithmic, not measured exposed distance, shade percentage or temperature. Mixed-shade weight is an assumption; known-label coverage includes fictional DEMO classifications.</p>
