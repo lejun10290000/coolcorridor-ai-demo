@@ -1,10 +1,10 @@
-import { footfall } from '../fixtures'
+import { footfallForSegment } from '../demoFootfall'
 import { shadeColours, shadeLabels } from '../campusMapDisplay'
 import { dataStatusText, reportsForSegment } from './model'
 import type { CurrentSegment, WorkflowState } from './model'
 
 export function SegmentEvidence({segment,version,state,mode,onAction,historical=false}:{segment:CurrentSegment;version:string;state:WorkflowState;mode:'resident'|'developer';onAction:()=>void;historical?:boolean}){
-  const f=footfall.find(f=>f.segment_id===segment.segment_id),source=segment.shade_source
+  const f=footfallForSegment(segment.segment_id),source=segment.shade_source
   const observations=state.observations.filter(o=>o.segment_id===segment.segment_id)
   return <aside className="inspector wf-evidence" aria-label="Segment evidence" aria-live="polite">
     <div className="eyebrow">SEGMENT EVIDENCE {historical?'· HISTORICAL':''}</div><h2>{segment.name}</h2><code>{segment.segment_id}</code>

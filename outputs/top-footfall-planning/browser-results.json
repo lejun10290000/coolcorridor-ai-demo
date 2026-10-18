@@ -1,0 +1,87 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "topTen": [
+    {
+      "rank": 1,
+      "id": "DEMO-REF-008",
+      "rate": 796
+    },
+    {
+      "rank": 2,
+      "id": "DEMO-REF-085",
+      "rate": 792
+    },
+    {
+      "rank": 3,
+      "id": "DEMO-REF-058",
+      "rate": 784
+    },
+    {
+      "rank": 4,
+      "id": "DEMO-REF-031",
+      "rate": 776
+    },
+    {
+      "rank": 5,
+      "id": "DEMO-REF-004",
+      "rate": 768
+    },
+    {
+      "rank": 6,
+      "id": "DEMO-REF-081",
+      "rate": 764
+    },
+    {
+      "rank": 7,
+      "id": "DEMO-REF-054",
+      "rate": 756
+    },
+    {
+      "rank": 8,
+      "id": "DEMO-REF-027",
+      "rate": 748
+    },
+    {
+      "rank": 9,
+      "id": "DEMO-REF-077",
+      "rate": 736
+    },
+    {
+      "rank": 10,
+      "id": "DEMO-REF-050",
+      "rate": 728
+    }
+  ],
+  "fictionalRankOnePrices": {
+    "treeCount": 3,
+    "treeUnitRM": 500,
+    "treeTotalRM": 1500,
+    "roofMetres": 21,
+    "roofUnitRM": 200,
+    "roofTotalRM": 4200
+  },
+  "datasetBefore": "demo-baseline-2026-10-17",
+  "datasetAfter": "demo-baseline-2026-10-17-v000001",
+  "fundedBeforePublication": 10,
+  "fundedAfterPublication": 9,
+  "finalCostRM": 8500,
+  "checks": [
+    "default top ten current-map links sorted by fictional comparable footfall",
+    "ranked path opens matching map and evidence count",
+    "tree and roof itemised cost estimates, editable prices",
+    "treatment, price and budget changes automatically recalculate funding",
+    "none excludes path; zero/invalid budget handled",
+    "unknown-shade assumption is explicit and optional",
+    "legacy manual proposal inputs preserved separately",
+    "simulated treatments paint only simulation map",
+    "unpublished drafts excluded from funding, scenario and Residents",
+    "publication in another tab refreshes baseline, benefit, portfolio and scenario",
+    "already-shaded rank-one path no longer funded; other links inherit new baseline",
+    "Resident routing receives only published shade/version",
+    "original snapshot and historical candidates preserved",
+    "chosen method, prices and funding survive reload",
+    "mobile prices stack, scenario rows readable, no horizontal overflow"
+  ],
+  "pageErrors": []
+}
