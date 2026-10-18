@@ -10,7 +10,7 @@ export const dataStatusText: Record<DataStatus, string> = { sample_observed: 'OB
 export interface ShadeSource { observation_id: string; method: string; source_note: string; observer_label: string; reviewer_label: string; review_note: string; evidence_reference: string; published_at: string; map_publication_id?: string }
 export interface MapShadeAssignment { segment_id: string; shade_label: ShadeLabel }
 export interface MapShadeDraft { base_dataset_version: string; assignments: MapShadeAssignment[]; updated_at: string }
-export interface MapShadePublication { publication_id: string; base_dataset_version: string; dataset_version: string; assignments: MapShadeAssignment[]; created_at: string; created_by_label: string; note: string }
+export interface MapShadePublication { publication_id: string; base_dataset_version: string; dataset_version: string; assignments: MapShadeAssignment[]; created_at: string; created_by_label: string; note: string; source_report_id?: string }
 export interface CurrentSegment extends WalkwaySegment { shade_source?: ShadeSource }
 export interface DatasetSnapshot { study_area_id: string; dataset_version: string; parent_dataset_version: string | null; created_at: string; created_by_label: string; segments: CurrentSegment[]; change_summary: string; warnings: string[] }
 export interface ObservationReview { action: 'under_review' | 'verified' | 'rejected'; reviewer_label: string; note: string; timestamp: string; shade_label: ShadeLabel; review_policy?: 'separate-field-reviewer-v1' }
@@ -43,7 +43,7 @@ export function currentStudyArea(state: WorkflowState): StudyArea { const snapsh
 export function initialWorkflow(): WorkflowState {
   return { schema_version: 1, revision: 0, current_version: studyArea.dataset_version, snapshots: [{ study_area_id: studyArea.study_area_id, dataset_version: studyArea.dataset_version, parent_dataset_version: null, created_at: studyArea.updated_at, created_by_label: 'Initial DEMO fixtures', segments: copy(segments), change_summary: 'Original illustrative shade baseline; no field observations.', warnings: ['Campus image/paths and planning inputs are DEMO. No field-verified navigation.'] }], observations: [], lifecycle_events: [], items: copy(candidates), reports: [], report_events: [], map_shade_draft:null, map_shade_updates:[] }
 }
-export function reportsForSegment(reports: ResidentReport[], id: string) { return reports.filter(r => r.segment_id === id) }
+export function reportsForSegment(reports: ResidentReport[], id: string) { return reports.filter(r => r.route ? r.route.segment_ids.includes(id) : r.segment_id === id) }
 export function submitReport(state: WorkflowState, input: {segment_id: string; category: string; comment_optional: string}, now: string): WorkflowState {
   timestamp(now); requireValue(currentSnapshot(state).segments.some(s => s.segment_id === input.segment_id), 'Unknown segment.')
   requireValue(['no shade','too hot at a stated time','blocked walkway','unsafe crossing','other'].includes(input.category), 'Choose a report category.')
@@ -54,6 +54,7 @@ export function validReportTransition(from: ReportStatus, to: ReportStatus) { re
 export function reviewReport(state: WorkflowState, id: string, to: ReportStatus, reviewer: string, note: string, now: string): WorkflowState {
   timestamp(now); actor(reviewer); requireValue(text(note), 'Add a review note.')
   const report = state.reports.find(r => r.report_id === id)
+  requireValue(to!=='verified'||!report?.route, 'Use Accept report to publish mixed shade for a route report.')
   requireValue(report && validReportTransition(report.review_status,to), 'Report review must follow submitted → under review → verified, or rejection.')
   const event: ReportEvent = {event_id:nextId(state,'REPORT-REVIEW'),report_id:id,from_status:report!.review_status,to_status:to,reviewer_label:reviewer.trim(),note:note.trim(),timestamp:now}
   return {...state,revision:state.revision+1,reports:state.reports.map(r=>r.report_id===id?{...r,review_status:to,review_note:note.trim()}:r),report_events:[...state.report_events,event]}

@@ -27,7 +27,7 @@ There is still **no HTTP backend** for these actions. The endpoint table above i
 | Operation | Inputs | Result / guards |
 |---|---|---|
 | `currentSnapshot`, `currentStudyArea` | shared state | Current segment snapshot and consistent current study-area version; original fixtures are not mutated |
-| `submitReport`, `reviewReport` | valid segment/category/note; review actor/action/time | Existing `ResidentReport` plus review-event history; submitted → under_review → verified, or submitted/under_review → rejected; no direct verification |
+| `submitReport`, `reviewReport` | legacy segment/category/note; review actor/action/time | Legacy single-link review remains submitted → under_review → verified, or rejection. New route reports use submitRouteReport/acceptRouteReport below; reviewReport cannot verify a route report without its map publication |
 | `advanceInstallation` | intervention, requested next status, actor/note/time | Sequential prototype-only status event through installed_pending_verification; verified/published require evidence operations |
 | `recordObservation` | `ObservationInput` + creation time | Stable linked observation, raw DEMO/attested field provenance, submitted queue entry; current snapshot unchanged |
 | `reviewObservation` | observation, separate review action, reviewer/note, reviewed label/time | Append-only review; raw label/status unchanged; intervention becomes verified only when every linked segment has verified evidence |
@@ -63,3 +63,15 @@ The current display contract retains the original1113×1414 coordinate frame, id
 - Resident continues to consume only `currentSnapshot(state)`. The existing shared state/storage listener causes both route objectives and overlay IDs to recalculate after publication without another calculate action. Storage is limited to the same browser profile/origin; no remote-user synchronization is provided.
 
 Optional saved fields and provenance are specified in DATA_DICTIONARY.md. No public HTTP/API dependency or package was added. Existing observation review and intervention publication remain separate and continue to work.
+
+### Point-to-point Resident reports and acceptance
+
+These are local TypeScript operations, not a deployed feedback API:
+
+- `submitRouteReport(state, {route, category, description}, now)` requires two distinct connected selectable endpoints, a current-version calculated path (shortest or exposure), exact ordered segment/node IDs, a supported category and nonempty description (maximum2000 characters). It stores the route immutably and creates a submitted report without changing shade. Category `broken shade structure` is supported. Unknown/disconnected/stale/forged paths are refused.
+- `acceptRouteReport(state, reportId, reviewer, note, now)` is the explicit Developer review decision. For a submitted report it records submitted→under_review→verified; for one already under review it records verified. In the same atomic state update it appends an audited map publication setting every saved path link to mixed shade, updates the current dataset, and links the report by accepted_publication_id. It cannot be repeated for a final report. Stored verified status is displayed as Accepted for route reports.
+- Rejection uses `reviewReport(..., 'rejected', ...)` and changes no map data. Legacy single-link reports remain reviewable but cannot be promoted through route acceptance, because no exact point-to-point path was saved.
+- Acceptance uses `publishMapShadeAssignments` without publishing/clearing a pending manual draft. The draft remains based on its earlier version, requiring review before a later manual publication. `MapShadePublication.source_report_id` distinguishes acceptance from a repair/manual edit; published source notes retain this link. It remains DEMO, with no observed shade timestamp or construction verification.
+- Resident automatically recalculates against the new snapshot. A later manual shade edit/publication is required after repairs; acceptance never automatically turns the route green or marks repair complete. The report, review events, accepted yellow snapshot and subsequent manual versions remain inspectable.
+
+`reportsForSegment` includes route reports that cover any link in their saved path, with no unrelated-path leakage. The normal Developer inbox provides all reports and an exact-path preview using the current published shade, independent of draft/scenario colours. No server synchronization, authentication or package was added.

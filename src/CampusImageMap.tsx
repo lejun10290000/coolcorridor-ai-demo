@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './types'
 import { campusMap, campusMapPoint, displayMidpoint, legacySegmentDisplayAliases, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
 import { campusNodeName, campusRouteNodes, campusWalkLinks } from './campusWalkways'
-import { dataStatusText } from './workflow/model'
+import { dataStatusText, reportsForSegment } from './workflow/model'
 import './campus-map.css'
 import { SelectedRouteOverlay } from './routing/SelectedRouteOverlay'
 
@@ -108,7 +108,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             </g> : null
           }))}
           {segments.map(s => {
-            const count = reports.filter(r => r.segment_id === s.segment_id).length
+            const count = reportsForSegment(reports,s.segment_id).length
             const displayId = legacySegmentDisplayAliases[s.segment_id] ?? s.segment_id
             const p = displayMidpoint(segmentDisplays[displayId]?.map_display_geometry ?? [])
             return count && p ? <g className="campus-report" key={s.segment_id} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} DEMO reports for {s.segment_id}; displayed at illustrative link {displayId}. Review status is in the inspector; not footfall.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null

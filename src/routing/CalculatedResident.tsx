@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { MapPanel } from '../MapPanel'
 import { campusNodeName, campusRouteNodes } from '../campusWalkways'
-import { currentSnapshot, malaysiaNow, submitReport } from '../workflow/model'
+import { currentSnapshot } from '../workflow/model'
 import type { WorkflowState } from '../workflow/model'
 import { SegmentEvidence } from '../workflow/SegmentEvidence'
 import { compareRoutes } from './compare'
 import { campusWideGraph } from './graph'
 import { RouteCards } from './RouteCards'
+import { RouteReportForm } from '../workflow/RouteReportForm'
 import './routing.css'
 
 // Normal app integration agreed by Builder 1 in PR #6, issuecomment-6234657305.
@@ -18,8 +19,6 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
   const [endpointSelectMode, setEndpointSelectMode] = useState<'from'|'to'>('from')
   const [route, setRoute] = useState<'shortest'|'exposure'>('shortest')
   const [openForm, setOpenForm] = useState(false)
-  const [category, setCategory] = useState('no shade')
-  const [comment, setComment] = useState('')
   const [message, setMessage] = useState('')
   const [recenter, setRecenter] = useState(0)
   const current = currentSnapshot(state)
@@ -34,7 +33,7 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
   )
   const chosen = comparison?.[route]?.segment_ids ?? []
   const chooseNode = (nodeId: string) => {
-    if (endpointSelectMode === 'from') setFromNode(nodeId)
+    if (endpointSelectMode === 'from') {setFromNode(nodeId);setEndpointSelectMode('to')}
     else setToNode(nodeId)
   }
   const updateFrom = (value: string) => setFromNode(value)
@@ -71,13 +70,11 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
           ? <p className="warning" role="alert">Start and destination are the same point. Choose two different dots.</p>
           : <p className="selected-route-status" data-testid="selected-route" role="status" data-route-version={comparison?.dataset_version}>Selected route: {fromName} → {toName} · {route==='shortest'?'Shortest':'Most shaded practical route'} · {chosen.length?chosen.join(' → '):'Unavailable'} · {current.dataset_version}</p>}
       <div className="main-grid"><MapPanel segments={current.segments} selected={selected} onSelect={setSelected} routeIds={chosen} recenter={recenter} reports={state.reports} fromNode={fromNode} toNode={toNode} endpointSelectMode={endpointSelectMode} onNodeSelect={chooseNode}/><SegmentEvidence segment={segment} version={current.dataset_version} state={state} mode="resident" onAction={()=>setOpenForm(true)}/></div>
+      <div className="wf-route-report-action"><button type="button" onClick={()=>setOpenForm(true)}>Report selected route</button><p>Choose two points, then report a problem on the exact selected path. You can also choose the endpoints in the report form.</p></div>
       {comparison
         ? <RouteCards comparison={comparison} selected={route} onSelect={setRoute} fromLabel={fromName} toLabel={toName}/>
         : <section className="route-comparison"><h2>Choose your own campus route</h2><p>The route will be calculated after you choose two different dots. No fixed Main Gate → Klinik UTM journey is preselected.</p><p className="warning">Unknown shade is ranked conservatively. Published DEMO classifications affect routing but do not establish observed shade. Both objectives can choose the same path.</p></section>}
-      {openForm&&<div className="modal" role="dialog" aria-modal="true" aria-labelledby="report-heading" onKeyDown={e=>{
-        if(e.key==='Escape')setOpenForm(false)
-        if(e.key==='Tab'){const controls=Array.from(e.currentTarget.querySelectorAll<HTMLElement>('button,select,textarea'));const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
-      }}><form className="dialog" onSubmit={e=>{e.preventDefault();if(commit(s=>submitReport(s,{segment_id:segment.segment_id,category,comment_optional:comment},malaysiaNow()))){setOpenForm(false);setComment('');setMessage('Report submitted with pending review status. Reports are not footfall.')}}}><button type="button" className="close" aria-label="Close report form" autoFocus onClick={()=>setOpenForm(false)}>×</button><h2 id="report-heading">Report walkway issue</h2><p>{segment.segment_id}. Reports start submitted/pending review and are never pedestrian counts.</p><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}>{['no shade','too hot at a stated time','blocked walkway','unsafe crossing','other'].map(x=><option key={x}>{x}</option>)}</select></label><label>Optional note<textarea maxLength={2000} value={comment} onChange={e=>setComment(e.target.value)}/></label><button type="submit">Submit demo report</button></form></div>}
+      {openForm&&<RouteReportForm from={fromNode} to={toNode} onFrom={updateFrom} onTo={updateTo} objective={route} onObjective={setRoute} comparison={comparison} commit={commit} onClose={()=>setOpenForm(false)} onSubmitted={()=>{setOpenForm(false);setMessage('Route report submitted for Developer review. Map shade is unchanged until accepted.')}}/>}
     </section>
   </main>
 }

@@ -3,6 +3,7 @@ import { currentSnapshot, initialWorkflow, lifecycleNext, shadeLabels, validLoca
 import type { WorkflowState } from './model'
 import type { DataStatus, Lifecycle } from '../types'
 import { mapShadeSource, validMapAssignments } from './mapShade'
+import { routeReportCategories, validReportedRoute } from './routeReports'
 
 const statuses: DataStatus[]=['sample_observed','human_reviewed','model_estimate','demo_fixture','simulated','unknown']
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v)
@@ -87,6 +88,10 @@ export function decodeWorkflow(raw:string):WorkflowState {
     assert(object(update)&&string(update.publication_id)&&update.publication_id.startsWith('MAP-SHADE-')&&time(update.created_at)&&[update.created_by_label,update.note].every(v=>string(v)&&v.trim().length>0)&&validMapAssignments(update.assignments))
     const index=state.snapshots.findIndex(s=>s.dataset_version===update.dataset_version),snapshot=state.snapshots[index],prior=state.snapshots[index-1]
     assert(index>0&&prior.dataset_version===update.base_dataset_version&&snapshot.parent_dataset_version===update.base_dataset_version&&snapshot.created_at===update.created_at&&snapshot.created_by_label===update.created_by_label)
+    if(update.source_report_id!==undefined){
+      const report=state.reports.find(r=>r.report_id===update.source_report_id),events=state.report_events.filter(e=>e.report_id===update.source_report_id),event=events[events.length-1]
+      assert(string(update.source_report_id)&&report?.route&&report.review_status==='verified'&&report.accepted_publication_id===update.publication_id&&JSON.stringify(update.assignments.map(a=>a.segment_id))===JSON.stringify(report.route.segment_ids)&&update.assignments.every(a=>a.shade_label==='mixed')&&event?.to_status==='verified'&&event.reviewer_label===update.created_by_label&&event.timestamp===update.created_at&&event.note===update.note)
+    }
     // Every changed record must be accounted for; non-selected evidence is carried forward intact.
     snapshot.segments.forEach(segment=>{
       const before=prior.segments.find(s=>s.segment_id===segment.segment_id)!,a=update.assignments.find(a=>a.segment_id===segment.segment_id)
@@ -115,7 +120,12 @@ export function decodeWorkflow(raw:string):WorkflowState {
     if(item.lifecycle==='published')assert(item.segment_ids.every(id=>state.observations.some(o=>o.intervention_id===item.intervention_id&&o.segment_id===id&&o.review_status==='published')))
   })
   state.reports.forEach(r=>{
-    assert(string(r.report_id)&&segments.some(s=>s.segment_id===r.segment_id)&&['no shade','too hot at a stated time','blocked walkway','unsafe crossing','other'].includes(r.category)&&time(r.created_at)&&string(r.comment_optional)&&string(r.review_note)&&r.data_status==='demo_fixture')
+    assert(string(r.report_id)&&segments.some(s=>s.segment_id===r.segment_id)&&routeReportCategories.includes(r.category)&&time(r.created_at)&&string(r.comment_optional)&&string(r.review_note)&&r.data_status==='demo_fixture')
+    if(r.route!==undefined){
+      assert(validReportedRoute(state,r.route)&&r.segment_id===r.route.segment_ids[0]&&r.comment_optional.trim().length>0)
+      if(r.review_status==='verified')assert(string(r.accepted_publication_id)&&state.map_shade_updates!.some(u=>u.publication_id===r.accepted_publication_id&&u.source_report_id===r.report_id))
+      else assert(r.accepted_publication_id===undefined)
+    }else assert(r.accepted_publication_id===undefined)
     let previous='submitted'
     state.report_events.filter(e=>e.report_id===r.report_id).forEach(e=>{assert(validReportTransition(previous as 'submitted',e.to_status)&&e.from_status===previous&&time(e.timestamp)&&[e.reviewer_label,e.note,e.event_id].every(string));previous=e.to_status})
     assert(previous===r.review_status)

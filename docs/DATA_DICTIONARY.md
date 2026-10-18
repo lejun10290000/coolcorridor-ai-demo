@@ -29,7 +29,7 @@ Candidate sites are positioned at display-polyline midpoints for review, carry D
 
 ## Versioned manual shade-observation workflow
 
-The original `StudyArea`, `WalkwaySegment`, report and candidate interfaces remain unchanged. New types live in `src/workflow/model.ts`:
+The original `StudyArea`, `WalkwaySegment` and candidate interfaces remain unchanged. Original report fields remain compatible; later route-report optional fields are documented below. Workflow types live in `src/workflow/model.ts`:
 
 | Record | Fields / provenance |
 |---|---|
@@ -79,3 +79,11 @@ Optional schema1 additions: `map_shade_draft` contains `base_dataset_version`, u
 UI labels Unshaded / Mixed shaded / Fully shaded map to existing `mostly_exposed` / `mixed` / `mostly_shaded` enums. They are DEMO ranking classes (weights1/.5/0), not measured shade percentages. Unknown remains weight1. On publication changed segments retain `shade_data_status: demo_fixture` and `shade_observed_at: null`. `shade_source.map_publication_id` links to the recorded manual classification; it is distinguished from field observations in the inspector. Geometry, lengths, footfall, field observation/review history and intervention states are not changed. The new snapshot carries all unedited records forward. A stale draft must be explicitly reviewed against the newest published version before applying/publishing.
 
 Original4 DEMO-S records and68 PR7 DEMO-WALK records remain unchanged, defined through the historical `legacyCampusWalkways.ts` fixture module. New reference records are appended by a strict recognized-ID migration to each old saved snapshot, preserving its existing records, observation/review/report/lifecycle history and current version. Historic geometry is not drawn on a different image. Four old intervention/report IDs retain declared visual proxies; no proxy is promoted into a surveyed location. Original metre facts are retained for old records; new lengths continue the explicit rough0.2m/pixel demo assumption, never a measured map scale or navigation distance.
+
+### Resident route reports
+
+`ResidentReport.route` is optional for backward compatibility and contains `from_node`, `to_node`, `objective` (shortest/exposure), ordered `segment_ids`, ordered `node_ids` (including hidden graph junctions) and source `dataset_version`. It stores the selected path rather than recalculating the report location later. New route reports require a nonempty problem description, retained in the compatible `comment_optional` field. `segment_id` retains the first saved link as a compatibility anchor; map counts/filtering use the full route list. Categories include `broken shade structure` and the original five options.
+
+`accepted_publication_id` is present only for accepted route reports. Existing stored status `verified` is displayed as **Accepted**; `submitted` as Pending review. Acceptance records the normal review-event sequence and a new `MapShadePublication` with optional `source_report_id`, assigning every saved link `mixed`. The report/publication/reviewer/time/note are cross-validated at reload. A route report cannot be stored as accepted without its matching mixed-shade publication; forged route IDs, unsupported endpoints or source links are rejected.
+
+Manual map repair publications keep their existing schema and do not change the accepted report into a repaired/closed record. Earlier accepted yellow snapshots and the original report remain historical evidence. Acceptance sets DEMO classifications with null observed timestamp; it never changes footfall, measured geometry or intervention lifecycle. Older reports without route metadata retain their prior shape/status/history, and are explicitly labelled legacy single-link reports in Developer.

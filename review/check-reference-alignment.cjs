@@ -60,10 +60,13 @@ const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/normal-points-
     await page.getByLabel('Destination',{exact:true}).selectOption('KLINIK-UTM')
     // Report on the new reference ID and inspect the same record in Developer.
     await page.locator('[data-segment-id="DEMO-REF-001"]').focus();await page.keyboard.press('Enter')
-    await page.getByRole('button',{name:'Report this walkway',exact:true}).click()
-    await page.getByLabel('Optional note',{exact:true}).fill('DEMO alignment browser test, not a field report')
-    await page.getByRole('button',{name:'Submit demo report',exact:true}).click()
+    await page.getByRole('button',{name:'Report a route',exact:true}).click()
+    await page.getByLabel('Report starting point',{exact:true}).selectOption('MAIN-GATE')
+    await page.getByLabel('Report destination',{exact:true}).selectOption('INNER-GATE')
+    await page.getByLabel('Describe the problem',{exact:true}).fill('DEMO alignment browser test, not a field report')
+    await page.getByRole('button',{name:'Submit route report',exact:true}).click()
     await page.waitForFunction(k=>JSON.parse(localStorage.getItem(k)).reports.length===1,key)
+    await page.getByLabel('Destination',{exact:true}).selectOption('KLINIK-UTM')
     for(const [width,height,label] of [[1440,1100,'desktop'],[390,844,'mobile']]){
       await page.setViewportSize({width,height});await page.getByRole('button',{name:'Full map',exact:true}).click();await aligned()
       await page.locator('.campus-map').screenshot({path:path.join(out,`03-resident-${label}.png`)})

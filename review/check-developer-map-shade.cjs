@@ -1,7 +1,7 @@
 // Normal production-entry test. Uses a fresh browser context and synthetic DEMO inputs only.
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path')
-const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resolve('outputs/developer-map-shade'),key='coolcorridor-shade-workflow-v1'
+const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resolve(process.env.MAP_SHADE_OUTPUT_DIR||'outputs/developer-map-shade'),key='coolcorridor-shade-workflow-v1'
 ;(async()=>{
   await fs.mkdir(out,{recursive:true})
   const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})

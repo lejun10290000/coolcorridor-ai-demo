@@ -1,5 +1,7 @@
 # Developer route shade editing and Resident publication
 
+The later [route report workflow](ROUTE_REPORT_SYSTEM.md) adds one explicit publication action: accepting a valid Resident route report immediately publishes mixed/yellow shade for its saved path. It preserves any manual draft as stale. Repairs still use the manual editor described here and require a separate publication; acceptance does not mark a repair complete.
+
 Feature branch `feature/developer-map-shade-publishing` starts from PR9 head `7d474151c15644b1225428760b7521ce72902ba4`. PR9 was checked open/unmerged before work. No main commit, automatic merge, force push or discarded work.
 
 ## Use in the normal app

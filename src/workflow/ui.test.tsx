@@ -11,7 +11,7 @@ describe('role-specific evidence and optimisation UI contract',()=>{
     const common={state,segment,version:state.current_version,onAction:()=>{}}
     const resident=renderToStaticMarkup(<SegmentEvidence {...common} mode="resident"/>)
     const developer=renderToStaticMarkup(<SegmentEvidence {...common} mode="developer"/>)
-    expect(resident).toContain('Report this walkway');expect(developer).not.toContain('Report this walkway');expect(developer).toContain('View reports for this segment')
+    expect(resident).toContain('Report a route');expect(developer).not.toContain('Report a route');expect(developer).toContain('View reports for this segment')
   })
   it('never leaks another selected segment’s reports or enables direct verification',()=>{
     const state=submitReport(initialWorkflow(),{segment_id:'DEMO-S01',category:'no shade',comment_optional:'Unique segment-one report'},'2026-10-17T17:00:00+08:00')

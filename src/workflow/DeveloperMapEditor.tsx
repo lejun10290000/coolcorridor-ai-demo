@@ -4,15 +4,16 @@ import type { CampusImageMapProps } from '../CampusImageMap'
 import { campusNodeName, campusRouteNodes } from '../campusWalkways'
 import { currentSnapshot, malaysiaNow } from './model'
 import type { WorkflowState } from './model'
-import type { ShadeLabel } from '../types'
+import type { ResidentReport, ShadeLabel } from '../types'
+import { reportedRouteLabel } from './routeReports'
 import { mapRouteSelection, mapShadeLabels, previewMapShade, publishMapShade, rebaseMapShadeDraft, removeMapShadeDraft, stageMapShade } from './mapShade'
 
 type Commit=(update:(state:WorkflowState)=>WorkflowState)=>boolean
-export function DeveloperMapEditor({state,commit,canEdit,...mapProps}:CampusImageMapProps&{state:WorkflowState;commit:Commit;canEdit:boolean}){
+export function DeveloperMapEditor({state,commit,canEdit,reportPreview,onCloseReportPreview,...mapProps}:CampusImageMapProps&{state:WorkflowState;commit:Commit;canEdit:boolean;reportPreview?:ResidentReport|null;onCloseReportPreview?:()=>void}){
   const [from,setFrom]=useState(''),[to,setTo]=useState(''),[pointMode,setPointMode]=useState<'from'|'to'>('from')
   const [selectedIds,setSelectedIds]=useState<string[]>([]),[label,setLabel]=useState<ShadeLabel>('mostly_exposed')
   const [editing,setEditing]=useState(true),[message,setMessage]=useState(''),[by,setBy]=useState('Demo map operator'),[note,setNote]=useState(''),[confirmed,setConfirmed]=useState(false)
-  const draft=state.map_shade_draft,current=currentSnapshot(state),active=editing&&canEdit
+  const draft=state.map_shade_draft,current=currentSnapshot(state),reviewPath=reportPreview?.route,active=editing&&canEdit&&!reviewPath
   const stale=!!draft&&draft.base_dataset_version!==state.current_version
   const connection=useMemo(()=>{
     if(!from||!to)return{ids:[],error:''}
@@ -30,7 +31,8 @@ export function DeveloperMapEditor({state,commit,canEdit,...mapProps}:CampusImag
     <div className="wf-panel"><h2>Edit map shade</h2><p>Select one or more point-to-point routes, or tap individual path links. Then choose a shade category. Changes first appear in the Developer draft; publish when ready to update Resident routing.</p>
       <p className="warning">Manual DEMO classifications only. “Fully shaded” ranks as the shaded category in this prototype, not a measured 100% shade claim. Field evidence/review and intervention approval remain separate below.</p>
       {!canEdit&&<p role="status">Switch to the current baseline to edit shade. Historical and simulated maps cannot be published.</p>}
-      <fieldset disabled={!canEdit}><legend>Choose paths to edit</legend>
+      {reviewPath&&<p className="warning">Reported path preview uses the current published shade. Close it to resume manual editing. Saved drafts are preserved.</p>}
+      <fieldset disabled={!canEdit||!!reviewPath}><legend>Choose paths to edit</legend>
         <label className="wf-check"><input type="checkbox" checked={editing} onChange={e=>setEditing(e.target.checked)}/>Select paths for shade editing</label>
         <div className="wf-editor-grid">
           <label>Route from<select aria-label="Developer route from" value={from} onChange={e=>setFrom(e.target.value)}><option value="">Choose a point</option>{campusRouteNodes.map(n=><option key={n.id} value={n.id}>{campusNodeName(n)}</option>)}</select></label>
@@ -47,10 +49,11 @@ export function DeveloperMapEditor({state,commit,canEdit,...mapProps}:CampusImag
         <details open><summary>Review changed links</summary><div className="wf-table-wrap"><table><thead><tr><th>Path link</th><th>Currently published</th><th>Developer draft</th><th>Action</th></tr></thead><tbody>{draft.assignments.map(a=><tr key={a.segment_id}><th scope="row">{a.segment_id}</th><td>{mapShadeLabels[current.segments.find(s=>s.segment_id===a.segment_id)!.shade_label]}</td><td>{mapShadeLabels[a.shade_label]} · DEMO</td><td><button type="button" aria-label={`Remove draft ${a.segment_id}`} onClick={()=>{commit(s=>removeMapShadeDraft(s,[a.segment_id]));setConfirmed(false)}}>Remove</button></td></tr>)}</tbody></table></div></details>
         <div className="wf-editor-grid"><label>Map operator label<input maxLength={2000} value={by} onChange={e=>{setBy(e.target.value);setConfirmed(false)}}/></label><label>Map publication note<textarea maxLength={2000} value={note} onChange={e=>{setNote(e.target.value);setConfirmed(false)}} placeholder="Describe this demo map update"/></label></div>
         <label className="wf-check"><input type="checkbox" checked={reviewed} onChange={e=>{setConfirmed(e.target.checked);setReviewedKey(draftKey)}}/>I reviewed these DEMO shade changes and want to publish them to Resident routing.</label>
-        <div className="wf-actions"><button type="button" disabled={!canEdit||stale||!reviewed||!by.trim()||!note.trim()} onClick={publish}>Publish to Resident map</button><button type="button" onClick={()=>{commit(s=>removeMapShadeDraft(s));setConfirmed(false);setMessage('Developer draft discarded. Published Resident map is unchanged.')}}>Discard Developer draft</button></div>
+        <div className="wf-actions"><button type="button" disabled={!canEdit||!!reviewPath||stale||!reviewed||!by.trim()||!note.trim()} onClick={publish}>Publish to Resident map</button><button type="button" onClick={()=>{commit(s=>removeMapShadeDraft(s));setConfirmed(false);setMessage('Developer draft discarded. Published Resident map is unchanged.')}}>Discard Developer draft</button></div>
       </section>}
     </div>
-    <p className="wf-map-state" data-testid="developer-map-state">{canEdit&&draft?'DEVELOPER DRAFT PREVIEW — not published to Residents':canEdit?'CURRENT PUBLISHED MAP':'READ-ONLY COMPARISON'} · {mapProps.scenario?'SIMULATED':current.dataset_version}</p>
-    <MapPanel {...mapProps} segments={canEdit&&draft?previewMapShade(state):mapProps.segments} onSelect={toggleSegment} routeIds={active?selectedIds:[]} fromNode={active?from:undefined} toNode={active?to:undefined} onNodeSelect={active?choosePoint:undefined}/>
+    {reviewPath&&<div className="wf-report-path" role="status"><b>Report {reportPreview!.report_id}: {reportedRouteLabel(reviewPath)}</b><p>Exact saved links, with current published shade. A later route calculation does not move this report.</p><button type="button" onClick={onCloseReportPreview}>Close reported route preview</button></div>}
+    <p className="wf-map-state" data-testid="developer-map-state">{reviewPath?'REPORTED ROUTE — CURRENT PUBLISHED SHADE':canEdit&&draft?'DEVELOPER DRAFT PREVIEW — not published to Residents':canEdit?'CURRENT PUBLISHED MAP':'READ-ONLY COMPARISON'} · {mapProps.scenario?'SIMULATED':current.dataset_version}</p>
+    <MapPanel {...mapProps} segments={reviewPath?current.segments:canEdit&&draft?previewMapShade(state):mapProps.segments} onSelect={toggleSegment} routeIds={reviewPath?.segment_ids??(active?selectedIds:[])} fromNode={reviewPath?.from_node??(active?from:undefined)} toNode={reviewPath?.to_node??(active?to:undefined)} onNodeSelect={active?choosePoint:undefined}/>
   </section>
 }

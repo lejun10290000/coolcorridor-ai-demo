@@ -39,6 +39,7 @@ export function rebaseMapShadeDraft(state:WorkflowState,now:string):WorkflowStat
   return {...state,revision:state.revision+1,map_shade_draft:{...state.map_shade_draft,base_dataset_version:state.current_version,updated_at:now}}
 }
 export function mapShadeSource(update:MapShadePublication):ShadeSource {
+  if(update.source_report_id)return {map_publication_id:update.publication_id,observation_id:update.publication_id,method:'Accepted Resident route report — DEMO mixed shade',source_note:`${update.source_report_id}: ${update.note}`,observer_label:update.created_by_label,reviewer_label:'',review_note:'Developer accepted this report and marked its saved route mixed shade. Repairs require a later manual map update; no field shade measurement is claimed.',evidence_reference:'',published_at:update.created_at}
   return {map_publication_id:update.publication_id,observation_id:update.publication_id,method:'Manual Developer DEMO map classification',source_note:update.note,observer_label:update.created_by_label,reviewer_label:'',review_note:'Operator-confirmed DEMO classification; no field observation or independent field review claimed.',evidence_reference:'',published_at:update.created_at}
 }
 export function previewMapShade(state:WorkflowState):CurrentSegment[] {
@@ -48,18 +49,25 @@ export function previewMapShade(state:WorkflowState):CurrentSegment[] {
   })
 }
 export function publishMapShade(state:WorkflowState,by:string,note:string,confirmed:boolean,now:string):WorkflowState {
-  const draft=state.map_shade_draft,baseline=currentSnapshot(state)
+  const draft=state.map_shade_draft
   requireValue(draft&&validMapAssignments(draft.assignments),'Save at least one Developer shade edit before publishing.')
   requireValue(draft.base_dataset_version===state.current_version,'The published map changed. Review the draft against the latest map first.')
   requireValue(confirmed,'Confirm you reviewed these DEMO shade changes before publishing.')
+  return {...publishMapShadeAssignments(state,draft.assignments,by,note,now),map_shade_draft:null}
+}
+/** Atomic publication used by reviewed reports too. An unrelated manual draft stays intact/stale. */
+export function publishMapShadeAssignments(state:WorkflowState,assignments:MapShadeAssignment[],by:string,note:string,now:string,sourceReportId?:string):WorkflowState {
+  const baseline=currentSnapshot(state)
+  requireValue(validMapAssignments(assignments),'Select valid reference shade assignments.')
   requireValue(validLocalTime(now)&&typeof by==='string'&&by.trim().length>0&&by.length<=2000&&typeof note==='string'&&note.trim().length>0&&note.length<=2000,'Enter an operator label and publication note, with a valid timestamp.')
+  if(sourceReportId){const report=state.reports.find(r=>r.report_id===sourceReportId);requireValue(report?.route&&report.review_status==='verified'&&!report.accepted_publication_id&&JSON.stringify(assignments.map(a=>a.segment_id))===JSON.stringify(report.route.segment_ids)&&assignments.every(a=>a.shade_label==='mixed'),'Report acceptance must publish exactly the saved route as mixed shade.')}
   const version=`${state.snapshots[0].dataset_version}-v${String(state.snapshots.length).padStart(6,'0')}`
   requireValue(!state.snapshots.some(s=>s.dataset_version===version),'Dataset version already exists.')
-  const update:MapShadePublication={publication_id:`MAP-SHADE-${String(state.revision+1).padStart(6,'0')}`,base_dataset_version:state.current_version,dataset_version:version,assignments:draft.assignments.map(a=>({...a})),created_at:now,created_by_label:by.trim(),note:note.trim()}
+  const update:MapShadePublication={publication_id:`MAP-SHADE-${String(state.revision+1).padStart(6,'0')}`,base_dataset_version:state.current_version,dataset_version:version,assignments:assignments.map(a=>({...a})),created_at:now,created_by_label:by.trim(),note:note.trim(),...(sourceReportId?{source_report_id:sourceReportId}:{})}
   const source=mapShadeSource(update)
   const snapshot={...baseline,dataset_version:version,parent_dataset_version:baseline.dataset_version,created_at:now,created_by_label:by.trim(),change_summary:`Developer map: ${note.trim()}`,warnings:['Manual DEMO shade classification; not field-observed shade, institutional approval or a measured cooling result. Geometry remains unsurveyed.'],segments:baseline.segments.map(s=>{
     const a=update.assignments.find(a=>a.segment_id===s.segment_id)
     return a?{...s,dataset_version:version,shade_label:a.shade_label,shade_observed_at:null,shade_data_status:'demo_fixture' as const,shade_source:{...source}}:{...s,dataset_version:version}
   })}
-  return {...state,revision:state.revision+1,current_version:version,snapshots:[...state.snapshots,snapshot],map_shade_draft:null,map_shade_updates:[...(state.map_shade_updates??[]),update]}
+  return {...state,revision:state.revision+1,current_version:version,snapshots:[...state.snapshots,snapshot],map_shade_updates:[...(state.map_shade_updates??[]),update],reports:sourceReportId?state.reports.map(r=>r.report_id===sourceReportId?{...r,accepted_publication_id:update.publication_id}:r):state.reports}
 }
