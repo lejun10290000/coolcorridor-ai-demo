@@ -152,11 +152,13 @@ const sourceNote = 'Illustrative connection visually traced from the supplied ca
 // Bends keep longer links on the visible pedestrian corridors instead of drawing straight
 // chords across campus buildings or the football field. Coordinates are native image pixels.
 const viaByPair: Record<string, { x: number; y: number }[]> = {
+  'WEST-UPPER-01::CAFE-PEGAWAI': [{x:280,y:585},{x:295,y:545}],
+  'CICT::CAFE-V1': [{x:675,y:625},{x:710,y:620}],
   'CAFE-PEGAWAI::BTMK': [{x:335,y:520},{x:365,y:545},{x:395,y:560}],
   'CAFE-PEGAWAI::WEST-NORTH-01': [{x:305,y:475},{x:315,y:445}],
-  'WEST-NORTH-01::NORTH-WEST-01': [{x:330,y:385},{x:365,y:345},{x:395,y:315}],
-  'NORTH-WEST-01::NORTH-WEST-02': [{x:460,y:265},{x:510,y:240}],
-  'NORTH-WEST-02::NORTH-TOP-01': [{x:610,y:195},{x:675,y:165},{x:725,y:150}],
+  'WEST-NORTH-01::NORTH-WEST-01': [{x:330,y:385},{x:340,y:350}],
+  'NORTH-WEST-01::NORTH-WEST-02': [{x:365,y:260},{x:385,y:220},{x:415,y:185},{x:460,y:155},{x:520,y:150}],
+  'NORTH-WEST-02::NORTH-TOP-01': [{x:620,y:155},{x:680,y:150},{x:725,y:145}],
   'NORTH-TOP-02::NORTH-EAST-01': [{x:970,y:155},{x:995,y:185}],
   'NORTH-EAST-01::NORTH-EAST-02': [{x:1000,y:270}],
   'NORTH-EAST-02::NORTH-EAST-03': [{x:1015,y:365},{x:1055,y:395}],
@@ -200,7 +202,7 @@ const viaByPair: Record<string, { x: number; y: number }[]> = {
   'FIELD-NORTH-EAST::FIELD-EAST-NORTH': [{x:950,y:655},{x:980,y:675}],
   'FIELD-WEST-01::KLINIK-APPROACH-01': [{x:720,y:575},{x:740,y:525},{x:770,y:475},{x:800,y:435}],
   'KLINIK-APPROACH-01::KLINIK-UTM': [{x:845,y:360}],
-  'KLINIK-UTM::KLINIK-APPROACH-02': [{x:905,y:315},{x:920,y:335}],
+  'KLINIK-UTM::KLINIK-APPROACH-02': [{x:910,y:350},{x:920,y:360}],
   'KLINIK-APPROACH-02::NORTH-EAST-02': [{x:955,y:355},{x:970,y:345}],
   'KLINIK-APPROACH-02::EAST-CENTRE-02': [{x:950,y:385},{x:970,y:405}],
   'EAST-CENTRE-02::EAST-CENTRE-01': [{x:965,y:445},{x:940,y:465}],
