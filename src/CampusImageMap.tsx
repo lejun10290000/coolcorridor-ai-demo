@@ -59,7 +59,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
       <button type="button" aria-label="Zoom in campus map" disabled={zoom === 3} onClick={() => changeZoom(.5)}>+</button>
       <button type="button" onClick={reset}>Full map</button>
     </div></div>
-    <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. {scenario ? 'SIMULATED / ASSUMPTION shade overlay.' : 'Shade provenance is recorded per segment; initial records are DEMO.'} Paths remain unverified.</p>
+    <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. {scenario ? 'SIMULATED / ASSUMPTION shade overlay.' : 'All walkway geometry and shade labels are UNSURVEYED / UNKNOWN.'} Paths remain unverified.</p>
     <div className="campus-map-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Campus map. Zoom with buttons; when zoomed, drag or use arrow keys to pan. Home resets."
       onKeyDown={e => {
         if (e.target !== e.currentTarget) return
@@ -133,7 +133,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         </svg>}
       </div>
     </div>
-    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Black dots: selected segment · dashed: uncertain DEMO path</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
+    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Grey dots = selectable junctions; yellow labels = named landmarks</span><span>Grey paths = UNSURVEYED walkway geometry</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
     <p className="campus-map-note">Choose any two dots as start and destination. Named dots follow the landmarks marked on the supplied map; unnamed dots remain selectable junctions. All paths, crossings, distances, shade and accessibility are UNSURVEYED; not for navigation.</p>
     {missing.length > 0 && <p role="status">No image-display geometry for {missing.map(s => s.segment_id).join(', ')}. These segments are not drawn.</p>}
     {candidates.length === 0 && <p className="campus-map-note">No selected intervention sites.</p>}
