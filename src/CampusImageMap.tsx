@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { useEffect, useId, useRef, useState } from 'react'
 import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './types'
-import { campusMap, campusMapPoint, displayMidpoint, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
+import { campusMap, campusMapPoint, displayMidpoint, legacySegmentDisplayAliases, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
 import { campusNodeName, campusRouteNodes } from './campusWalkways'
 import { dataStatusText } from './workflow/model'
 import './campus-map.css'
@@ -31,7 +31,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
   const reset = () => { setZoom(1); setPan({ x: 0, y: 0 }) }
   // In the Resident map, show the campus-wide network as the base layer. Legacy edges
   // appear only when selected or when an existing DEMO intervention references them.
-  const visibleSegments = segments.filter(s => s.segment_id.startsWith('DEMO-WALK-') || s.segment_id === selected || routeIds.includes(s.segment_id) || candidates.some(c => c.segment_ids.includes(s.segment_id)))
+  const visibleSegments = segments.filter(s => s.segment_id.startsWith('DEMO-WALK-'))
   useEffect(() => { reset() }, [recenter])
   // A resize resets the shared scene so a formerly visible path cannot remain offscreen.
   useEffect(() => { const observer = new ResizeObserver(reset); if (viewport.current) observer.observe(viewport.current); return () => observer.disconnect() }, [])
@@ -98,17 +98,19 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
           })}
           <SelectedRouteOverlay segments={segments} routeIds={routeIds}/>
           {candidates.flatMap(c => c.segment_ids.map(id => {
-            const p = displayMidpoint(segmentDisplays[id]?.map_display_geometry ?? [])
-            return p && segments.some(s => s.segment_id === id) ? <g key={`${c.intervention_id}-${id}`} className="campus-candidate" data-intervention-id={c.intervention_id} data-scenario={scenario} role="button" tabIndex={0} aria-label={`${scenario ? 'SIMULATED' : 'DEMO candidate'} ${c.intervention_id}: ${c.type}, ${id}`} onClick={() => choose(id)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(id) } }} transform={`translate(${p.x},${p.y})`}>
-              <title>{scenario ? 'SIMULATED' : 'DEMO candidate'} {c.intervention_id}: {c.type} — {id}. Unverified display location.</title>
+            const displayId = legacySegmentDisplayAliases[id] ?? id
+            const p = displayMidpoint(segmentDisplays[displayId]?.map_display_geometry ?? [])
+            return p && segments.some(s => s.segment_id === id) ? <g key={`${c.intervention_id}-${id}`} className="campus-candidate" data-intervention-id={c.intervention_id} data-scenario={scenario} role="button" tabIndex={0} aria-label={`${scenario ? 'SIMULATED' : 'DEMO candidate'} ${c.intervention_id}: ${c.type}, source ${id}, visual proxy ${displayId}`} onClick={() => choose(id)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(id) } }} transform={`translate(${p.x},${p.y})`}>
+              <title>{scenario ? 'SIMULATED' : 'DEMO candidate'} {c.intervention_id}: {c.type} — source record {id}; shown at illustrative campus link {displayId}. Not a surveyed installation location.</title>
               <rect x="-18" y="-18" width="36" height="36" rx="5" fill={scenario ? '#8250ad' : '#fff'} stroke="#55255b" strokeWidth="5"/>
               <text y="6" textAnchor="middle" fill={scenario ? '#fff' : '#55255b'} fontSize="22" fontWeight="bold">{scenario ? 'S' : 'I'}</text>
             </g> : null
           }))}
           {segments.map(s => {
             const count = reports.filter(r => r.segment_id === s.segment_id).length
-            const p = displayMidpoint(segmentDisplays[s.segment_id]?.map_display_geometry ?? [])
-            return count && p ? <g className="campus-report" key={s.segment_id} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} DEMO reports for {s.segment_id}; review status is in the inspector. Not footfall.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null
+            const displayId = legacySegmentDisplayAliases[s.segment_id] ?? s.segment_id
+            const p = displayMidpoint(segmentDisplays[displayId]?.map_display_geometry ?? [])
+            return count && p ? <g className="campus-report" key={s.segment_id} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} DEMO reports for {s.segment_id}; displayed at illustrative link {displayId}. Review status is in the inspector; not footfall.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null
           })}
           {campusRouteNodes.map(node => {
             const mapped=campusMapPoint(node), x=mapped.x, y=mapped.y
