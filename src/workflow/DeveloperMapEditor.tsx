@@ -29,7 +29,7 @@ export function DeveloperMapEditor({state,commit,canEdit,reportPreview,onCloseRe
   function publish(){if(commit(s=>publishMapShade(s,by,note,reviewed,malaysiaNow()))){setMessage('Published to Resident map. Shortest and most shaded practical routes now use the new dataset.');setConfirmed(false);setSelectedIds([]);setNote('')}}
   return <section className="wf-map-editor" aria-label="Developer route shade editor">
     <div className="wf-panel"><h2>Edit map shade</h2><p>Select one or more point-to-point routes, or tap individual path links. Then choose a shade category. Changes first appear in the Developer draft; publish when ready to update Resident routing.</p>
-      <p className="warning">Manual DEMO classifications only. “Fully shaded” ranks as the shaded category in this prototype, not a measured 100% shade claim. Field evidence/review and intervention approval remain separate below.</p>
+      <p className="warning">Manual DEMO classifications only. “Fully shaded” ranks as the shaded category in this prototype, not a measured 100% shade claim.</p>
       {!canEdit&&<p role="status">Switch to the current baseline to edit shade. Historical and simulated maps cannot be published.</p>}
       {reviewPath&&<p className="warning">Reported path preview uses the current published shade. Close it to resume manual editing. Saved drafts are preserved.</p>}
       <fieldset disabled={!canEdit||!!reviewPath}><legend>Choose paths to edit</legend>

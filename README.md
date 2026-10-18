@@ -2,7 +2,7 @@
 
 # CoolCorridor AI — Phase 0 prototype
 
-An interactive, laptop-first prototype for the UTM Kuala Lumpur pilot: Resident route/evidence/report flow and Developer planning, budget optimisation, scenario and demo lifecycle flow.
+An interactive, laptop-first prototype for the UTM Kuala Lumpur pilot: Resident route/evidence/report flow and Developer manual map updates, report review, budget optimisation and scenarios.
 
 Phase 0B adds an approved cinematic Home screen with a genuine Three.js 360° orbit around an original fictional township. Its two portals enter the existing Resident and Developer modes. See the [Home implementation and provenance notes](docs/LANDING_PHASE0B.md), [desktop screenshot](outputs/phase0b-desktop-1440.png), [mobile screenshot](outputs/phase0b-mobile-390.png) and [motion preview](outputs/phase0b-motion-preview.mp4).
 
@@ -32,7 +32,7 @@ On Home, use the chapter controls to inspect three camera views, click **360° t
 - Resident can report a selected point-to-point route with a required problem description (for example, a broken shade structure). Developer reviews it in **Review Resident reports**, previews the saved path, and chooses **Accept report** to immediately publish yellow/mixed shade for that exact path in both modes. Rejection leaves shade unchanged. After a repair, use the manual shade editor and publish a separate update. See [route report instructions and actual tests](docs/ROUTE_REPORT_SYSTEM.md).
 - Optimisation is a deterministic exhaustive subset search that honours budget, exclusions and mutual constraints; overlapping segment benefits are not double-counted.
 - Before/after outputs are **SIMULATED**, retain baseline data, and make no cooling, energy, carbon or beneficiary claim.
-- Lifecycle actions are prototype-only and never real UTM approval/construction.
+- The installation/observation/review/publish panel has been removed from Developer mode at the operator's request. Use manual map updates or accept route reports to publish shade changes; stored observation/lifecycle history is preserved.
 - The AI UI/service contract is reserved but no pretrained inference is yet integrated because no permitted imagery or model environment was supplied. See [data dictionary](docs/DATA_DICTIONARY.md).
 - The Home world's route, buildings and shade cues are fictional concept art, separate from the supplied campus illustration used inside the modes. No UTM or Sime Darby Property logo or photo is used.
 
@@ -48,7 +48,7 @@ Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geom
 
 See [map handoff, tests and source notes](docs/CAMPUS_MAP_HANDOFF.md) and [data dictionary](docs/DATA_DICTIONARY.md). The optional standalone review at `/review/campus-map.html` is available with the dev server; it is a test harness, not the operational app.
 
-## Developer shade observations and versioned publication
+## Developer manual map updates and versioned publication
 
 The Developer inbox lists all reports; the inspector can also filter to reports covering its selected link. New reports save the exact route links, endpoints, objective and source dataset. A Developer's explicit Accept action records review and publication atomically; older single-link reports retain their original review history and separate legacy review controls. Reports remain separate from footfall.
 
@@ -56,23 +56,24 @@ The Developer inbox lists all reports; the inspector can also filter to reports 
 
 Use **Baseline / Simulated scenario** and explicit per-segment projection controls to preview hypothetical shade classifications. No projection is assumed by default. Historical snapshots can be viewed without changing the current published dataset.
 
-For an installed prototype intervention: record a documented DEMO or genuinely observed shade entry → start review → verify/reject → explicitly publish. Publishing creates a new immutable snapshot/version shared immediately by Resident and Developer. Raw observations and review/lifecycle history remain inspectable. DEMO entries stay DEMO; an attested field entry is stored as `sample_observed` and its separately reviewed, published assessment as `human_reviewed`. No actual field records have been supplied or collected by this implementation.
+Use **Edit map shade** to select point-to-point paths, apply a category to the Developer draft, review the changes and choose **Publish to Resident map**. Accepting a valid route report also publishes its saved links as mixed shade. A repair requires a later manual update. Previous snapshots and stored evidence history remain inspectable; removing the old installation panel does not clear saved data.
 
 State is persisted only in this browser under `coolcorridor-shade-workflow-v1`, with guarded schema validation and visible corruption/storage-failure warnings. It is not a central database, production authentication or tamper-proof audit log. Evidence is a text reference only; no photos are uploaded. No GPS or location permissions are used.
 
-See the [Developer workflow handoff and manual acceptance path](docs/DEVELOPER_SHADE_WORKFLOW.md), [schema/provenance](docs/DATA_DICTIONARY.md), and [browser results/screenshots](outputs/developer-shade-workflow/browser-results.json).
+See the [manual map workflow](docs/DEVELOPER_MAP_SHADE.md), [route reports](docs/ROUTE_REPORT_SYSTEM.md) and [schema/provenance](docs/DATA_DICTIONARY.md). The [older observation workflow handoff](docs/DEVELOPER_SHADE_WORKFLOW.md) documents retained historical functionality, not the current Developer screen.
 
 To exercise the production workflow with the optional separately supplied Playwright/Chromium runtime:
 
 ```sh
 npm run build
 npm test
-npx vite preview --host 127.0.0.1 --port 4180 --strictPort
+npx vite preview --host 127.0.0.1 --port 4183 --strictPort
 # In another terminal, with Playwright and Chrome available:
-node review/check-developer-workflow.cjs
+node review/check-developer-map-shade.cjs
+node review/check-route-reports.cjs
 ```
 
-Set `PLAYWRIGHT_MODULE` / `CHROME_PATH` if they are outside the default lookup locations; `WORKFLOW_APP_URL` defaults to `http://127.0.0.1:4180`. The older `review/check-campus-app.cjs` entry delegates to this workflow runner and retains port 4174 (or `CAMPUS_APP_URL`) for compatibility. No app dependency installation changes are required.
+Set `PLAYWRIGHT_MODULE` / `CHROME_PATH` if they are outside the default lookup locations; `ALIGNMENT_APP_URL` defaults to `http://127.0.0.1:4183`. No app dependency installation changes are required.
 
 ## Calculated Resident routing
 

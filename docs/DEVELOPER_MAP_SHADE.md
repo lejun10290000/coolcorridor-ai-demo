@@ -1,5 +1,9 @@
 # Developer route shade editing and Resident publication
 
+Current Developer screen: the operator has removed the separate Installation → observation → review → publish panel. Use the manual map editor and report acceptance workflow. Earlier observation/lifecycle records and compatibility code are retained; the editor no longer points to an observation panel below it.
+
+Panel-removal verification: `npm test`102/102 passed; `npm run build` passed with the existing cinematic size warning. A fresh browser smoke check against the normal production entry on4183 confirmed the section/controls are absent at desktop/mobile sizes, manual selection→draft→publication still changes both maps, Resident report controls remain available, and there are no page errors/mobile horizontal overflow. Screenshots/results are in `outputs/developer-manual-only/`. Saved-data schemas and stored records are unchanged.
+
 The later [route report workflow](ROUTE_REPORT_SYSTEM.md) adds one explicit publication action: accepting a valid Resident route report immediately publishes mixed/yellow shade for its saved path. It preserves any manual draft as stale. Repairs still use the manual editor described here and require a separate publication; acceptance does not mark a repair complete.
 
 Feature branch `feature/developer-map-shade-publishing` starts from PR9 head `7d474151c15644b1225428760b7521ce72902ba4`. PR9 was checked open/unmerged before work. No main commit, automatic merge, force push or discarded work.

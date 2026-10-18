@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "checks": [
+    "installation/observation section and controls absent on desktop/mobile",
+    "manual route selection, draft and publication succeed",
+    "mixed shade appears in Developer and Resident",
+    "Resident report controls/inbox remain present",
+    "no mobile horizontal overflow or page errors"
+  ],
+  "pageErrors": []
+}
