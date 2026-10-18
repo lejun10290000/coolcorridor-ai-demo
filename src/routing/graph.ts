@@ -1,19 +1,40 @@
 import type { DataStatus, ShadeLabel, WalkwaySegment } from '../types'
+import { campusRouteNodes, campusWalkLinks } from '../campusWalkways'
 
 export interface GraphLink { edge_id: string; segment_id: string; from: string; to: string; bidirectional: boolean; data_status: 'demo_fixture'; verification: 'pending_verification'; source: string }
 export interface RouteGraph { graph_id: string; nodes: string[]; links: GraphLink[]; warnings: string[] }
-/** Explicit ILLUSTRATIVE topology only. No image points or pixel-derived distances. */
+/** Small legacy fixture retained for regression tests and comparison with earlier demos. */
 export const demoGraph: RouteGraph = {
   graph_id: 'utmkul-illustrative-graph-v1',
   nodes: ['MAIN-GATE', 'DEMO-JUNCTION', 'KLINIK'],
   links: [
     {edge_id:'EDGE-S01',segment_id:'DEMO-S01',from:'MAIN-GATE',to:'DEMO-JUNCTION',bidirectional:true,data_status:'demo_fixture',verification:'pending_verification',source:'Illustrative Main Gate → junction topology; uses supplied legacy segment length, not image scale.'},
     {edge_id:'EDGE-S02',segment_id:'DEMO-S02',from:'DEMO-JUNCTION',to:'KLINIK',bidirectional:true,data_status:'demo_fixture',verification:'pending_verification',source:'Illustrative junction → Klinik topology; crossings and access unverified.'},
-    {edge_id:'EDGE-S03',segment_id:'DEMO-S03',from:'MAIN-GATE',to:'KLINIK',bidirectional:true,data_status:'demo_fixture',verification:'pending_verification',source:'Illustrative alternative topology; legacy metre fixture, not surveyed length.'},
+    {edge_id:'EDGE-S03',segment_id:'DEMO-S03',from:'MAIN-GATE',to:'KLINIK',bidirectional:true,data_status:'demo_fixture',verification:'pending_verification',source:'Illustrative alternative topology; legacy metre fixture, not surveyed.'},
   ],
   warnings: [
     'DEMO graph and legacy metre lengths are algorithm inputs, not surveyed pedestrian navigation. Crossings, walkability and accessibility require field checks.',
     'DEMO-S04 is not routed: it joins the interior of the drawn S02 connector, but no split topology or defensible connector length is supplied.',
+  ],
+}
+/** Campus-wide graph used by the app: all links and landmarks are still illustrative. */
+export const campusWideGraph: RouteGraph = {
+  graph_id: 'utmkul-campus-wide-illustrative-v1',
+  nodes: campusRouteNodes.map(node => node.id),
+  links: campusWalkLinks.map(link => ({
+    edge_id: link.edge_id,
+    segment_id: link.segment_id,
+    from: link.from,
+    to: link.to,
+    bidirectional: true,
+    data_status: 'demo_fixture',
+    verification: 'pending_verification',
+    source: link.source,
+  })),
+  warnings: [
+    'Campus-wide graph is a visual planning sketch traced from the supplied map. All links are GREY / UNSURVEYED; pedestrian access and crossings are not verified.',
+    'Shown lengths use an assumed 0.20 metres per reference-image pixel because no map scale is supplied. Distances and durations are rough demo estimates, not measurements or navigation directions.',
+    'The source image is not georeferenced. No GPS, outdoor routing data, shade survey, surface, slope or accessibility inspection is claimed.',
   ],
 }
 export interface RoutingConfig { shade_weights: Record<ShadeLabel, number>; walking_speed_mps: number }
