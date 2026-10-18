@@ -71,7 +71,6 @@ export const campusRouteNodes: CampusRouteNode[] = [
   { id: 'KLINIK-UTM', x: 733, y: 308, label: 'Klinik UTM' },
   { id: 'EAST-CENTRE-01', x: 778, y: 447 },
   { id: 'EAST-CENTRE-02', x: 834, y: 395 },
-  { id: 'EAST-CENTRE-03', x: 902, y: 444 },
   { id: 'WEST-CENTRE-01', x: 390, y: 560 },
   { id: 'INNER-GATE-01', x: 315, y: 888 },
 ]
@@ -144,8 +143,6 @@ const pairs: [string, string][] = [
   ['KLINIK-UTM','KLINIK-APPROACH-02'],
   ['KLINIK-APPROACH-02','NORTH-EAST-02'],
   ['KLINIK-APPROACH-02','EAST-CENTRE-02'],
-  ['EAST-CENTRE-02','EAST-CENTRE-03'],
-  ['EAST-CENTRE-03','REAR-GATE'],
   ['EAST-CENTRE-02','EAST-CENTRE-01'],
   ['EAST-CENTRE-01','FIELD-NORTH-WEST'],
 ]
