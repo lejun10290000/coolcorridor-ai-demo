@@ -12,14 +12,15 @@ export const campusMap = {
   source: 'Operator-supplied UTM KL campus illustration from a lecturer-provided PDF. Original creator and reuse licence unconfirmed.',
   origin: { x: 285, y: 1075 }, destination: { x: 884, y: 312 },
 }
-// Align the reference overlay to the existing Main Gate and Klinik marker positions rather
-// than stretching the whole reference canvas. These are image pixels, not geographic data.
-const sourceMain = campusWalkLinks.length ? { x: 212, y: 900 } : { x: 0, y: 0 }
-const sourceKlinik = { x: 733, y: 308 }
-const sx = (campusMap.destination.x - campusMap.origin.x) / (sourceKlinik.x - sourceMain.x)
-const sy = (campusMap.destination.y - campusMap.origin.y) / (sourceKlinik.y - sourceMain.y)
+// Node/link coordinates use the same aspect ratio as this map image. Keep one uniform
+// proportional transform: independently anchoring Main Gate and Klinik stretches the
+// drawing and causes the other walkway dots to drift away from their paths. Image pixels
+// only; there is no georeferencing or map-scale claim.
 export function campusMapPoint(point: { x: number; y: number }): MapDisplayPoint {
-  return { x: campusMap.origin.x + (point.x - sourceMain.x) * sx, y: campusMap.origin.y + (point.y - sourceMain.y) * sy }
+  return {
+    x: point.x * campusMap.width / 1088,
+    y: point.y * campusMap.height / 1382,
+  }
 }
 const points = (pairs: [number, number][]): MapDisplayPoint[] => pairs.map(([x, y]) => ({ x, y }))
 const source = 'Visually traced on supplied 1290 × 1640 campus illustration; uncertain connections, crossings and building approach are DEMO, not surveyed.'
