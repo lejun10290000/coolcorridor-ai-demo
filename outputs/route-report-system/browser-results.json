@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "reportedPath": [
+    "DEMO-REF-001",
+    "DEMO-REF-002"
+  ],
+  "reportId": "REPORT-000004",
+  "versions": {
+    "initial": "demo-baseline-2026-10-17-v000001",
+    "accepted": "demo-baseline-2026-10-17-v000002",
+    "manualRepair": "demo-baseline-2026-10-17-v000003"
+  },
+  "exposureRankingCost": {
+    "before": 0,
+    "accepted": 18,
+    "manualRepair": 0
+  },
+  "checks": [
+    "point-to-point route selected by real map clicks",
+    "description required and disconnected route cannot be submitted",
+    "exact route IDs and source version saved",
+    "submission and rejection leave map unchanged",
+    "Developer previews and accepts exact reported path",
+    "acceptance atomically records review and publishes mixed/yellow in both modes",
+    "open Resident tab automatically recalculates version and ranking cost on acceptance",
+    "unrelated draft preserved and not accidentally published",
+    "no repeated acceptance; no automatic repair/green",
+    "later manual edit/publication required for repaired shade",
+    "accepted yellow snapshot and review history retained after repair/reload",
+    "mobile form contained, submit reachable by scrolling, body scroll restored, inbox without overflow"
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,96 @@
+// Production entry; fresh browser context, synthetic local records only.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
+const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path')
+const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resolve(process.env.PLANNING_OUTPUT_DIR||'outputs/budget-scenario'),key='coolcorridor-shade-workflow-v1'
+;(async()=>{
+  await fs.mkdir(out,{recursive:true})
+  const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})
+  try{
+    const context=await browser.newContext({viewport:{width:1440,height:1100},reducedMotion:'reduce'}),errors=[]
+    context.on('page',p=>{p.setDefaultTimeout(15000);p.on('pageerror',e=>errors.push(e.message))})
+    const planner=await context.newPage(),publisher=await context.newPage(),resident=await context.newPage()
+    async function enter(page,role){await page.goto(base+'/');await page.getByLabel('Visual quality').selectOption('fallback');await page.getByRole('button',{name:`Enter ${role} Mode`,exact:true}).click();await page.locator('.campus-map-overlay').waitFor();if(role==='Developer')await page.getByLabel('Planning method',{exact:true}).selectOption('manual')}
+    const stored=()=>planner.evaluate(k=>JSON.parse(localStorage.getItem(k)),key)
+    const color=(page,id)=>page.locator(`[data-segment-id="${id}"] .campus-shade-stroke`).getAttribute('stroke')
+    const budget=()=>planner.getByLabel('Available budget (whole RM)',{exact:true})
+    const result=()=>planner.getByTestId('plan-result')
+    const preview=()=>planner.getByRole('button',{name:'Simulated scenario',exact:true}).click()
+    const baseline=()=>planner.getByRole('button',{name:'Baseline',exact:true}).click()
+    async function expectPlan(text){await result().getByText(`Selected: ${text}`,{exact:true}).waitFor()}
+    async function route(page,from,to){await page.getByLabel('Developer route from',{exact:true}).selectOption(from);await page.getByLabel('Developer route to',{exact:true}).selectOption(to);await page.getByRole('button',{name:'Add route to selection',exact:true}).click()}
+    async function draft(page,from,to,label){await route(page,from,to);await page.getByLabel('Shade for selected paths',{exact:true}).selectOption(label);await page.getByRole('button',{name:'Apply shade to Developer draft',exact:true}).click()}
+    await enter(planner,'Developer');await planner.getByRole('button',{name:'Optimise plan',exact:true}).click();await expectPlan('INT-03')
+    const initial=await stored(),initialSnapshot=JSON.stringify(initial.snapshots[0])
+    assert.match(await result().innerText(),/92 assumed illustrative benefit/)
+    await budget().fill('10000');await expectPlan('INT-02')
+    await budget().fill('20000');await expectPlan('INT-03')
+    await planner.getByRole('checkbox',{name:'Eligible: INT-03 — Covered walkway',exact:true}).uncheck();await expectPlan('INT-01')
+    await planner.getByRole('checkbox',{name:'Eligible: INT-03 — Covered walkway',exact:true}).check();await expectPlan('INT-03')
+    await planner.getByLabel('Assumed cost for INT-03 (RM)',{exact:true}).fill('19000');assert.match(await result().innerText(),/RM 19,000 total/)
+    await planner.getByLabel('Total assumed benefit for INT-03',{exact:true}).fill('1');await expectPlan('INT-01')
+    await planner.getByLabel('Total assumed benefit for INT-03',{exact:true}).fill('92');await expectPlan('INT-03')
+    await planner.getByLabel('Assumed cost for INT-03 (RM)',{exact:true}).fill('20000')
+    // Assign a two-link route from the existing map selection to the proposal.
+    await planner.locator('[data-campus-node-id="MAIN-GATE"]').click();await planner.locator('[data-campus-node-id="INNER-GATE"]').click();await planner.getByRole('button',{name:'Add route to selection',exact:true}).click()
+    await route(planner,'INNER-GATE','RAZAK-ENTRANCE')
+    const ids=(await planner.getByTestId('developer-selection').getAttribute('data-selected-segments')).split(',');assert.equal(ids.length,2)
+    await planner.getByRole('button',{name:'Use selected map paths for INT-03',exact:true}).click()
+    assert.deepEqual((await stored()).planning_workspace.candidates['INT-03'].segment_ids,ids)
+    assert.match(await result().innerText(),/92 assumed illustrative benefit/)
+    const projected=ids[0],following=ids[1]
+    await planner.getByLabel(`Simulated shade projection for ${projected}`,{exact:true}).selectOption('mostly_shaded')
+    assert.equal(await color(planner,projected),'#707580')
+    await preview();assert.equal(await color(planner,projected),'#35745A');assert.equal(await color(planner,following),'#707580')
+    assert.equal(await planner.getByRole('heading',{name:'Edit map shade',exact:true}).count(),0)
+    assert.equal(await planner.getByRole('button',{name:'Publish to Resident map',exact:true}).count(),0)
+    await planner.getByRole('complementary',{name:'Simulated segment comparison',exact:true}).waitFor()
+    assert.equal(await planner.getByLabel('Baseline dataset',{exact:true}).isDisabled(),true)
+    await planner.locator('.main-grid').screenshot({path:path.join(out,'01-simulated-map-and-inspector.png')})
+    await enter(publisher,'Developer');await enter(resident,'Resident')
+    await resident.getByLabel('Starting point',{exact:true}).selectOption('MAIN-GATE');await resident.getByLabel('Destination',{exact:true}).selectOption('KLINIK-UTM')
+    const beforeVersion=(await stored()).current_version
+    assert.equal(await color(resident,projected),'#707580')
+    await draft(publisher,'MAIN-GATE','INNER-GATE','mixed');await draft(publisher,'INNER-GATE','RAZAK-ENTRANCE','mostly_exposed')
+    // Saved manual drafts do not seep into the scenario or Resident map.
+    assert.equal(await color(planner,following),'#707580');assert.equal(await color(resident,following),'#707580')
+    assert.equal(await planner.getByTestId('scenario-baseline-version').innerText(),beforeVersion)
+    await publisher.getByLabel('Map publication note',{exact:true}).fill('Synthetic browser check: mixed Main Gate link and exposed next link, not field evidence.')
+    await publisher.getByRole('checkbox',{name:'I reviewed these DEMO shade changes and want to publish them to Resident routing.',exact:true}).check()
+    await publisher.getByRole('button',{name:'Publish to Resident map',exact:true}).click()
+    await planner.waitForFunction(({key,before})=>JSON.parse(localStorage.getItem(key)).current_version!==before,{key,before:beforeVersion})
+    const published=await stored(),version=published.current_version
+    await planner.getByTestId('scenario-baseline-version').filter({hasText:version}).waitFor()
+    assert.equal(await color(planner,projected),'#35745A');assert.equal(await color(planner,following),'#C4473A')
+    assert.equal(await planner.locator(`[data-projection-segment="${projected}"] [data-baseline-label]`).getAttribute('data-baseline-label'),'mixed')
+    await resident.waitForFunction(v=>document.querySelector('[data-route-objective="shortest"]')?.getAttribute('data-route-version')===v,version)
+    assert.equal(await color(resident,projected),'#BD8B16');assert.equal(await color(resident,following),'#C4473A')
+    assert.equal(JSON.stringify(published.snapshots[0]),initialSnapshot);assert.deepEqual(published.items,initial.items)
+    await planner.locator('.main-grid').screenshot({path:path.join(out,'02-simulation-refreshed-after-publication.png')})
+    await resident.locator('.campus-map').screenshot({path:path.join(out,'03-resident-published-baseline.png')})
+    await planner.locator('.wf-two-col').screenshot({path:path.join(out,'04-budget-and-scenario-panels.png')})
+    // Latest baseline also follows automatically after re-entering a saved scenario.
+    await baseline();assert.equal(await color(planner,projected),'#BD8B16')
+    await planner.getByLabel('Baseline dataset',{exact:true}).selectOption(beforeVersion);assert.equal(await color(planner,projected),'#707580')
+    await preview();assert.equal(await planner.getByLabel('Baseline dataset',{exact:true}).inputValue(),'current');assert.equal(await color(planner,projected),'#35745A')
+    await budget().fill('0');await expectPlan('No selected interventions');assert.equal(await color(planner,projected),'#BD8B16')
+    await budget().fill('1.5');assert.equal(await result().count(),0);assert.equal(await planner.getByRole('button',{name:'Simulated scenario',exact:true}).isDisabled(),true)
+    await budget().fill('20000');await expectPlan('INT-03');assert.equal(await color(planner,projected),'#35745A')
+    for(const box of await planner.getByRole('checkbox',{name:/^Eligible:/}).all())await box.uncheck()
+    await expectPlan('No selected interventions');assert.equal(await color(planner,projected),'#BD8B16')
+    for(const box of await planner.getByRole('checkbox',{name:/^Eligible:/}).all())await box.check()
+    await expectPlan('INT-03')
+    await planner.reload();await planner.getByLabel('Visual quality').selectOption('fallback');await planner.getByRole('button',{name:'Enter Developer Mode',exact:true}).click()
+    await expectPlan('INT-03');assert.deepEqual((await stored()).planning_workspace.candidates['INT-03'].segment_ids,ids)
+    assert.equal(await color(planner,projected),'#BD8B16');await preview();assert.equal(await color(planner,projected),'#35745A')
+    await planner.getByRole('button',{name:'Clear simulated projections',exact:true}).click();assert.equal(await color(planner,projected),'#BD8B16')
+    await planner.getByLabel(`Simulated shade projection for ${projected}`,{exact:true}).selectOption('mostly_shaded')
+    for(const page of [planner,resident]){await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)}
+    const mobileRow=planner.locator(`[data-projection-segment="${projected}"]`)
+    assert.equal(await mobileRow.evaluate(el=>getComputedStyle(el).display),'block')
+    assert.ok(await mobileRow.locator('[data-baseline-label]').evaluate(el=>el.getBoundingClientRect().width)>250)
+    await planner.locator('.main-grid').screenshot({path:path.join(out,'05-simulated-map-mobile.png')});await planner.locator('.wf-two-col').screenshot({path:path.join(out,'06-planning-panels-mobile.png')})
+    assert.deepEqual(errors,[])
+    const results={status:'passed',normalEntry:base+'/',datasetBefore:beforeVersion,datasetAfter:version,proposalPaths:ids,projectedLink:projected,baselineFollowingLink:following,checks:['RM10,000 → RM20,000 automatic portfolio recalculation','exclusion, cost and total benefit changes recalculate without another click','real map point selection and multi-link candidate assignment','multi-link proposal score remains 92, not multiplied','explicit projection paints current map only in simulation','scenario-specific inspector and no manual publication controls','unpublished Developer draft excluded from simulation and Residents','open simulation automatically refreshes after publication in another tab','explicit projection retained; unprojected link follows new baseline','Resident routing receives only published baseline colors/version','original snapshot and historical candidates preserved','historical baseline view cannot pin simulation to an old version','zero budget, invalid budget, all excluded handled','inputs, targets and projections survive reload','clear projections returns map to latest baseline','desktop and mobile without horizontal overflow','mobile comparison rows stack with readable full-width baseline labels'],pageErrors:errors}
+    await fs.writeFile(path.join(out,'browser-results.json'),JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results,null,2))
+  }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exit(1)})

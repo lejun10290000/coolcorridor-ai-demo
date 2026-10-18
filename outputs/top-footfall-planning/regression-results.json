@@ -1,0 +1,142 @@
+{
+  "manual_candidate_planning": {
+    "status": "passed",
+    "normalEntry": "http://127.0.0.1:4183/",
+    "datasetBefore": "demo-baseline-2026-10-17",
+    "datasetAfter": "demo-baseline-2026-10-17-v000001",
+    "proposalPaths": [
+      "DEMO-REF-001",
+      "DEMO-REF-002"
+    ],
+    "projectedLink": "DEMO-REF-001",
+    "baselineFollowingLink": "DEMO-REF-002",
+    "checks": [
+      "RM10,000 → RM20,000 automatic portfolio recalculation",
+      "exclusion, cost and total benefit changes recalculate without another click",
+      "real map point selection and multi-link candidate assignment",
+      "multi-link proposal score remains 92, not multiplied",
+      "explicit projection paints current map only in simulation",
+      "scenario-specific inspector and no manual publication controls",
+      "unpublished Developer draft excluded from simulation and Residents",
+      "open simulation automatically refreshes after publication in another tab",
+      "explicit projection retained; unprojected link follows new baseline",
+      "Resident routing receives only published baseline colors/version",
+      "original snapshot and historical candidates preserved",
+      "historical baseline view cannot pin simulation to an old version",
+      "zero budget, invalid budget, all excluded handled",
+      "inputs, targets and projections survive reload",
+      "clear projections returns map to latest baseline",
+      "desktop and mobile without horizontal overflow",
+      "mobile comparison rows stack with readable full-width baseline labels"
+    ],
+    "pageErrors": []
+  },
+  "manual_shade_and_routing": {
+    "status": "passed",
+    "normalEntry": "http://127.0.0.1:4183/",
+    "datasetBefore": "demo-baseline-2026-10-17",
+    "datasetAfter": "demo-baseline-2026-10-17-v000001",
+    "shortestBefore": "DEMO-REF-080",
+    "shortestAfter": "DEMO-REF-080",
+    "exposureBefore": "DEMO-REF-080",
+    "exposureAfter": "DEMO-REF-081,DEMO-REF-082",
+    "shortestDistance": 34,
+    "shadedDistance": 38,
+    "maximumDetourRatio": 1.25,
+    "editedCategories": {
+      "unshaded": [
+        "DEMO-REF-001",
+        "DEMO-REF-002"
+      ],
+      "mixed": [
+        "DEMO-REF-003"
+      ],
+      "fullyShaded": [
+        "DEMO-REF-081",
+        "DEMO-REF-082"
+      ]
+    },
+    "checks": [
+      "uniform visible point radii, including selected endpoints",
+      "real Developer point clicks and multiple point-to-point routes",
+      "direct path taps toggle the nearest link despite overlapping hit areas",
+      "three shade classes and persisted unpublished draft",
+      "Resident draft isolation in another open tab",
+      "explicit publication note/review and immutable version",
+      "open Resident tab automatically recalculates after storage event",
+      "shortest stays shortest; most shaded path changes within 25%",
+      "map and route-card segment IDs agree",
+      "same published shade colors in both modes",
+      "historical map remains unchanged and read-only",
+      "isolated point yields no invented connection",
+      "desktop/mobile without horizontal overflow",
+      "published map persists after refresh"
+    ],
+    "pageErrors": []
+  },
+  "resident_reports": {
+    "status": "passed",
+    "normalEntry": "http://127.0.0.1:4183/",
+    "reportedPath": [
+      "DEMO-REF-001",
+      "DEMO-REF-002"
+    ],
+    "reportId": "REPORT-000004",
+    "versions": {
+      "initial": "demo-baseline-2026-10-17-v000001",
+      "accepted": "demo-baseline-2026-10-17-v000002",
+      "manualRepair": "demo-baseline-2026-10-17-v000003"
+    },
+    "exposureRankingCost": {
+      "before": 0,
+      "accepted": 18,
+      "manualRepair": 0
+    },
+    "checks": [
+      "dropdown-only routing cannot seed a report",
+      "manual map endpoints autofill read-only report fields independently of later routing lists/cards",
+      "description required and disconnected map selection cannot be submitted",
+      "exact route IDs, map-point provenance and source version saved",
+      "Resident map never shows report numbers",
+      "Developer pending counts change 2→1→0 after acceptance/rejection, and stay absent after reload",
+      "submission and rejection leave map unchanged",
+      "Developer previews and accepts exact reported path",
+      "acceptance atomically records review and publishes mixed/yellow in both modes",
+      "open Resident tab automatically recalculates version and ranking cost on acceptance",
+      "unrelated draft preserved and not accidentally published",
+      "no repeated acceptance; no automatic repair/green",
+      "later manual edit/publication required for repaired shade",
+      "accepted yellow snapshot and review history retained after repair/reload",
+      "mobile manual point autofill, submit reachable, body scroll restored, inbox without overflow"
+    ],
+    "pageErrors": []
+  },
+  "map_alignment": {
+    "status": "passed",
+    "entry": "http://127.0.0.1:4183/",
+    "asset": "/maps/utmkul-reference-normal-points.png",
+    "sha256": "848ab2273286b8af8ee30142bd5595bd67c8608052b84f99c921edfa8fc5eab5",
+    "referenceDimensions": [
+      1113,
+      1414
+    ],
+    "backgroundDimensions": [
+      1113,
+      1413
+    ],
+    "visibleCircles": 60,
+    "referenceLinks": 92,
+    "checks": [
+      "edited background bytes served; original coordinate frame retained",
+      "six original coordinate anchors within0.01 frame pixel after desktop/mobile/zoom/pan/resize/reset (not an image-recognition check)",
+      "Resident and Developer identical image/point transforms/path geometry",
+      "real dot selection and calculated overlay IDs",
+      "arbitrary endpoints and unavailable isolated spur",
+      "reference report visible in Developer and persists after reload",
+      "scenario keeps shared image/point geometry",
+      "zero horizontal overflow/browser errors/external requests"
+    ],
+    "errors": [],
+    "external": []
+  }
+}

@@ -1,0 +1,7 @@
+import { describe, expect, it } from 'vitest'
+import { hourlyEquivalent, optimise, priorities, validTransition } from './domain'
+import { candidates, segments } from './fixtures'
+
+describe('hourly-equivalent passage event rate', () => { it('calculates only positive durations', () => { expect(hourlyEquivalent(18,15)).toBe(72); expect(hourlyEquivalent(4,0)).toBeNull() }) })
+describe('optimiser', () => { it('uses a real constrained portfolio under budget', () => { const plan=optimise(candidates,20000,[]); expect(plan.cost).toBeLessThanOrEqual(20000); expect(plan.ids).not.toContain('INT-01'); expect(plan.ids).toContain('INT-03') }); it('recomputes when budget changes and handles no fit',()=>{ expect(optimise(candidates,10000,[]).ids).not.toEqual(optimise(candidates,20000,[]).ids); expect(optimise(candidates,0,[]).ids).toEqual([]) }); it('honours exclusions and avoids double counting',()=>{ const p=optimise(candidates,20000,['INT-03']); expect(p.ids).toContain('INT-01'); expect(p.ids).not.toContain('INT-02'); expect(p.benefit).toBe(65) }) })
+describe('priority and lifecycle truthfulness',()=>{ it('leaves unknown evidence unranked',()=>{ const p=priorities(segments,{ 'DEMO-S01':72,'DEMO-S02':48 }); expect(p.find(x=>x.segment_id==='DEMO-S04')?.score).toBeNull() }); it('requires sequential status progression',()=>{ expect(validTransition('proposed','approved_demo')).toBe(true); expect(validTransition('proposed','published')).toBe(false) }) })

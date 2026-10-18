@@ -1,0 +1,126 @@
+// Normal app production-entry report → review → mixed shade → manual repair acceptance.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
+const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path')
+const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resolve(process.env.ROUTE_REPORT_OUTPUT_DIR||'outputs/route-report-system'),key='coolcorridor-shade-workflow-v1'
+;(async()=>{
+  await fs.mkdir(out,{recursive:true})
+  const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})
+  try{
+    const context=await browser.newContext({viewport:{width:1440,height:1100},reducedMotion:'reduce'}),errors=[]
+    context.on('page',p=>{p.setDefaultTimeout(15000);p.on('pageerror',e=>errors.push(e.message))})
+    const developer=await context.newPage(),resident=await context.newPage()
+    async function enter(page,mode){await page.getByLabel('Visual quality').selectOption('fallback');await page.getByRole('button',{name:`Enter ${mode} Mode`,exact:true}).click();await page.locator('.campus-map-overlay').waitFor()}
+    const stored=()=>developer.evaluate(k=>JSON.parse(localStorage.getItem(k)),key)
+    const reportRecord=id=>developer.locator(`[data-report-id="${id}"]`)
+    const line=(page,id)=>page.locator(`[data-segment-id="${id}"] .campus-shade-stroke`)
+    async function chooseDeveloperRoute(from,to){await developer.getByLabel('Developer route from',{exact:true}).selectOption(from);await developer.getByLabel('Developer route to',{exact:true}).selectOption(to);await developer.getByRole('button',{name:'Add route to selection',exact:true}).click()}
+    async function stage(label){await developer.getByLabel('Shade for selected paths',{exact:true}).selectOption(label);await developer.getByRole('button',{name:'Apply shade to Developer draft',exact:true}).click()}
+    async function publish(note){await developer.getByLabel('Map publication note',{exact:true}).fill(note);await developer.getByRole('checkbox',{name:'I reviewed these DEMO shade changes and want to publish them to Resident routing.',exact:true}).check();await developer.getByRole('button',{name:'Publish to Resident map',exact:true}).click()}
+    await developer.goto(base+'/');await enter(developer,'Developer')
+    await chooseDeveloperRoute('MAIN-GATE','RAZAK-ENTRANCE');await stage('mostly_shaded');await publish('Synthetic test baseline: shaded route. No field observation.')
+    const initial=await stored(),initialVersion=initial.current_version
+    // An unrelated saved Developer draft must survive acceptance without being published.
+    await chooseDeveloperRoute('INNER-GATE','DEWAN-AZMAN-HASHIM');await stage('mostly_exposed');const draftBefore=(await stored()).map_shade_draft
+    await resident.goto(base+'/');await enter(resident,'Resident')
+    // Choosing routing dropdowns/cards must not seed the report form.
+    await resident.getByLabel('Starting point',{exact:true}).selectOption('NORTH-WEST');await resident.getByLabel('Destination',{exact:true}).selectOption('L1-ACCESS');await resident.locator('[data-route-objective="exposure"]').click()
+    await resident.getByRole('button',{name:'Report selected route',exact:true}).click()
+    assert.equal(await resident.getByLabel('Report starting point',{exact:true}).inputValue(),'');assert.equal(await resident.getByLabel('Report destination',{exact:true}).inputValue(),'')
+    assert.equal(await resident.getByLabel('Reported route option',{exact:true}).count(),0)
+    await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic dropdown-only report must stay disabled.');assert.equal(await resident.getByRole('button',{name:'Submit route report',exact:true}).isEnabled(),false)
+    await resident.getByRole('dialog').getByRole('button',{name:'Choose report points on map',exact:true}).click()
+    await resident.locator('[data-campus-node-id="PA9-SPUR"]').click();await resident.locator('[data-campus-node-id="MAIN-GATE"]').click()
+    await resident.getByRole('button',{name:'Report selected route',exact:true}).click();await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic disconnected selection must stay disabled.')
+    assert.equal(await resident.getByRole('button',{name:'Submit route report',exact:true}).isEnabled(),false)
+    await resident.getByRole('button',{name:'Change report points on map',exact:true}).click()
+    await resident.locator('[data-campus-node-id="MAIN-GATE"]').click();await resident.locator('[data-campus-node-id="RAZAK-ENTRANCE"]').click()
+    assert.equal(await resident.getByLabel('Starting point',{exact:true}).inputValue(),'MAIN-GATE');assert.equal(await resident.getByLabel('Destination',{exact:true}).inputValue(),'RAZAK-ENTRANCE')
+    const chosen=(await resident.locator('[data-route-objective="shortest"]').getAttribute('data-route-segments')).split(',');assert.deepEqual(chosen,['DEMO-REF-001','DEMO-REF-002'])
+    // A later optimized journey must not overwrite the independently captured report points.
+    await resident.getByLabel('Starting point',{exact:true}).selectOption('NORTH-WEST');await resident.getByLabel('Destination',{exact:true}).selectOption('L1-ACCESS');await resident.locator('[data-route-objective="exposure"]').click()
+    await resident.getByRole('button',{name:'Report selected route',exact:true}).click()
+    assert.equal(await resident.getByLabel('Report starting point',{exact:true}).inputValue(),'Pintu Masuk Utama');assert.equal(await resident.getByLabel('Report destination',{exact:true}).inputValue(),'Reference junction 03')
+    assert.equal(await resident.getByLabel('Report starting point',{exact:true}).evaluate(e=>e.readOnly),true)
+    assert.equal(await resident.getByTestId('report-route-preview').getAttribute('data-report-segments'),chosen.join(','))
+    await resident.getByRole('button',{name:'Close report form',exact:true}).click()
+    await resident.getByLabel('Starting point',{exact:true}).selectOption('MAIN-GATE');await resident.getByLabel('Destination',{exact:true}).selectOption('RAZAK-ENTRANCE')
+    const exposureCost=async()=>Number((await resident.locator('[data-route-objective="exposure"]').innerText()).match(/Exposure-ranking cost:\s*([\d.]+)/)[1])
+    const costBefore=await exposureCost();assert.equal(costBefore,0)
+    await resident.getByRole('button',{name:'Report selected route',exact:true}).click()
+    assert.equal(await resident.getByRole('button',{name:'Submit route report',exact:true}).isEnabled(),false)
+    await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic browser report: shade canopy is broken along the manually selected path.')
+    assert.equal(await resident.getByTestId('report-route-preview').getAttribute('data-report-segments'),chosen.join(','))
+    await resident.screenshot({path:path.join(out,'01-resident-point-to-point-report.png')})
+    await resident.getByRole('button',{name:'Submit route report',exact:true}).click()
+    await developer.waitForFunction(k=>JSON.parse(localStorage.getItem(k)).reports.length===1,key)
+    const submitted=await stored(),report=submitted.reports[0],id=report.report_id
+    assert.equal(report.route.selection_source,'map_points');assert.equal(await resident.locator('.campus-report').count(),0)
+    assert.equal(report.category,'broken shade structure');assert.deepEqual(report.route.segment_ids,chosen);assert.equal(submitted.current_version,initialVersion)
+    for(const link of chosen)assert.equal(await line(resident,link).getAttribute('stroke'),'#35745A')
+    await resident.getByRole('button',{name:'Report selected route',exact:true}).click();await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic overlapping report to test count reduction and rejection.');await resident.getByRole('button',{name:'Submit route report',exact:true}).click()
+    await developer.getByRole('button',{name:/Review Resident reports \(2 pending\)/}).click()
+    const second=(await stored()).reports[1].report_id
+    for(const link of chosen)assert.equal(await developer.locator(`[data-report-segment-id="${link}"]`).getAttribute('data-report-count'),'2')
+    assert.equal(await resident.locator('.campus-report').count(),0)
+    assert.match(await reportRecord(id).innerText(),/shade canopy is broken/)
+    assert.equal(await reportRecord(id).getByRole('button',{name:'Accept report',exact:true}).isEnabled(),false)
+    await reportRecord(id).getByRole('button',{name:'Show reported route on map',exact:true}).click()
+    assert.deepEqual(await developer.locator('[data-route-overlay-id]').evaluateAll(ns=>ns.map(n=>n.getAttribute('data-route-overlay-id'))),chosen)
+    for(const link of chosen)assert.equal(await line(developer,link).getAttribute('stroke'),'#35745A')
+    await developer.locator('.campus-map').screenshot({path:path.join(out,'02b-developer-pending-map-counts.png')})
+    await developer.getByRole('region',{name:'Resident report inbox',exact:true}).screenshot({path:path.join(out,'02-developer-pending-review.png')})
+    await reportRecord(id).getByLabel(`Report review note — ${id}`,{exact:true}).fill('Synthetic demo review: report accepted; mark the saved path mixed shade pending repair.')
+    await reportRecord(id).getByRole('button',{name:'Accept report',exact:true}).click()
+    await resident.waitForFunction(({k,v})=>JSON.parse(localStorage.getItem(k)).current_version!==v,{k:key,v:initialVersion})
+    const accepted=await stored(),acceptedVersion=accepted.current_version
+    assert.equal(accepted.reports[0].review_status,'verified');assert.ok(accepted.reports[0].accepted_publication_id)
+    assert.deepEqual(accepted.map_shade_draft,draftBefore);assert.equal(accepted.map_shade_updates.slice(-1)[0].source_report_id,id)
+    assert.deepEqual(accepted.map_shade_updates.slice(-1)[0].assignments.map(a=>a.segment_id),chosen)
+    await resident.waitForFunction(v=>document.querySelector('[data-route-objective="shortest"]')?.getAttribute('data-route-version')===v,acceptedVersion)
+    const costAccepted=await exposureCost();assert.ok(costAccepted>costBefore)
+    for(const link of chosen)for(const page of [resident,developer])assert.equal(await line(page,link).getAttribute('stroke'),'#BD8B16')
+    for(const link of chosen)assert.equal(await developer.locator(`[data-report-segment-id="${link}"]`).getAttribute('data-report-count'),'1')
+    assert.equal(await resident.locator('.campus-report').count(),0)
+    assert.equal(await line(developer,'DEMO-REF-003').getAttribute('stroke'),'#707580')
+    assert.equal(await reportRecord(id).getByRole('button',{name:'Accept report',exact:true}).count(),0)
+    await developer.locator('.campus-map').screenshot({path:path.join(out,'03-developer-accepted-yellow-route.png')})
+    await resident.locator('.campus-map').screenshot({path:path.join(out,'04-resident-accepted-yellow-route.png')})
+    // Rejection has no automatic map effect.
+    await reportRecord(second).getByLabel(`Report review note — ${second}`,{exact:true}).fill('Synthetic rejection; no map change requested.')
+    await reportRecord(second).getByRole('button',{name:'Reject report',exact:true}).click()
+    assert.equal((await stored()).current_version,acceptedVersion);assert.equal((await stored()).reports[1].review_status,'rejected')
+    assert.equal(await developer.locator('.campus-report').count(),0);assert.equal(await resident.locator('.campus-report').count(),0)
+    await developer.locator('.campus-map').screenshot({path:path.join(out,'04b-developer-reviewed-no-counts.png')})
+    // Merely accepting never makes a path green. Only a later explicit manual edit does.
+    await developer.getByRole('button',{name:'Close reported route preview',exact:true}).click()
+    await developer.getByRole('button',{name:'Use latest map as draft baseline',exact:true}).click()
+    await chooseDeveloperRoute('MAIN-GATE','RAZAK-ENTRANCE');await stage('mostly_shaded')
+    for(const link of chosen)assert.equal(await line(resident,link).getAttribute('stroke'),'#BD8B16')
+    await publish('Synthetic manual repair update: classify the repaired path shaded. Not a field result.')
+    const repaired=await stored(),repairVersion=repaired.current_version
+    await resident.waitForFunction(v=>document.querySelector('[data-route-objective="exposure"]')?.getAttribute('data-route-version')===v,repairVersion)
+    const costRepaired=await exposureCost();assert.equal(costRepaired,0)
+    for(const link of chosen)assert.equal(await line(resident,link).getAttribute('stroke'),'#35745A')
+    assert.equal(repaired.reports[0].accepted_publication_id,accepted.reports[0].accepted_publication_id)
+    for(const link of chosen)assert.equal(repaired.snapshots.find(s=>s.dataset_version===acceptedVersion).segments.find(s=>s.segment_id===link).shade_label,'mixed')
+    await resident.locator('.campus-map').screenshot({path:path.join(out,'05-resident-after-manual-repair-publication.png')})
+    for(const page of [resident,developer]){await page.reload();await enter(page,page===resident?'Resident':'Developer');assert.equal(await line(page,chosen[0]).getAttribute('stroke'),'#35745A')}
+    assert.equal((await stored()).reports[0].review_status,'verified')
+    await developer.getByRole('region',{name:'Resident report inbox',exact:true}).screenshot({path:path.join(out,'06-preserved-review-history.png')})
+    // Mobile form, focus/scroll and no-route validation use normal UI too.
+    assert.equal(await developer.locator('.campus-report').count(),0);assert.equal(await resident.locator('.campus-report').count(),0)
+    await resident.setViewportSize({width:390,height:844});await resident.getByRole('button',{name:'Choose report points on map',exact:true}).click();await resident.locator('[data-campus-node-id="MAIN-GATE"]').click();await resident.locator('[data-campus-node-id="RAZAK-ENTRANCE"]').click();await resident.getByRole('button',{name:'Report selected route',exact:true}).click()
+    assert.equal(await resident.getByLabel('Report starting point',{exact:true}).inputValue(),'Pintu Masuk Utama');await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic mobile manual-point form preview only; not submitted.')
+    assert.equal(await resident.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
+    assert.ok(await resident.locator('.route-report-dialog').evaluate(e=>e.getBoundingClientRect().height<=innerHeight-30))
+    await resident.screenshot({path:path.join(out,'07-resident-mobile-report-form.png')})
+    await resident.getByRole('button',{name:'Submit route report',exact:true}).scrollIntoViewIfNeeded();assert.equal(await resident.getByRole('button',{name:'Submit route report',exact:true}).isEnabled(),true)
+    await resident.screenshot({path:path.join(out,'09-resident-mobile-report-submit.png')})
+    await resident.getByRole('button',{name:'Close report form',exact:true}).click();assert.equal(await resident.evaluate(()=>document.body.style.overflow),'')
+    await developer.setViewportSize({width:390,height:844});assert.equal(await developer.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
+    await developer.getByRole('region',{name:'Resident report inbox',exact:true}).screenshot({path:path.join(out,'08-developer-mobile-inbox.png')})
+    assert.deepEqual(errors,[])
+    const result={status:'passed',normalEntry:base+'/',reportedPath:chosen,reportId:id,versions:{initial:initialVersion,accepted:acceptedVersion,manualRepair:repairVersion},exposureRankingCost:{before:costBefore,accepted:costAccepted,manualRepair:costRepaired},checks:['dropdown-only routing cannot seed a report','manual map endpoints autofill read-only report fields independently of later routing lists/cards','description required and disconnected map selection cannot be submitted','exact route IDs, map-point provenance and source version saved','Resident map never shows report numbers','Developer pending counts change 2→1→0 after acceptance/rejection, and stay absent after reload','submission and rejection leave map unchanged','Developer previews and accepts exact reported path','acceptance atomically records review and publishes mixed/yellow in both modes','open Resident tab automatically recalculates version and ranking cost on acceptance','unrelated draft preserved and not accidentally published','no repeated acceptance; no automatic repair/green','later manual edit/publication required for repaired shade','accepted yellow snapshot and review history retained after repair/reload','mobile manual point autofill, submit reachable, body scroll restored, inbox without overflow'],pageErrors:errors}
+    await fs.writeFile(path.join(out,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2))
+  }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exit(1)})

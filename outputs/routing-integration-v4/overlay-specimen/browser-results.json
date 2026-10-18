@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "scope": "Isolated overlay component specimen only; shared map renderer integration is pending agreement",
+  "checks": [
+    "selected IDs correspond to computed objective",
+    "white halo/purple casing/shade centre",
+    "screen-space widths",
+    "active overlay painted after complete shade layer",
+    "desktop/mobile no overflow"
+  ],
+  "browserErrors": []
+}

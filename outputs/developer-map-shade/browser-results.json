@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "datasetBefore": "demo-baseline-2026-10-17",
+  "datasetAfter": "demo-baseline-2026-10-17-v000001",
+  "shortestBefore": "DEMO-REF-080",
+  "shortestAfter": "DEMO-REF-080",
+  "exposureBefore": "DEMO-REF-080",
+  "exposureAfter": "DEMO-REF-081,DEMO-REF-082",
+  "shortestDistance": 34,
+  "shadedDistance": 38,
+  "maximumDetourRatio": 1.25,
+  "editedCategories": {
+    "unshaded": [
+      "DEMO-REF-001",
+      "DEMO-REF-002"
+    ],
+    "mixed": [
+      "DEMO-REF-003"
+    ],
+    "fullyShaded": [
+      "DEMO-REF-081",
+      "DEMO-REF-082"
+    ]
+  },
+  "checks": [
+    "uniform visible point radii, including selected endpoints",
+    "real Developer point clicks and multiple point-to-point routes",
+    "direct path taps toggle the nearest link despite overlapping hit areas",
+    "three shade classes and persisted unpublished draft",
+    "Resident draft isolation in another open tab",
+    "explicit publication note/review and immutable version",
+    "open Resident tab automatically recalculates after storage event",
+    "shortest stays shortest; most shaded path changes within 25%",
+    "map and route-card segment IDs agree",
+    "same published shade colors in both modes",
+    "historical map remains unchanged and read-only",
+    "isolated point yields no invented connection",
+    "desktop/mobile without horizontal overflow",
+    "published map persists after refresh"
+  ],
+  "pageErrors": []
+}

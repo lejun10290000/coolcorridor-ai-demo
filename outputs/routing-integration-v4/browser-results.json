@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "scope": "Independent preview only; production integration not demonstrated",
+  "entryUrl": "http://127.0.0.1:4181/review/dynamic-routing.html",
+  "checks": [
+    "initial shortest 190m; both cards retained with same-path explanation and practical fallback reason",
+    "scenario changes do not affect Resident routing",
+    "year3333 inline error preserves values and focuses date",
+    "submission/verification do not recalculate before publication",
+    "same-origin second-tab publish automatically recalculates mounted Resident without reload",
+    "published exposure route198m and cost145; shortest190m",
+    "actual map route strokes match selected computed segment IDs/status/version; practical detour4.2% within25%",
+    "desktop/mobile no horizontal overflow",
+    "local-only copy and refresh persistence",
+    "field same-alias verification rejected inline; separate alias accepted",
+    "zero external requests/browser errors"
+  ],
+  "publishedVersion": "demo-baseline-2026-10-17-v000001",
+  "browserErrors": [],
+  "externalRequests": []
+}

@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "entry": "http://127.0.0.1:4183/",
+  "asset": "/maps/utmkul-reference-2026-10-18.jpeg",
+  "sha256": "88fb162710ce201571c382124a61d5f02031b1d636772689398498a87e7f38f6",
+  "referenceDimensions": [
+    1113,
+    1414
+  ],
+  "visibleCircles": 60,
+  "referenceLinks": 92,
+  "checks": [
+    "exact supplied JPEG bytes served",
+    "six independently read image anchors within0.01 source pixel after desktop/mobile/zoom/pan/resize/reset",
+    "Resident and Developer identical image/point transforms/path geometry",
+    "real dot selection and calculated overlay IDs",
+    "arbitrary endpoints and unavailable isolated spur",
+    "reference report visible in Developer and persists after reload",
+    "scenario keeps shared image/point geometry",
+    "zero horizontal overflow/browser errors/external requests"
+  ],
+  "errors": [],
+  "external": []
+}
