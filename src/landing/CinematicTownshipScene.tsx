@@ -44,7 +44,7 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.42
     renderer.shadowMap.enabled = qualityRef.current === 'high'
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.type = THREE.PCFShadowMap
     renderer.domElement.className = 'township-canvas'
     renderer.domElement.setAttribute('aria-label', 'Interactive 3D concept township. Drag the empty world area to orbit the camera.')
     renderer.domElement.setAttribute('role', 'img')
