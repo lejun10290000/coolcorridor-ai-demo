@@ -1,5 +1,5 @@
 import type { DataStatus, ShadeLabel, WalkwaySegment } from '../types'
-import { campusRouteNodes, campusWalkLinks } from '../campusWalkways'
+import { campusGraphNodes, campusWalkLinks } from '../campusWalkways'
 
 export interface GraphLink { edge_id: string; segment_id: string; from: string; to: string; bidirectional: boolean; data_status: 'demo_fixture'; verification: 'pending_verification'; source: string }
 export interface RouteGraph { graph_id: string; nodes: string[]; links: GraphLink[]; warnings: string[] }
@@ -19,8 +19,8 @@ export const demoGraph: RouteGraph = {
 }
 /** Campus-wide graph used by the app: all links and landmarks are still illustrative. */
 export const campusWideGraph: RouteGraph = {
-  graph_id: 'utmkul-campus-wide-illustrative-v1',
-  nodes: campusRouteNodes.map(node => node.id),
+  graph_id: 'utmkul-annotated-reference-v2',
+  nodes: campusGraphNodes.map(node => node.id),
   links: campusWalkLinks.map(link => ({
     edge_id: link.edge_id,
     segment_id: link.segment_id,

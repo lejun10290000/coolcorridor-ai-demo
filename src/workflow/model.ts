@@ -1,4 +1,5 @@
 import { candidates, segments, studyArea } from '../fixtures'
+import { referenceMap } from '../campusWalkways'
 import { optimise, validTransition } from '../domain'
 import { requireObservationField } from './validationError'
 import type { DataStatus, InterventionCandidate, Lifecycle, ReportStatus, ResidentReport, ShadeLabel, StudyArea, WalkwaySegment } from '../types'
@@ -35,7 +36,7 @@ function timestamp(value: string) { requireValue(validLocalTime(value), 'Use a v
 function actor(value: string) { requireValue(text(value), 'Enter an actor/reviewer label (no personal details needed).') }
 function nextId(state: WorkflowState, prefix: string) { return `${prefix}-${String(state.revision+1).padStart(6,'0')}` }
 export function currentSnapshot(state: WorkflowState) { return state.snapshots.find(s => s.dataset_version === state.current_version)! }
-export function currentStudyArea(state: WorkflowState): StudyArea { const snapshot=currentSnapshot(state);return {...studyArea,dataset_version:snapshot.dataset_version,updated_at:snapshot.created_at} }
+export function currentStudyArea(state: WorkflowState): StudyArea { const snapshot=currentSnapshot(state);return {...studyArea,base_map_source:'Operator-supplied annotated campus reference received 18 October 2026',source_url:`/${referenceMap.asset}`,dataset_version:snapshot.dataset_version,updated_at:snapshot.created_at} }
 export function initialWorkflow(): WorkflowState {
   return { schema_version: 1, revision: 0, current_version: studyArea.dataset_version, snapshots: [{ study_area_id: studyArea.study_area_id, dataset_version: studyArea.dataset_version, parent_dataset_version: null, created_at: studyArea.updated_at, created_by_label: 'Initial DEMO fixtures', segments: copy(segments), change_summary: 'Original illustrative shade baseline; no field observations.', warnings: ['Campus image/paths and planning inputs are DEMO. No field-verified navigation.'] }], observations: [], lifecycle_events: [], items: copy(candidates), reports: [], report_events: [] }
 }

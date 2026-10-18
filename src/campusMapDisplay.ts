@@ -1,5 +1,5 @@
 /** Image pixels only. No image-to-WGS84 transform is known or implied. */
-import { campusWalkLinks } from './campusWalkways'
+import { campusWalkLinks, referenceMap } from './campusWalkways'
 export interface MapDisplayPoint { x: number; y: number }
 export interface SegmentDisplayGeometry {
   segment_id: string
@@ -8,43 +8,28 @@ export interface SegmentDisplayGeometry {
   source: string
 }
 export const campusMap = {
-  width: 1290, height: 1640, asset: 'maps/utmkul-campus-map.png',
-  source: 'Operator-supplied UTM KL campus illustration from a lecturer-provided PDF. Original creator and reuse licence unconfirmed.',
-  origin: { x: 285, y: 1075 }, destination: { x: 884, y: 312 },
+  ...referenceMap,
+  source:'Exact operator-supplied annotated campus reference, received 18 October 2026. Original creator/reuse licence unconfirmed. Printed dashed path is a reference example, not a live route.',
+  origin:{x:216,y:922},destination:{x:747,y:317},
 }
 // Route-node coordinates are now traced directly in the native base-image pixel space.
 // This is a display transform only; it does not georeference the map.
 export function campusMapPoint(point: { x: number; y: number }): MapDisplayPoint {
   return { x: point.x, y: point.y }
 }
-const points = (pairs: [number, number][]): MapDisplayPoint[] => pairs.map(([x, y]) => ({ x, y }))
-const source = 'Visually traced on supplied 1290 × 1640 campus illustration; uncertain connections, crossings and building approach are DEMO, not surveyed.'
-/** Separate sidecar keyed by existing IDs; never derived from schematic geographic fixtures. */
-const legacySegmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fromEntries([
-  ['DEMO-S01', points([[285,1075],[335,1020],[420,972],[525,905]])],
-  ['DEMO-S02', points([[525,905],[625,835],[740,760],[705,701],[685,665],[790,615],[920,560],[948,480],[927,399],[913,370],[869,386],[852,355],[884,340],[884,312]])],
-  ['DEMO-S03', points([[285,1075],[252,1020],[242,920],[239,795],[245,680],[279,651],[345,650],[440,625],[507,604],[472,520],[535,488],[603,465],[650,446],[698,430],[752,411],[801,387],[837,375],[869,360],[884,340],[884,312]])],
-  ['DEMO-S04', points([[920,560],[1010,540],[1080,531],[1131,522]])],
-].map(([id, geometry]) => [id, { segment_id: id as string, map_display_geometry: geometry as MapDisplayPoint[], data_status: 'demo_fixture', source }]))
-
 const campusSegmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fromEntries(campusWalkLinks.map(link => [link.segment_id, {
   segment_id: link.segment_id,
   map_display_geometry: link.points.map(p => campusMapPoint(p)),
   data_status: 'demo_fixture' as const,
   source: link.source,
 }]))
-export const segmentDisplays: Record<string, SegmentDisplayGeometry> = { ...legacySegmentDisplays, ...campusSegmentDisplays }
-
-/** Legacy workflow IDs remain in saved evidence records. Their old shortcut chords are
- * not drawn over the campus-wide map; demo intervention/report markers use these neutral
- * visual proxies on the new grey campus network only. This does not rewrite source records.
- */
-export const legacySegmentDisplayAliases: Record<string, string> = {
-  'DEMO-S01': 'DEMO-WALK-01',
-  'DEMO-S02': 'DEMO-WALK-62',
-  'DEMO-S03': 'DEMO-WALK-57',
-  'DEMO-S04': 'DEMO-WALK-18',
+// Legacy IDs retain their historical evidence; these four declared proxies are display-only.
+export const legacySegmentDisplayAliases:Record<string,string>={
+ 'DEMO-S01':'DEMO-REF-055','DEMO-S02':'DEMO-REF-042',
+ 'DEMO-S03':'DEMO-REF-001','DEMO-S04':'DEMO-REF-023',
 }
+export const segmentDisplays:Record<string,SegmentDisplayGeometry>={...campusSegmentDisplays}
+for(const [legacy,id] of Object.entries(legacySegmentDisplayAliases))segmentDisplays[legacy]={...campusSegmentDisplays[id],segment_id:legacy,source:'Legacy evidence shown at a declared illustrative visual proxy; not surveyed. Original source record is retained.'}
 
 export const shadeColours = { mostly_exposed: '#C4473A', mixed: '#BD8B16', mostly_shaded: '#35745A', unknown: '#707580' }
 export const shadeLabels = { mostly_exposed: 'Mostly exposed', mixed: 'Mixed shade', mostly_shaded: 'Mostly shaded', unknown: 'Unknown / needs survey' }

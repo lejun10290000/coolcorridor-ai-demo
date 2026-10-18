@@ -1,5 +1,6 @@
+import { referenceSegments } from './referenceCampusSegments'
 import type { FootfallObservation, InterventionCandidate, StudyArea, WalkwaySegment } from './types'
-import { campusNodeName, campusRouteNodes, campusWalkLinks } from './campusWalkways'
+import { campusNodeName, campusRouteNodes, campusWalkLinks } from './legacyCampusWalkways'
 
 export const studyArea: StudyArea = { study_area_id: 'utmkul-pilot', name: 'UTM Kuala Lumpur pilot', dataset_version: 'demo-baseline-2026-10-17', base_map_source: 'Operator-supplied UTM KL campus illustration', source_url: '/maps/utmkul-campus-map.png', licence_or_attribution_note: 'Lecturer-provided PDF crop; original creator and reuse licence unconfirmed. Display overlays are DEMO, not georeferenced or navigation data.', updated_at: '2026-10-17T09:00:00+08:00' }
 // No sourced WGS84 geometry is available. Empty arrays preserve the shared interface.
@@ -28,6 +29,7 @@ export const segments: WalkwaySegment[] = [
       footfall_observation_ids: [],
     }
   }),
+  ...referenceSegments(studyArea),
 ]
 export const footfall: FootfallObservation[] = [
   { observation_id: 'FF-01', segment_id: 'DEMO-S01', pass_count: 18, duration_min: 15, passes_per_hour_equivalent: 72, window_start: '2026-10-17T12:00:00+08:00', window_end: '2026-10-17T12:15:00+08:00', direction: 'both directions', method: 'manual tally', data_status: 'demo_fixture', source_note: 'Illustrative fixture; not an observed UTM count.' },

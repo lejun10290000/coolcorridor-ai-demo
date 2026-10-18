@@ -1,3 +1,5 @@
+> Current map alignment: both modes now use the exact 1113 × 1414 annotated reference supplied on 18 October 2026. See [reference alignment and saved-data compatibility](docs/REFERENCE_MAP_ALIGNMENT.md). Earlier 1290 × 1640 map notes below describe the previous image. The old asset and evidence remain preserved.
+
 # CoolCorridor AI — Phase 0 prototype
 
 An interactive, laptop-first prototype for the UTM Kuala Lumpur pilot: Resident route/evidence/report flow and Developer planning, budget optimisation, scenario and demo lifecycle flow.
@@ -24,7 +26,7 @@ On Home, use the chapter controls to inspect three camera views, click **360° t
 
 ## Scope and data status
 
-- Resident and Developer use the bundled, operator-supplied UTM KL campus illustration (`public/maps/utmkul-campus-map.png`) with aligned interactive SVG overlays. No online map tiles are requested. The image is not georeferenced; its original creator/reuse licence is unconfirmed and permission must be checked before public deployment.
+- Resident and Developer use the exact operator-supplied annotated campus reference (`public/maps/utmkul-reference-2026-10-18.jpeg`,1113×1414) with aligned interactive SVG overlays. No online map tiles are requested. The image is not georeferenced; its original creator/reuse licence is unconfirmed and permission must be checked before public deployment.
 - All walkway overlay geometry, route results, shade values, footfall, costs and benefits currently use visibly labelled **DEMO / ILLUSTRATIVE** fixtures. They are not verified navigation or field observations.
 - Optimisation is a deterministic exhaustive subset search that honours budget, exclusions and mutual constraints; overlapping segment benefits are not double-counted.
 - Before/after outputs are **SIMULATED**, retain baseline data, and make no cooling, energy, carbon or beneficiary claim.
@@ -40,7 +42,7 @@ Shared types are in `src/types.ts`, fixtures in `src/fixtures.ts`, domain algori
 
 Select a route card to outline its segment IDs in purple while retaining the shade colours. Select a segment by click/tap or Enter/Space to update the evidence inspector. Zoom from 100% to 300%, drag or use arrow keys when zoomed, and reset with Full map, Recenter or Home. Image-load errors hide overlays and offer a local retry; there is no online fallback.
 
-Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geometry (currently unavailable). Both modes share the same image, segment IDs and display data. All paths and crossings require field checks. The normal Resident entry calculates Shortest route and Most shaded practical route from the current published snapshot. The practical path minimises exposure-ranking cost within 25% of shortest distance; route metrics use legacy DEMO metre fixtures, never image pixels. Initial both objectives select S03/190 m. These are algorithm demonstrations, not surveyed navigation. Image inference and shade measurement remain unavailable.
+Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geometry (currently unavailable). Both modes share the same image, segment IDs and display data. All paths and crossings require field checks. The normal Resident entry calculates Shortest route and Most shaded practical route from the current published snapshot. The practical path minimises exposure-ranking cost within 25% of shortest distance; route metrics use legacy DEMO metre fixtures, never image pixels. The current reference network lets users choose two source circles; older S03/190m examples below are historical test fixtures. These are algorithm demonstrations, not surveyed navigation. Image inference and shade measurement remain unavailable.
 
 See [map handoff, tests and source notes](docs/CAMPUS_MAP_HANDOFF.md) and [data dictionary](docs/DATA_DICTIONARY.md). The optional standalone review at `/review/campus-map.html` is available with the dev server; it is a test harness, not the operational app.
 

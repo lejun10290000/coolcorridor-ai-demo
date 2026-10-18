@@ -21,5 +21,5 @@
 .map-point-mode button.point-mode-active{background:#bd8b16;border-color:#976a08;color:#211a25;box-shadow:0 0 0 2px #f7e9b7}
 .campus-route-node{cursor:pointer;outline:none}
 .campus-route-node:focus-visible>circle:first-of-type{stroke:#17131b;stroke-width:9}
-.campus-map-legend .campus-route-key{background:#707580;border:3px solid #707580;height:12px}
+.campus-map-legend .campus-route-key{background:#707580;border:3px solid #55255b;height:12px}
 @media(max-width:620px){.route-endpoint-pickers>label{min-width:100%}.map-point-mode{min-width:100%}}

@@ -19,7 +19,7 @@ No pretrained model weights or permitted walkway image were supplied in Phase 0.
 
 ## Campus image display geometry
 
-`public/maps/utmkul-campus-map.png` is the exact supplied 1290 × 1640 PNG cropped from a lecturer-provided PDF. Original creator and reuse licence are unconfirmed; obtain permission before public deployment. This is the only active basemap in Resident and Developer modes. No OSM tile source or attribution remains in the map renderer.
+`public/maps/utmkul-campus-map.png` is the exact supplied 1290 × 1640 PNG cropped from a lecturer-provided PDF. Original creator and reuse licence are unconfirmed; obtain permission before public deployment. This is the preserved historical basemap. The current shared background is the exact 1113 × 1414 annotated JPEG received on 18 October 2026 (see REFERENCE_MAP_ALIGNMENT.md). No OSM tile source or attribution remains in the map renderer.
 
 `src/campusMapDisplay.ts` defines `MapDisplayPoint { x, y }` in intrinsic image pixels (right/down) and `SegmentDisplayGeometry { segment_id, map_display_geometry, data_status, source }`. Display records are `demo_fixture`, keyed by the existing segment IDs. No image-to-world transform is known. Pixel points must never be treated as geographic coordinates. The previously schematic geographic arrays were cleared to `[]` (unavailable), preserving `WalkwaySegment.geometry: Position[]` for future sourced WGS84 records. No field geometry is discarded because none was supplied.
 
@@ -65,3 +65,11 @@ Shortest ignores shade even for equal-length ties. Practical considers every sim
 The final selected-route SVG overlay uses only computed ordered IDs; metadata links overlay/version to the same card/current snapshot. White halo/purple casing/shade centre paints after all base shade strokes. Other shade segments remain visible; grey remains grey. Root App uses one authoritative local workflow for Resident/Developer, with automatic same-origin/profile tab updates. No cross-device/profile/person synchronisation or backend exists.
 
 New `ObservationReview.review_policy` is optional `separate-field-reviewer-v1`. Marked field verification events must have distinct observer/reviewer aliases after trim/case folding; unmarked legacy history stays readable without destructive reset. New publication cannot promote matching-alias legacy field verification; existing published matching-alias evidence warns about legacy policy. DEMO provenance never becomes genuine field evidence by verification. Schema/storage key remain1. Different aliases do not authenticate real people.
+
+## Aligned annotated reference network
+
+Current image: `public/maps/utmkul-reference-2026-10-18.jpeg` (1113×1414), byte-identical to the user-supplied annotated JPEG. `campusMap`/`referenceMap` supply that same asset/dimensions to both modes; SVG/viewBox/image fit together, without a two-anchor geographic transform. `campusRouteNodes` contains60 visible reference-circle centres; `campusGraphNodes` adds17 invisible connectivity junctions. No dot is placed at a hidden path bend.
+
+New `DEMO-REF-001`–`DEMO-REF-092` records describe re-traced illustrative corridors. Each starts unknown/grey, no shade observation timestamp or footfall. Access labels identify nearby landmarks, not surveyed entrances. The isolated PA9 spur is left disconnected rather than inventing a connector. The source's printed dashed Main Gate→Klinik path is a fixed example; live selected routing is purple.
+
+Original4 DEMO-S records and68 PR7 DEMO-WALK records remain unchanged, defined through the historical `legacyCampusWalkways.ts` fixture module. New reference records are appended by a strict recognized-ID migration to each old saved snapshot, preserving its existing records, observation/review/report/lifecycle history and current version. Historic geometry is not drawn on a different image. Four old intervention/report IDs retain declared visual proxies; no proxy is promoted into a surveyed location. Original metre facts are retained for old records; new lengths continue the explicit rough0.2m/pixel demo assumption, never a measured map scale or navigation distance.

@@ -23,7 +23,7 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
   const [message, setMessage] = useState('')
   const [recenter, setRecenter] = useState(0)
   const current = currentSnapshot(state)
-  const segment = current.segments.find(s => s.segment_id === selected) ?? current.segments.find(s => s.segment_id === 'DEMO-WALK-01') ?? current.segments[0]
+  const segment = current.segments.find(s => s.segment_id === selected) ?? current.segments.find(s => s.segment_id === 'DEMO-REF-001') ?? current.segments[0]
   const fromName = campusNodeName(campusRouteNodes.find(n => n.id === fromNode) ?? campusRouteNodes[0])
   const toName = campusNodeName(campusRouteNodes.find(n => n.id === toNode) ?? campusRouteNodes[1])
   const comparison = useMemo(
@@ -41,7 +41,7 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
   const updateTo = (value: string) => setToNode(value)
   return <main className="wf-app"><header><button className="link" onClick={back}>← Home</button><div><span className="chip">DEMO ROUTING</span> <span className="chip wf-version">{current.dataset_version}</span></div></header>
     <section className="workspace resident"><div className="topbar"><div><div className="eyebrow">RESIDENT MODE</div><h1>Find a more comfortable walk</h1></div><button onClick={()=>setRecenter(r=>r+1)}>Recenter map</button></div>
-      <p className="wf-local">Choose any two campus dots as start and destination. All pictured walkways begin GREY / UNSURVEYED. Connections, crossings, shade, accessibility and the distances used for route comparison are illustrative estimates only; this is not a navigation service.</p>
+      <p className="wf-local">Choose any two campus dots as start and destination. All pictured walkways begin GREY / UNSURVEYED. Connections, crossings, shade, accessibility and the distances used for route comparison are illustrative estimates only; this is not a navigation service. Saved state stays in this browser origin/profile only, with no cross-device sync.</p>
       {notice&&<p className="warning" role="alert">{notice}</p>}
       <div className="endpoint route-endpoint-pickers">
         <label>From

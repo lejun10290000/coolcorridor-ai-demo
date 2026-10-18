@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { currentSnapshot, initialWorkflow } from './workflow/model'
-import { campusRouteNodes, campusWalkLinks, campusNodeName } from './campusWalkways'
+import { campusRouteNodes, campusGraphNodes, campusWalkLinks, campusNodeName } from './campusWalkways'
 import { campusWideGraph } from './routing/graph'
 import { compareRoutes } from './routing/compare'
 import { campusMap, legacySegmentDisplayAliases, segmentDisplays } from './campusMapDisplay'
 
 describe('campus-wide selectable unsurveyed walkway network', () => {
   it('has a unique, connected set of selectable dots and valid link references', () => {
-    const ids = campusRouteNodes.map(node => node.id)
+    const ids = campusGraphNodes.map(node => node.id)
     expect(new Set(ids).size).toBe(ids.length)
     expect(new Set(campusWalkLinks.map(link => link.segment_id)).size).toBe(campusWalkLinks.length)
     expect(campusWalkLinks.every(link => ids.includes(link.from) && ids.includes(link.to) && link.from !== link.to)).toBe(true)
@@ -22,31 +22,16 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
       visited.add(next)
       pending.push(next)
     }
-    expect(visited.size).toBe(ids.length)
+    expect(visited.size).toBe(ids.length-1)
+    expect(visited.has('PA9-SPUR')).toBe(false) // visible isolated stub; never invent a link
+    expect(compareRoutes(currentSnapshot(initialWorkflow()),campusWideGraph,'PA9-SPUR','MAIN-GATE').shortest).toBeNull()
   })
 
   it('names the map-marked landmarks without forcing a label on every junction', () => {
     const labels = campusRouteNodes.filter(node => node.label).map(node => node.label)
-    expect(labels).toEqual(expect.arrayContaining([
-      'Pintu Masuk Utama',
-      'Pintu Masuk Belakang (Parking Bas UTM)',
-      'Cafe Pegawai',
-      'BTMK',
-      'Library PSZ',
-      'CICT',
-      'Cafe (V1)',
-      'Dewan Tan Sri Ainuddin Wahid',
-      'Klinik UTM',
-      'MJIIT',
-      'Cafe (MJIIT)',
-      'Residensi UTMKL',
-      'Menara Razak',
-      'Anjung Menara Razak',
-      'Dewan Azman Hashim',
-      'Masjid UTMKL',
-    ]))
+    expect(labels).toEqual(expect.arrayContaining(['Pintu Masuk Utama','Klinik UTM','Cafe Pegawai access','MJIIT west access','Residensi UTMKL access']))
     const unnamed = campusRouteNodes.find(node => !node.label)!
-    expect(campusNodeName(unnamed)).toMatch(/^Unlabelled junction \d+$/)
+    expect(campusNodeName(unnamed)).toMatch(/^Reference junction \d+$/)
   })
 
   it('routes between any two connected nodes and keeps every new segment unknown/grey', () => {
@@ -64,7 +49,7 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
 
 
   it('keeps selectable dots and shaped walkway paths aligned to the native map image', () => {
-    const byId = new Map(campusRouteNodes.map(node => [node.id, node]))
+    const byId = new Map(campusGraphNodes.map(node => [node.id, node]))
     for (const node of campusRouteNodes) {
       expect(node.x).toBeGreaterThanOrEqual(0)
       expect(node.x).toBeLessThanOrEqual(campusMap.width)
@@ -72,8 +57,8 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
       expect(node.y).toBeLessThanOrEqual(campusMap.height)
     }
     for (const link of campusWalkLinks) {
-      expect(link.points[0]).toEqual(byId.get(link.from))
-      expect(link.points[link.points.length - 1]).toEqual(byId.get(link.to))
+      expect(link.points[0]).toMatchObject({x:byId.get(link.from)!.x,y:byId.get(link.from)!.y})
+      expect(link.points[link.points.length - 1]).toMatchObject({x:byId.get(link.to)!.x,y:byId.get(link.to)!.y})
       expect(link.points.length).toBeGreaterThanOrEqual(2)
       expect(link.points.every(point =>
         point.x >= 0 && point.x <= campusMap.width && point.y >= 0 && point.y <= campusMap.height
@@ -92,6 +77,17 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
     expect(Object.values(legacySegmentDisplayAliases).every(id => Boolean(segmentDisplays[id]))).toBe(true)
   })
 
+  it('locks physical source-image anchors instead of stretching two endpoints',()=>{
+    const node=(id:string)=>campusRouteNodes.find(n=>n.id===id)!
+    expect([campusMap.width,campusMap.height]).toEqual([1113,1414])
+    expect(node('MAIN-GATE')).toMatchObject({x:216,y:922})
+    expect(node('KLINIK-UTM')).toMatchObject({x:747,y:317})
+    expect(node('REAR-GATE')).toMatchObject({x:977,y:456})
+    expect(node('RESIDENSI-UTMKL')).toMatchObject({x:939,y:731})
+    expect(node('NORTH-EAST')).toMatchObject({x:875,y:100})
+    expect(node('PARKING-SOUTH')).toMatchObject({x:623,y:1164})
+    expect(new Set(campusRouteNodes.map(n=>`${n.x},${n.y}`)).size).toBe(campusRouteNodes.length)
+  })
   it('routes in either direction and refuses the same point as both endpoints', () => {
     const snapshot = currentSnapshot(initialWorkflow())
     const forward = compareRoutes(snapshot, campusWideGraph, 'MAIN-GATE', 'KLINIK-UTM')

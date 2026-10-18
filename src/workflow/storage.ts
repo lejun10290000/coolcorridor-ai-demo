@@ -19,28 +19,19 @@ const assert=(v:unknown)=>{if(!v)throw new Error('Stored workflow data is invali
  * below handles it as incompatible instead of guessing how to repair it.
  */
 function migrateLegacyCampusSnapshots(value: Record<string, unknown>) {
-  const snapshots = value.snapshots
-  if (!Array.isArray(snapshots)) return
-  const currentCampusSegments = segments.filter(segment => segment.segment_id.startsWith('DEMO-WALK-'))
-  const legacySegments = segments.filter(segment => !segment.segment_id.startsWith('DEMO-WALK-'))
-  if (!currentCampusSegments.length) return
-  const isOldSnapshot = (snapshot: unknown) => object(snapshot)
-    && Array.isArray(snapshot.segments)
-    && snapshot.segments.length === legacySegments.length
-    && JSON.stringify(snapshot.segments.map((segment: unknown) => object(segment) ? segment.segment_id : null))
-      === JSON.stringify(legacySegments.map(segment => segment.segment_id))
-  // Migrate only if every stored version has the same known pre-campus-wide segment set.
-  if (!snapshots.every(isOldSnapshot)) return
-  value.snapshots = snapshots.map((snapshot: unknown) => {
-    const prior = snapshot as Record<string, unknown>
-    if (typeof prior.dataset_version !== 'string') return prior
-    return {
-      ...prior,
-      segments: [
-        ...(prior.segments as unknown[]),
-        ...currentCampusSegments.map(segment => ({ ...segment, dataset_version: prior.dataset_version })),
-      ],
-    }
+  const snapshots=value.snapshots
+  if(!Array.isArray(snapshots)||!snapshots.length)return
+  // Recognize the exact original 4-record, PR7 72-record, or intermediate legacy+reference
+  // ID set. Append absent known fixture records; never rewrite a retained record or evidence.
+  const knownOrders=[segments.filter(s=>s.segment_id.startsWith('DEMO-S')).map(s=>s.segment_id),
+    segments.filter(s=>!s.segment_id.startsWith('DEMO-REF-')).map(s=>s.segment_id),
+    segments.filter(s=>!s.segment_id.startsWith('DEMO-WALK-')).map(s=>s.segment_id)]
+  const matched=knownOrders.find(ids=>snapshots.every(snapshot=>object(snapshot)&&Array.isArray(snapshot.segments)&&JSON.stringify(snapshot.segments.map(s=>object(s)?s.segment_id:null))===JSON.stringify(ids)))
+  if(!matched)return
+  value.snapshots=snapshots.map(snapshot=>{
+    const prior=snapshot as Record<string,unknown>,existing=prior.segments as Record<string,unknown>[]
+    const byId=new Map(existing.map(s=>[s.segment_id,s]))
+    return {...prior,segments:segments.map(s=>byId.get(s.segment_id)??{...s,dataset_version:prior.dataset_version})}
   })
 }
 /** Runtime validation is deliberately stricter than JSON.parse; no fixture is promoted on reload. */

@@ -23,7 +23,7 @@ export function DeveloperWorkspace({state,commit,notice,back}:{state:WorkflowSta
   const scenario=useMemo(()=>buildScenario(baseline,state.items,plan?.ids??[],assumptions),[baseline,state.items,plan,assumptions])
   const scenarioActive=view==='scenario'&&plan!==null
   const mapSegments=scenarioActive?scenario.segments:baseline.segments
-  const selectedSegment=baseline.segments.find(s=>s.segment_id===selected) ?? baseline.segments.find(s=>s.segment_id==='DEMO-WALK-01') ?? baseline.segments[0]
+  const selectedSegment=baseline.segments.find(s=>s.segment_id===selected) ?? baseline.segments.find(s=>s.segment_id==='DEMO-REF-001') ?? baseline.segments[0]
   const ps=priorities(baseline.segments,Object.fromEntries(footfall.map(f=>[f.segment_id,f.passes_per_hour_equivalent])))
   function optimisePlan(){try{const p=calculatePlan(state.items,budget,excluded);setCalculation({key:inputKey,plan:p});setPlanError('');setAssumptions({});setView('baseline')}catch(e){setPlanError(e instanceof Error?e.message:'Invalid plan input.');setCalculation(null)}}
   return <main className="wf-app"><header><button className="link" onClick={back}>← Home</button><div><span className="chip">DEMO PLANNING</span> <span className="chip wf-version">{state.current_version}</span></div></header>

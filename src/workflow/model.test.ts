@@ -216,3 +216,27 @@ describe('saved workflow migration for campus-wide routes', () => {
     expect(added.every(segment => segment.dataset_version === restored.state.current_version)).toBe(true)
   })
 })
+
+
+describe('reference-image alignment upgrade preserves PR7 saved evidence',()=>{
+  it('reports the current shared reference image without mutating historical fixtures',()=>{
+    expect(currentStudyArea(initialWorkflow()).source_url).toBe('/maps/utmkul-reference-2026-10-18.jpeg')
+  })
+  it('appends the reference network to every old version without changing reports, observations or old segment facts',()=>{
+    let state=publishIntervention(verified(),'INT-01','Publisher','Synthetic pre-alignment history',now)
+    state=submitReport(state,{segment_id:'DEMO-WALK-01',category:'other',comment_optional:'Retain original campus-wide report'},now)
+    const prior:WorkflowState={...state,snapshots:state.snapshots.map(s=>({...s,segments:s.segments.filter(segment=>!segment.segment_id.startsWith('DEMO-REF-'))}))}
+    expect(prior.snapshots[0].segments).toHaveLength(72)
+    const before=JSON.stringify(prior),restored=decodeWorkflow(before)
+    expect(JSON.stringify(prior)).toBe(before)
+    expect(restored.reports).toEqual(prior.reports);expect(restored.observations).toEqual(prior.observations)
+    expect(restored.lifecycle_events).toEqual(prior.lifecycle_events);expect(restored.current_version).toBe(prior.current_version)
+    restored.snapshots.forEach((s,i)=>{
+      expect(s.segments.filter(segment=>!segment.segment_id.startsWith('DEMO-REF-'))).toEqual(prior.snapshots[i].segments)
+      const added=s.segments.filter(segment=>segment.segment_id.startsWith('DEMO-REF-'))
+      expect(added.length).toBeGreaterThan(0)
+      expect(added.every(segment=>segment.shade_label==='unknown'&&segment.shade_observed_at===null&&segment.shade_data_status==='unknown'&&segment.dataset_version===s.dataset_version)).toBe(true)
+    })
+    expect(decodeWorkflow(JSON.stringify(restored))).toEqual(restored)
+  })
+})
