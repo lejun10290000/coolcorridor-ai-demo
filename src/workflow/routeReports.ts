@@ -3,7 +3,7 @@ import { compareRoutes } from '../routing/compare'
 import { campusWideGraph } from '../routing/graph'
 import type { ReportedRoute, ResidentReport } from '../types'
 import { reviewReport, validLocalTime } from './model'
-import type { WorkflowState } from './model'
+import type { DatasetSnapshot, WorkflowState } from './model'
 import { publishMapShadeAssignments } from './mapShade'
 
 export const routeReportCategories=['broken shade structure','no shade','too hot at a stated time','blocked walkway','unsafe crossing','other']
@@ -11,8 +11,15 @@ const text=(s:unknown):s is string=>typeof s==='string'&&s.trim().length>0&&s.le
 function requireValue(ok:unknown,message:string):asserts ok {if(!ok)throw new Error(message)}
 export function routePointName(id:string){const node=campusRouteNodes.find(n=>n.id===id);return node?campusNodeName(node):id}
 export function reportedRouteLabel(route:ReportedRoute){return `${routePointName(route.from_node)} → ${routePointName(route.to_node)}`}
+/** Reports connect only the independently captured map clicks, never the active routing card. */
+export function manualReportRoute(snapshot:DatasetSnapshot,from:string,to:string):ReportedRoute|null {
+  if(!from||!to||from===to||!campusRouteNodes.some(n=>n.id===from)||!campusRouteNodes.some(n=>n.id===to))return null
+  const path=compareRoutes(snapshot,campusWideGraph,from,to).shortest
+  return path?{from_node:from,to_node:to,objective:'shortest',segment_ids:[...path.segment_ids],node_ids:[...path.node_ids],dataset_version:path.dataset_version,selection_source:'map_points'}:null
+}
 export function validReportedRoute(state:WorkflowState,route:ReportedRoute):boolean {
   if(!route||typeof route!=='object'||!['shortest','exposure'].includes(route.objective)||!campusRouteNodes.some(n=>n.id===route.from_node)||!campusRouteNodes.some(n=>n.id===route.to_node)||route.from_node===route.to_node||!Array.isArray(route.segment_ids)||!Array.isArray(route.node_ids))return false
+  if(route.selection_source!==undefined&&(route.selection_source!=='map_points'||route.objective!=='shortest'))return false
   const snapshot=state.snapshots.find(s=>s.dataset_version===route.dataset_version)
   if(!snapshot)return false
   const path=compareRoutes(snapshot,campusWideGraph,route.from_node,route.to_node)[route.objective]

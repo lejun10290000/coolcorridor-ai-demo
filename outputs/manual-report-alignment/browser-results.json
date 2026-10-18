@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "entry": "http://127.0.0.1:4183/",
+  "asset": "/maps/utmkul-reference-normal-points.png",
+  "sha256": "848ab2273286b8af8ee30142bd5595bd67c8608052b84f99c921edfa8fc5eab5",
+  "referenceDimensions": [
+    1113,
+    1414
+  ],
+  "backgroundDimensions": [
+    1113,
+    1413
+  ],
+  "visibleCircles": 60,
+  "referenceLinks": 92,
+  "checks": [
+    "edited background bytes served; original coordinate frame retained",
+    "six original coordinate anchors within0.01 frame pixel after desktop/mobile/zoom/pan/resize/reset (not an image-recognition check)",
+    "Resident and Developer identical image/point transforms/path geometry",
+    "real dot selection and calculated overlay IDs",
+    "arbitrary endpoints and unavailable isolated spur",
+    "reference report visible in Developer and persists after reload",
+    "scenario keeps shared image/point geometry",
+    "zero horizontal overflow/browser errors/external requests"
+  ],
+  "errors": [],
+  "external": []
+}

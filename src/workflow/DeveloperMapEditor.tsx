@@ -54,6 +54,6 @@ export function DeveloperMapEditor({state,commit,canEdit,reportPreview,onCloseRe
     </div>
     {reviewPath&&<div className="wf-report-path" role="status"><b>Report {reportPreview!.report_id}: {reportedRouteLabel(reviewPath)}</b><p>Exact saved links, with current published shade. A later route calculation does not move this report.</p><button type="button" onClick={onCloseReportPreview}>Close reported route preview</button></div>}
     <p className="wf-map-state" data-testid="developer-map-state">{reviewPath?'REPORTED ROUTE — CURRENT PUBLISHED SHADE':canEdit&&draft?'DEVELOPER DRAFT PREVIEW — not published to Residents':canEdit?'CURRENT PUBLISHED MAP':'READ-ONLY COMPARISON'} · {mapProps.scenario?'SIMULATED':current.dataset_version}</p>
-    <MapPanel {...mapProps} segments={reviewPath?current.segments:canEdit&&draft?previewMapShade(state):mapProps.segments} onSelect={toggleSegment} routeIds={reviewPath?.segment_ids??(active?selectedIds:[])} fromNode={reviewPath?.from_node??(active?from:undefined)} toNode={reviewPath?.to_node??(active?to:undefined)} onNodeSelect={active?choosePoint:undefined}/>
+    <MapPanel {...mapProps} showReportNumbers segments={reviewPath?current.segments:canEdit&&draft?previewMapShade(state):mapProps.segments} onSelect={toggleSegment} routeIds={reviewPath?.segment_ids??(active?selectedIds:[])} fromNode={reviewPath?.from_node??(active?from:undefined)} toNode={reviewPath?.to_node??(active?to:undefined)} onNodeSelect={active?choosePoint:undefined}/>
   </section>
 }

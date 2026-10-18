@@ -5,7 +5,7 @@ import type { ReportedRoute } from '../types'
 import { currentSnapshot, initialWorkflow, reportsForSegment, reviewReport, submitReport } from './model'
 import type { WorkflowState } from './model'
 import { publishMapShade, rebaseMapShadeDraft, stageMapShade } from './mapShade'
-import { acceptRouteReport, submitRouteReport } from './routeReports'
+import { acceptRouteReport, manualReportRoute, submitRouteReport, validReportedRoute } from './routeReports'
 import { decodeWorkflow } from './storage'
 const now='2026-10-18T19:00:00+08:00'
 function path(s:WorkflowState,from='MAIN-GATE',to='RAZAK-ENTRANCE',objective:'shortest'|'exposure'='shortest'):ReportedRoute{
@@ -20,6 +20,22 @@ function publish(s:WorkflowState,ids:string[],label:'mostly_shaded'|'mostly_expo
 }
 function freeze<T>(v:T):T{if(v&&typeof v==='object'){Object.freeze(v);Object.values(v).forEach(freeze)}return v}
 describe('Resident point-to-point reports and Developer acceptance',()=>{
+  it('builds a report from independent map points using connected corridors, regardless of the shaded-route choice',()=>{
+    const s=publish(initialWorkflow(),['DEMO-REF-081','DEMO-REF-082'],'mostly_shaded'),snapshot=currentSnapshot(s)
+    expect(compareRoutes(snapshot,campusWideGraph,'NORTH-WEST','L1-ACCESS').exposure!.segment_ids).toEqual(['DEMO-REF-081','DEMO-REF-082'])
+    const route=manualReportRoute(snapshot,'NORTH-WEST','L1-ACCESS')!
+    expect(route.segment_ids).toEqual(['DEMO-REF-080']);expect(route.selection_source).toBe('map_points');expect(route.objective).toBe('shortest')
+    const reported=submitted(s,route);expect(decodeWorkflow(JSON.stringify(reported))).toEqual(reported)
+    expect(validReportedRoute(s,{...route,objective:'exposure'})).toBe(false)
+  })
+  it('requires both distinct connected manual report points and rejects unsupported selection provenance',()=>{
+    const s=initialWorkflow(),snapshot=currentSnapshot(s)
+    for(const [from,to] of [['',''],['MAIN-GATE',''],['MAIN-GATE','MAIN-GATE'],['PA9-SPUR','MAIN-GATE'],['invented','MAIN-GATE']])expect(manualReportRoute(snapshot,from,to)).toBeNull()
+    const route=manualReportRoute(snapshot,'MAIN-GATE','INNER-GATE')!
+    expect(validReportedRoute(s,{...route,selection_source:'routing_lists'} as unknown as ReportedRoute)).toBe(false)
+    const accepted=acceptRouteReport(submitted(s,route),'REPORT-000001','Demo','Accept saved manual points',now)
+    expect(accepted.reports[0].route!.selection_source).toBe('map_points');expect(decodeWorkflow(JSON.stringify(accepted))).toEqual(accepted)
+  })
   it('freezes the exact selected route and description without changing published shade',()=>{
     const base=freeze(initialWorkflow()),route=path(base),s=submitted(base,route)
     expect(s.snapshots).toEqual(base.snapshots);expect(s.current_version).toBe(base.current_version)

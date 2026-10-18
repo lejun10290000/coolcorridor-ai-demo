@@ -11,12 +11,13 @@ export interface CampusImageMapProps {
   segments: WalkwaySegment[]; selected?: string; onSelect: (id: string) => void
   routeIds?: string[]; candidates?: InterventionCandidate[]; scenario?: boolean; recenter: number
   reports?: ResidentReport[]
+  showReportNumbers?: boolean
   fromNode?: string
   toNode?: string
   endpointSelectMode?: 'from' | 'to'
   onNodeSelect?: (nodeId: string) => void
 }
-export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], fromNode, toNode, onNodeSelect }: CampusImageMapProps) {
+export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], showReportNumbers = false, fromNode, toNode, onNodeSelect }: CampusImageMapProps) {
   const labelId = useId()
   const viewport = useRef<HTMLDivElement>(null)
   const scene = useRef<HTMLDivElement>(null)
@@ -33,6 +34,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
   // appear only when selected or when an existing DEMO intervention references them.
   const referenceIds=new Set(campusWalkLinks.map(s=>s.segment_id))
   const visibleSegments=segments.filter(s=>referenceIds.has(s.segment_id))
+  const pendingReports=reports.filter(r=>r.review_status==='submitted'||r.review_status==='under_review')
   useEffect(() => { reset() }, [recenter])
   // A resize resets the shared scene so a formerly visible path cannot remain offscreen.
   useEffect(() => { const observer = new ResizeObserver(reset); if (viewport.current) observer.observe(viewport.current); return () => observer.disconnect() }, [])
@@ -107,11 +109,11 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
               <text y="6" textAnchor="middle" fill={scenario ? '#fff' : '#55255b'} fontSize="22" fontWeight="bold">{scenario ? 'S' : 'I'}</text>
             </g> : null
           }))}
-          {segments.map(s => {
-            const count = reportsForSegment(reports,s.segment_id).length
+          {showReportNumbers&&segments.map(s => {
+            const count = reportsForSegment(pendingReports,s.segment_id).length
             const displayId = legacySegmentDisplayAliases[s.segment_id] ?? s.segment_id
             const p = displayMidpoint(segmentDisplays[displayId]?.map_display_geometry ?? [])
-            return count && p ? <g className="campus-report" key={s.segment_id} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} DEMO reports for {s.segment_id}; displayed at illustrative link {displayId}. Review status is in the inspector; not footfall.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null
+            return count && p ? <g className="campus-report" key={s.segment_id} data-report-segment-id={s.segment_id} data-report-count={count} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} pending DEMO reports for {s.segment_id}; displayed at illustrative link {displayId}. Not footfall. Accepted/rejected reports remain in history.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null
           })}
           {campusRouteNodes.map(node => {
             const mapped=campusMapPoint(node), x=mapped.x, y=mapped.y
@@ -133,7 +135,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         </svg>}
       </div>
     </div>
-    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Dots align with the reference circles; names appear in endpoint lists</span><span>Solid grey paths = UNSURVEYED walkway geometry</span><span>Dashed grey centre = illustrative selected route</span><span>□ I: DEMO intervention · ■ S: SIMULATED site · numbered circles: DEMO reports</span></div>
+    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Dots align with the reference circles; names appear in endpoint lists</span><span>Solid grey paths = UNSURVEYED walkway geometry</span><span>Dashed grey centre = illustrative selected route</span><span>□ I: DEMO intervention · ■ S: SIMULATED site</span>{showReportNumbers&&<span>Numbered circles: pending DEMO reports only</span>}</div>
     <p className="campus-map-note">Choose two reference circles as start and destination. Your active route has a purple casing. The isolated PA9 spur has no documented connection and may return no route. Named dots follow the landmarks marked on the supplied map; unnamed dots remain selectable junctions. All paths, crossings, distances, shade and accessibility are UNSURVEYED; not for navigation.</p>
     {missing.length > 0 && <p role="status">No image-display geometry for {missing.map(s => s.segment_id).join(', ')}. These segments are not drawn.</p>}
     {candidates.length === 0 && <p className="campus-map-note">No selected intervention sites.</p>}

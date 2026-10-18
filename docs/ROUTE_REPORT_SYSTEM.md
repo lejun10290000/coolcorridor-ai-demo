@@ -4,9 +4,13 @@ Branch `feature/route-report-review` starts from PR10 head `5d8cd5b1bb21100657fa
 
 ## Resident
 
-Choose two map dots or endpoint lists around the affected section and a route option, then choose **Report selected route**. Alternatively **Report a route** in the inspector opens the same form with endpoint lists. Selecting the first map dot advances input to the destination.
+Choose two map dots around the affected section, then choose **Report selected route**. Alternatively **Report a route** in the inspector opens the same form. **Choose report points on map** resets report selection to From; the first click saves the start and advances to To, and the second saves the destination. Selecting a new map start clears the old report destination so an earlier endpoint cannot leak into a fresh pair.
 
-The form shows the calculated path and exact included link IDs. Choose the problem category (for example **broken shade structure**) and describe the problem. The description is required. Disconnected/same/unknown endpoints cannot be submitted. Submission saves the endpoints, route objective, ordered link/node IDs, source dataset and problem text. It leaves published map colours unchanged and starts Pending review. These are local DEMO reports, separate from footfall or field shade measurements.
+The form automatically fills read-only start/destination names from manual map clicks. Main routing dropdowns and route cards have independent state and never fill or overwrite report points. The form has no route-option selector or editable endpoint lists. Without two distinct connected map-clicked points, submission is disabled; the form offers a return-to-map selection action.
+
+Existing shortest corridor links connect the manual points without inventing a straight line; this is independent of the active most-shaded/shortest journey card above. The report shows the exact included links. Choose the problem category (for example **broken shade structure**) and describe the problem. The description is required. Submission saves the endpoints, ordered link/node IDs, source dataset, `selection_source: map_points` and problem text. It leaves colours unchanged and starts Pending review. These are local DEMO reports, separate from footfall or field shade measurements. Older reports with a saved routing objective remain readable and reviewable.
+
+Resident maps show no report-number circles or report-count legend/inspector summary. Developer maps count only submitted/under-review reports on each covered link. Acceptance/rejection automatically removes that report from map counts; another pending report on the same link keeps its badge. Final reports and accepted-shade provenance remain in history, and accepted links remain yellow until a later manual shade update.
 
 ## Developer review
 
@@ -26,12 +30,12 @@ All geometry, lengths/accessibility and shade classifications remain DEMO/unsurv
 
 ## Actual validation
 
-- `npm test`: **102 passed across10 files**, including7 new route-report tests. Covers frozen path/descriptions, connected-path and current-version validation, no-map-change submission/rejection, atomic accepted publication, repeated/final/legacy refusal, preserved unrelated evidence, stable report location after rerouting, stale draft preservation, later manual repair and strict reload rejection of forged route/audit records.
+- Latest `npm test`: **104 passed across10 files**, including9 route-report tests. Adds independent manual map-point capture, empty/partial/disconnected handling, compatibility and persistence of map-point provenance; earlier frozen-path, acceptance, history, repair and tamper checks also pass.
 - `npm run build`: passed; existing cinematic chunk-size warning remains.
 - `review/check-route-reports.cjs`: passed against the **normal production root** `http://127.0.0.1:4183/`, using fresh synthetic data. Real Resident map clicks selected Main Gate→reference junction03 (DEMO-REF-001→002). The route was green before submission, stayed green while pending, changed to yellow after Developer acceptance, and stayed yellow until a later explicit manual repair publication. Exposure-ranking cost changed0→18→0, with automatic updates in the already-open Resident tab. These are DEMO algorithm costs, not measured exposure. Rejection did not change the map. An unrelated draft survived acceptance. Accepted yellow snapshot/report history survived repair and reload. No page errors or mobile horizontal overflow; the mobile form is scrollable with a reachable submit button and restores background scrolling on close.
 - `review/check-developer-map-shade.cjs`: passed again on the same normal entry. Existing multi-route selection/draft/three-category/publication flow, cross-tab recalculation, 25% detour, history and mobile behavior remained intact. Shortest34 DEMO metres and shaded38,11.8% detour, remained reproducible.
 - `review/check-reference-alignment.cjs`: passed again. Shared map geometry, normal marker sizes, reference anchors after zoom/pan/resize, both modes, route highlighting, revised report submission/filtering/persistence, isolated no-route and scenario isolation remained intact.
-- Primary screenshots/results: `outputs/route-report-system/`; regression evidence: `outputs/route-report-regression-alignment/` and `outputs/route-report-regression-shade/`. Primary desktop/mobile report, review and yellow-map screenshots were opened for visual QA.
+- Latest manual-point/badge screenshots and results: `outputs/manual-report-map-selection/`; alignment regression: `outputs/manual-report-alignment/`. Browser checks cover dropdown-only reports blocked, independent autofill despite later routing/card changes, read-only fields with no report route selector, Resident counts always absent, overlapping Developer counts2→1→0 on acceptance/rejection and cleared after reload, plus the previous yellow/publication/manual-repair flow. Older evidence remains in the preceding output folders.
 
 Reproduce with the production build served by the existing Vite preview on4183:
 
@@ -48,3 +52,5 @@ node review/check-developer-map-shade.cjs
 ```
 
 For normal use run `npm run dev -- --host 127.0.0.1 --port 5174 --strictPort`, refresh that URL and enter either mode. Valid existing local state is preserved; no storage clearing is needed. No app dependency or remote API was added.
+
+To save a new run separately from historical evidence, set `ROUTE_REPORT_OUTPUT_DIR=outputs/manual-report-map-selection` and `ALIGNMENT_OUTPUT_DIR=outputs/manual-report-alignment` before running the corresponding browser scripts.

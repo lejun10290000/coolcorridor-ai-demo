@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { MapPanel } from '../MapPanel'
 import { campusNodeName, campusRouteNodes } from '../campusWalkways'
 import { currentSnapshot } from '../workflow/model'
@@ -8,6 +8,7 @@ import { compareRoutes } from './compare'
 import { campusWideGraph } from './graph'
 import { RouteCards } from './RouteCards'
 import { RouteReportForm } from '../workflow/RouteReportForm'
+import { manualReportRoute, routePointName } from '../workflow/routeReports'
 import './routing.css'
 
 // Normal app integration agreed by Builder 1 in PR #6, issuecomment-6234657305.
@@ -19,6 +20,8 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
   const [endpointSelectMode, setEndpointSelectMode] = useState<'from'|'to'>('from')
   const [route, setRoute] = useState<'shortest'|'exposure'>('shortest')
   const [openForm, setOpenForm] = useState(false)
+  const [reportPoints,setReportPoints]=useState({from:'',to:''})
+  const mapAnchor=useRef<HTMLDivElement>(null)
   const [message, setMessage] = useState('')
   const [recenter, setRecenter] = useState(0)
   const current = currentSnapshot(state)
@@ -32,10 +35,12 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
     [current, fromNode, toNode],
   )
   const chosen = comparison?.[route]?.segment_ids ?? []
+  const reportRoute=useMemo(()=>manualReportRoute(current,reportPoints.from,reportPoints.to),[current,reportPoints])
   const chooseNode = (nodeId: string) => {
-    if (endpointSelectMode === 'from') {setFromNode(nodeId);setEndpointSelectMode('to')}
-    else setToNode(nodeId)
+    if (endpointSelectMode === 'from') {setFromNode(nodeId);setEndpointSelectMode('to');setReportPoints({from:nodeId,to:''})}
+    else {setToNode(nodeId);setReportPoints(p=>({...p,to:nodeId}))}
   }
+  const chooseReportPoints=()=>{setOpenForm(false);setReportPoints({from:'',to:''});setEndpointSelectMode('from');requestAnimationFrame(()=>{mapAnchor.current?.scrollIntoView({block:'start'});mapAnchor.current?.querySelector<HTMLElement>('.campus-map-viewport')?.focus({preventScroll:true})})}
   const updateFrom = (value: string) => setFromNode(value)
   const updateTo = (value: string) => setToNode(value)
   return <main className="wf-app"><header><button className="link" onClick={back}>← Home</button><div><span className="chip">DEMO ROUTING</span> <span className="chip wf-version">{current.dataset_version}</span></div></header>
@@ -69,12 +74,12 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
         : fromNode===toNode
           ? <p className="warning" role="alert">Start and destination are the same point. Choose two different dots.</p>
           : <p className="selected-route-status" data-testid="selected-route" role="status" data-route-version={comparison?.dataset_version}>Selected route: {fromName} → {toName} · {route==='shortest'?'Shortest':'Most shaded practical route'} · {chosen.length?chosen.join(' → '):'Unavailable'} · {current.dataset_version}</p>}
-      <div className="main-grid"><MapPanel segments={current.segments} selected={selected} onSelect={setSelected} routeIds={chosen} recenter={recenter} reports={state.reports} fromNode={fromNode} toNode={toNode} endpointSelectMode={endpointSelectMode} onNodeSelect={chooseNode}/><SegmentEvidence segment={segment} version={current.dataset_version} state={state} mode="resident" onAction={()=>setOpenForm(true)}/></div>
-      <div className="wf-route-report-action"><button type="button" onClick={()=>setOpenForm(true)}>Report selected route</button><p>Choose two points, then report a problem on the exact selected path. You can also choose the endpoints in the report form.</p></div>
+      <div className="main-grid" ref={mapAnchor}><MapPanel segments={current.segments} selected={selected} onSelect={setSelected} routeIds={chosen} recenter={recenter} fromNode={fromNode} toNode={toNode} endpointSelectMode={endpointSelectMode} onNodeSelect={chooseNode}/><SegmentEvidence segment={segment} version={current.dataset_version} state={state} mode="resident" onAction={()=>setOpenForm(true)}/></div>
+      <section className="wf-route-report-action" aria-label="Report map point selection"><button type="button" onClick={chooseReportPoints}>Choose report points on map</button><button type="button" onClick={()=>setOpenForm(true)}>Report selected route</button><p data-testid="report-map-selection">Report points: {reportPoints.from?routePointName(reportPoints.from):'Click a starting point'} → {reportPoints.to?routePointName(reportPoints.to):'Click a destination'}. Only manual map clicks set these points; routing lists and cards are separate.</p></section>
       {comparison
         ? <RouteCards comparison={comparison} selected={route} onSelect={setRoute} fromLabel={fromName} toLabel={toName}/>
         : <section className="route-comparison"><h2>Choose your own campus route</h2><p>The route will be calculated after you choose two different dots. No fixed Main Gate → Klinik UTM journey is preselected.</p><p className="warning">Unknown shade is ranked conservatively. Published DEMO classifications affect routing but do not establish observed shade. Both objectives can choose the same path.</p></section>}
-      {openForm&&<RouteReportForm from={fromNode} to={toNode} onFrom={updateFrom} onTo={updateTo} objective={route} onObjective={setRoute} comparison={comparison} commit={commit} onClose={()=>setOpenForm(false)} onSubmitted={()=>{setOpenForm(false);setMessage('Route report submitted for Developer review. Map shade is unchanged until accepted.')}}/>}
+      {openForm&&<RouteReportForm from={reportPoints.from} to={reportPoints.to} route={reportRoute} onChoosePoints={chooseReportPoints} commit={commit} onClose={()=>setOpenForm(false)} onSubmitted={()=>{setOpenForm(false);setMessage('Route report submitted for Developer review. Map shade is unchanged until accepted.')}}/>}
     </section>
   </main>
 }
