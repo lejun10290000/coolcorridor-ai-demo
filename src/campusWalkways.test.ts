@@ -10,7 +10,7 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
     expect(new Set(ids).size).toBe(ids.length)
     expect(new Set(campusWalkLinks.map(link => link.segment_id)).size).toBe(campusWalkLinks.length)
     expect(campusWalkLinks.every(link => ids.includes(link.from) && ids.includes(link.to) && link.from !== link.to)).toBe(true)
-    const adjacency = new Map(ids.map(id => [id, [] as string[]]))
+    const adjacency = new Map<string, string[]>(ids.map(id => [id, []] as [string, string[]]))
     for (const link of campusWalkLinks) {
       adjacency.get(link.from)!.push(link.to)
       adjacency.get(link.to)!.push(link.from)
@@ -58,7 +58,7 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
     expect(route.shortest!.edges.every(edge => edge.shade_label === 'unknown' && edge.shade_data_status === 'unknown')).toBe(true)
     expect(route.shortest!.unknown_coverage_pct).toBe(100)
     expect(route.identical_path).toBe(true)
-    expect(route.warnings.join(' ')).toContain('not for navigation')
+    expect(route.warnings.join(' ')).toContain('Not for navigation')
   })
 
   it('routes in either direction and refuses the same point as both endpoints', () => {
