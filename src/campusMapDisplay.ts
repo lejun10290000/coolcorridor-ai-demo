@@ -35,6 +35,17 @@ const campusSegmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fro
 }]))
 export const segmentDisplays: Record<string, SegmentDisplayGeometry> = { ...legacySegmentDisplays, ...campusSegmentDisplays }
 
+/** Legacy workflow IDs remain in saved evidence records. Their old shortcut chords are
+ * not drawn over the campus-wide map; demo intervention/report markers use these neutral
+ * visual proxies on the new grey campus network only. This does not rewrite source records.
+ */
+export const legacySegmentDisplayAliases: Record<string, string> = {
+  'DEMO-S01': 'DEMO-WALK-01',
+  'DEMO-S02': 'DEMO-WALK-62',
+  'DEMO-S03': 'DEMO-WALK-57',
+  'DEMO-S04': 'DEMO-WALK-18',
+}
+
 export const shadeColours = { mostly_exposed: '#C4473A', mixed: '#BD8B16', mostly_shaded: '#35745A', unknown: '#707580' }
 export const shadeLabels = { mostly_exposed: 'Mostly exposed', mixed: 'Mixed shade', mostly_shaded: 'Mostly shaded', unknown: 'Unknown / needs survey' }
 export const svgPoints = (geometry: MapDisplayPoint[]) => geometry.map(p => `${p.x},${p.y}`).join(' ')
