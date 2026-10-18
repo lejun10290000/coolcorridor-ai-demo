@@ -16,7 +16,7 @@ export interface CampusImageMapProps {
   endpointSelectMode?: 'from' | 'to'
   onNodeSelect?: (nodeId: string) => void
 }
-export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], fromNode, toNode, endpointSelectMode = 'from', onNodeSelect }: CampusImageMapProps) {
+export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], fromNode, toNode, onNodeSelect }: CampusImageMapProps) {
   const labelId = useId()
   const viewport = useRef<HTMLDivElement>(null)
   const scene = useRef<HTMLDivElement>(null)
