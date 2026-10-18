@@ -1,4 +1,5 @@
 /** Image pixels only. No image-to-WGS84 transform is known or implied. */
+import { campusWalkLinks, referenceMap } from './campusWalkways'
 export interface MapDisplayPoint { x: number; y: number }
 export interface SegmentDisplayGeometry {
   segment_id: string
@@ -14,12 +15,20 @@ export const campusMap = {
 const points = (pairs: [number, number][]): MapDisplayPoint[] => pairs.map(([x, y]) => ({ x, y }))
 const source = 'Visually traced on supplied 1290 × 1640 campus illustration; uncertain connections, crossings and building approach are DEMO, not surveyed.'
 /** Separate sidecar keyed by existing IDs; never derived from schematic geographic fixtures. */
-export const segmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fromEntries([
+const legacySegmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fromEntries([
   ['DEMO-S01', points([[285,1075],[335,1020],[420,972],[525,905]])],
   ['DEMO-S02', points([[525,905],[625,835],[740,760],[705,701],[685,665],[790,615],[920,560],[948,480],[927,399],[913,370],[869,386],[852,355],[884,340],[884,312]])],
   ['DEMO-S03', points([[285,1075],[252,1020],[242,920],[239,795],[245,680],[279,651],[345,650],[440,625],[507,604],[472,520],[535,488],[603,465],[650,446],[698,430],[752,411],[801,387],[837,375],[869,360],[884,340],[884,312]])],
   ['DEMO-S04', points([[920,560],[1010,540],[1080,531],[1131,522]])],
 ].map(([id, geometry]) => [id, { segment_id: id as string, map_display_geometry: geometry as MapDisplayPoint[], data_status: 'demo_fixture', source }]))
+
+const campusSegmentDisplays: Record<string, SegmentDisplayGeometry> = Object.fromEntries(campusWalkLinks.map(link => [link.segment_id, {
+  segment_id: link.segment_id,
+  map_display_geometry: link.points.map(p => ({ x: p.x * campusMap.width / referenceMap.width, y: p.y * campusMap.height / referenceMap.height })),
+  data_status: 'demo_fixture' as const,
+  source: link.source,
+}]))
+export const segmentDisplays: Record<string, SegmentDisplayGeometry> = { ...legacySegmentDisplays, ...campusSegmentDisplays }
 
 export const shadeColours = { mostly_exposed: '#C4473A', mixed: '#BD8B16', mostly_shaded: '#35745A', unknown: '#707580' }
 export const shadeLabels = { mostly_exposed: 'Mostly exposed', mixed: 'Mixed shade', mostly_shaded: 'Mostly shaded', unknown: 'Unknown / needs survey' }
