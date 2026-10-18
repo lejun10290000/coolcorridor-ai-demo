@@ -187,3 +187,32 @@ describe('separate field reviewer and actionable validation',()=>{
     expect(observationLocalTimestamp('2026-10-17T12:00:00')).toBe(input.observed_at)
   })
 })
+
+
+describe('saved workflow migration for campus-wide routes', () => {
+  it('adds new grey/unknown campus walkways without dropping existing local reports or legacy data', () => {
+    const original = initialWorkflow()
+    const originalLegacySegments = original.snapshots[0].segments.filter(segment => !segment.segment_id.startsWith('DEMO-WALK-'))
+    const oldSaved = submitReport(original, {
+      segment_id: 'DEMO-S01',
+      category: 'no shade',
+      comment_optional: 'Keep this pre-upgrade report.',
+    }, now)
+    const olderLocalState: WorkflowState = {
+      ...oldSaved,
+      snapshots: oldSaved.snapshots.map(snapshot => ({
+        ...snapshot,
+        segments: snapshot.segments.filter(segment => !segment.segment_id.startsWith('DEMO-WALK-')),
+      })),
+    }
+
+    const restored = loadWorkflow(JSON.stringify(olderLocalState))
+    expect(restored.warning).toBe('')
+    expect(restored.state.reports).toEqual(oldSaved.reports)
+    expect(restored.state.snapshots[0].segments.filter(segment => !segment.segment_id.startsWith('DEMO-WALK-'))).toEqual(originalLegacySegments)
+    const added = restored.state.snapshots[0].segments.filter(segment => segment.segment_id.startsWith('DEMO-WALK-'))
+    expect(added).toHaveLength(initialWorkflow().snapshots[0].segments.filter(segment => segment.segment_id.startsWith('DEMO-WALK-')).length)
+    expect(added.every(segment => segment.shade_label === 'unknown' && segment.shade_data_status === 'unknown' && segment.shade_observed_at === null)).toBe(true)
+    expect(added.every(segment => segment.dataset_version === restored.state.current_version)).toBe(true)
+  })
+})
