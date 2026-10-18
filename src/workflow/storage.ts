@@ -10,11 +10,45 @@ const time=(v:unknown):v is string=>typeof v==='string'&&validLocalTime(v)
 const array=(v:unknown):v is unknown[]=>Array.isArray(v)&&v.length<=10000
 const unique=(v:unknown[],key:string)=>v.every(object)&&new Set(v.map(x=>(x as Record<string,unknown>)[key])).size===v.length
 const assert=(v:unknown)=>{if(!v)throw new Error('Stored workflow data is invalid or incompatible.')}
+
+/**
+ * Safe additive migration for local data saved before campus-wide walkway links existed.
+ * Add only the new grey/unknown fixture records to each old snapshot. Existing snapshot
+ * history, legacy segment evidence, observations, reports and lifecycle events are retained.
+ * If the persisted structure is not an exact recognizable legacy shape, strict validation
+ * below handles it as incompatible instead of guessing how to repair it.
+ */
+function migrateLegacyCampusSnapshots(value: Record<string, unknown>) {
+  const snapshots = value.snapshots
+  if (!Array.isArray(snapshots)) return
+  const currentCampusSegments = segments.filter(segment => segment.segment_id.startsWith('DEMO-WALK-'))
+  const legacySegments = segments.filter(segment => !segment.segment_id.startsWith('DEMO-WALK-'))
+  if (!currentCampusSegments.length) return
+  const isOldSnapshot = (snapshot: unknown) => object(snapshot)
+    && Array.isArray(snapshot.segments)
+    && snapshot.segments.length === legacySegments.length
+    && JSON.stringify(snapshot.segments.map((segment: unknown) => object(segment) ? segment.segment_id : null))
+      === JSON.stringify(legacySegments.map(segment => segment.segment_id))
+  // Migrate only if every stored version has the same known pre-campus-wide segment set.
+  if (!snapshots.every(isOldSnapshot)) return
+  value.snapshots = snapshots.map((snapshot: unknown) => {
+    const prior = snapshot as Record<string, unknown>
+    if (typeof prior.dataset_version !== 'string') return prior
+    return {
+      ...prior,
+      segments: [
+        ...(prior.segments as unknown[]),
+        ...currentCampusSegments.map(segment => ({ ...segment, dataset_version: prior.dataset_version })),
+      ],
+    }
+  })
+}
 /** Runtime validation is deliberately stricter than JSON.parse; no fixture is promoted on reload. */
 export function decodeWorkflow(raw:string):WorkflowState {
   const value:unknown=JSON.parse(raw)
   assert(object(value));const s=value as Record<string,unknown>
   assert(s.schema_version===1&&Number.isSafeInteger(s.revision)&&Number(s.revision)>=0)
+  migrateLegacyCampusSnapshots(s)
   for(const key of ['snapshots','observations','items','reports','report_events','lifecycle_events'])assert(array(s[key])&&unique(s[key] as unknown[],key==='snapshots'?'dataset_version':key==='items'?'intervention_id':key==='observations'?'observation_id':key==='reports'?'report_id':'event_id'))
   const state=value as WorkflowState
   assert(state.snapshots.length>0&&state.current_version===state.snapshots[state.snapshots.length-1].dataset_version)
