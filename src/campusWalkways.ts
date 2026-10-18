@@ -1,6 +1,6 @@
 /**
  * Campus-wide illustrative walking graph traced from the user-supplied UTM KL map.
- * Coordinates are pixels on the 1088 x 1382 reference image, NOT geographic coordinates.
+ * Coordinates are native pixels on the 1290 x 1640 campus map image, NOT geographic coordinates.
  * The source has no defensible scale. Lengths are rough planning estimates (0.20 m per
  * reference-image pixel) to compare paths only; not for navigation. Every edge begins
  * UNSURVEYED / UNKNOWN.
