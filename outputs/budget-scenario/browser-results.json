@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "datasetBefore": "demo-baseline-2026-10-17",
+  "datasetAfter": "demo-baseline-2026-10-17-v000001",
+  "proposalPaths": [
+    "DEMO-REF-001",
+    "DEMO-REF-002"
+  ],
+  "projectedLink": "DEMO-REF-001",
+  "baselineFollowingLink": "DEMO-REF-002",
+  "checks": [
+    "RM10,000 → RM20,000 automatic portfolio recalculation",
+    "exclusion, cost and total benefit changes recalculate without another click",
+    "real map point selection and multi-link candidate assignment",
+    "multi-link proposal score remains 92, not multiplied",
+    "explicit projection paints current map only in simulation",
+    "scenario-specific inspector and no manual publication controls",
+    "unpublished Developer draft excluded from simulation and Residents",
+    "open simulation automatically refreshes after publication in another tab",
+    "explicit projection retained; unprojected link follows new baseline",
+    "Resident routing receives only published baseline colors/version",
+    "original snapshot and historical candidates preserved",
+    "historical baseline view cannot pin simulation to an old version",
+    "zero budget, invalid budget, all excluded handled",
+    "inputs, targets and projections survive reload",
+    "clear projections returns map to latest baseline",
+    "desktop and mobile without horizontal overflow",
+    "mobile comparison rows stack with readable full-width baseline labels"
+  ],
+  "pageErrors": []
+}

@@ -4,6 +4,7 @@ import type { WorkflowState } from './model'
 import type { DataStatus, Lifecycle } from '../types'
 import { mapShadeSource, validMapAssignments } from './mapShade'
 import { routeReportCategories, validReportedRoute } from './routeReports'
+import { validPlanningWorkspace } from './planning'
 
 const statuses: DataStatus[]=['sample_observed','human_reviewed','model_estimate','demo_fixture','simulated','unknown']
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v)
@@ -131,10 +132,12 @@ export function decodeWorkflow(raw:string):WorkflowState {
     assert(previous===r.review_status)
   })
   assert(currentSnapshot(state))
+  // A damaged optional simulation must not discard valid published map/history.
+  if(state.planning_workspace!==undefined&&!validPlanningWorkspace(state.planning_workspace,state.items))delete state.planning_workspace
   return state
 }
 export function loadWorkflow(raw:string|null):{state:WorkflowState;warning:string} {
   if(raw===null)return {state:initialWorkflow(),warning:''}
-  try{return{state:decodeWorkflow(raw),warning:''}}
+  try{const state=decodeWorkflow(raw);return{state,warning:JSON.parse(raw).planning_workspace!==undefined&&state.planning_workspace===undefined?'Invalid saved planning inputs were reset. Published map and history were preserved.':''}}
   catch{return{state:initialWorkflow(),warning:'Saved local workflow data is corrupt or incompatible. Recovered the original DEMO baseline for this session. A new successful action will replace that invalid saved state.'}}
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MapPanel } from '../MapPanel'
 import type { CampusImageMapProps } from '../CampusImageMap'
 import { campusNodeName, campusRouteNodes } from '../campusWalkways'
@@ -9,7 +9,7 @@ import { reportedRouteLabel } from './routeReports'
 import { mapRouteSelection, mapShadeLabels, previewMapShade, publishMapShade, rebaseMapShadeDraft, removeMapShadeDraft, stageMapShade } from './mapShade'
 
 type Commit=(update:(state:WorkflowState)=>WorkflowState)=>boolean
-export function DeveloperMapEditor({state,commit,canEdit,reportPreview,onCloseReportPreview,...mapProps}:CampusImageMapProps&{state:WorkflowState;commit:Commit;canEdit:boolean;reportPreview?:ResidentReport|null;onCloseReportPreview?:()=>void}){
+export function DeveloperMapEditor({state,commit,canEdit,reportPreview,onCloseReportPreview,onSelectionChange,...mapProps}:CampusImageMapProps&{state:WorkflowState;commit:Commit;canEdit:boolean;reportPreview?:ResidentReport|null;onCloseReportPreview?:()=>void;onSelectionChange?:(ids:string[])=>void}){
   const [from,setFrom]=useState(''),[to,setTo]=useState(''),[pointMode,setPointMode]=useState<'from'|'to'>('from')
   const [selectedIds,setSelectedIds]=useState<string[]>([]),[label,setLabel]=useState<ShadeLabel>('mostly_exposed')
   const [editing,setEditing]=useState(true),[message,setMessage]=useState(''),[by,setBy]=useState('Demo map operator'),[note,setNote]=useState(''),[confirmed,setConfirmed]=useState(false)
@@ -22,11 +22,13 @@ export function DeveloperMapEditor({state,commit,canEdit,reportPreview,onCloseRe
   const draftKey=JSON.stringify(draft)
   const [reviewedKey,setReviewedKey]=useState('')
   const reviewed=confirmed&&reviewedKey===draftKey
+  useEffect(()=>{onSelectionChange?.(selectedIds)},[selectedIds,onSelectionChange])
   function choosePoint(id:string){if(pointMode==='from'){setFrom(id);setPointMode('to')}else setTo(id);setMessage('')}
   function toggleSegment(id:string){mapProps.onSelect(id);if(active){setSelectedIds(ids=>ids.includes(id)?ids.filter(v=>v!==id):[...ids,id]);setMessage('')}}
   function addRoute(){setSelectedIds(ids=>[...new Set([...ids,...connection.ids])]);setFrom('');setTo('');setPointMode('from');setMessage('Route added. Choose another pair or tap paths to add/remove links.')}
   function applyShade(){if(commit(s=>stageMapShade(s,selectedIds,label,malaysiaNow()))){setMessage(`${selectedIds.length} selected links saved as ${mapShadeLabels[label]} in the Developer draft. Resident map is unchanged.`);setSelectedIds([]);setConfirmed(false)}}
   function publish(){if(commit(s=>publishMapShade(s,by,note,reviewed,malaysiaNow()))){setMessage('Published to Resident map. Shortest and most shaded practical routes now use the new dataset.');setConfirmed(false);setSelectedIds([]);setNote('')}}
+  if(mapProps.scenario)return <section className="wf-map-editor" aria-label="Simulated campus map"><p className="wf-map-state" data-testid="developer-map-state">SIMULATED / ASSUMPTION · {current.dataset_version}</p><p>Latest published map with explicit hypothetical projections. Developer drafts and report markers are excluded. Return to Baseline for manual updates.</p><MapPanel {...mapProps} reports={[]} showReportNumbers={false} routeIds={[]} fromNode={undefined} toNode={undefined} onNodeSelect={undefined}/></section>
   return <section className="wf-map-editor" aria-label="Developer route shade editor">
     <div className="wf-panel"><h2>Edit map shade</h2><p>Select one or more point-to-point routes, or tap individual path links. Then choose a shade category. Changes first appear in the Developer draft; publish when ready to update Resident routing.</p>
       <p className="warning">Manual DEMO classifications only. “Fully shaded” ranks as the shaded category in this prototype, not a measured 100% shade claim.</p>

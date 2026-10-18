@@ -11,11 +11,17 @@ export function optimise(candidates: InterventionCandidate[], budget: number, ex
     const constraints = picked.flatMap(c => c.constraints)
     if (cost > budget || new Set(constraints).size !== constraints.length) continue
     const perSegment = new Map<string, number>()
-    picked.forEach(c => c.segment_ids.forEach(id => perSegment.set(id, Math.max(perSegment.get(id) ?? 0, c.modelled_benefit))))
+    // Each candidate's score is its TOTAL assumed benefit. Split it across unique
+    // links before taking the maximum at overlaps, so longer selections cannot
+    // multiply the same score or count the same link twice.
+    picked.forEach(c => {
+      const ids = [...new Set(c.segment_ids)], share = ids.length ? c.modelled_benefit / ids.length : 0
+      ids.forEach(id => perSegment.set(id, Math.max(perSegment.get(id) ?? 0, share)))
+    })
     const benefit = [...perSegment.values()].reduce((a, b) => a + b, 0)
-    if (benefit > best.benefit || benefit === best.benefit && cost < best.cost) best = { ids: picked.map(c => c.intervention_id), cost, benefit }
+    if (benefit > best.benefit + 1e-9 || Math.abs(benefit-best.benefit) <= 1e-9 && cost < best.cost) best = { ids: picked.map(c => c.intervention_id), cost, benefit }
   }
-  return { ...best, remaining: budget - best.cost, reason: best.ids.length ? 'Deterministic exhaustive search; overlapping segment benefits use the maximum only.' : 'No eligible portfolio fits the current budget and exclusions.' }
+  return { ...best, remaining: budget - best.cost, reason: best.ids.length ? 'Deterministic exhaustive search; total candidate scores are split equally across their links, with the maximum only at overlaps. Ties favour lower cost.' : 'No positive-benefit eligible portfolio fits the current budget and exclusions.' }
 }
 export function priorities(segments: WalkwaySegment[], rates: Record<string, number>): Priority[] {
   return segments.map(s => {
