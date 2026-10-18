@@ -13,7 +13,7 @@ import './workflow.css'
 
 type Commit=(update:(s:WorkflowState)=>WorkflowState)=>boolean
 export function DeveloperWorkspace({state,commit,notice,back}:{state:WorkflowState;commit:Commit;notice:string;back:()=>void}){
-  const [selected,setSelected]=useState('DEMO-S01'),[recenter,setRecenter]=useState(0),[showReports,setShowReports]=useState(false)
+  const [selected,setSelected]=useState('DEMO-WALK-01'),[recenter,setRecenter]=useState(0),[showReports,setShowReports]=useState(false)
   const [budget,setBudget]=useState('20000'),[excluded,setExcluded]=useState<string[]>([]),[calculation,setCalculation]=useState<{key:string;plan:Plan}|null>(null),[planError,setPlanError]=useState('')
   const [view,setView]=useState<'baseline'|'scenario'>('baseline'),[baselineChoice,setBaselineChoice]=useState('current'),[assumptions,setAssumptions]=useState<Record<string,ShadeLabel|''>>({})
   const current=currentSnapshot(state),baseline=baselineChoice==='current'?current:state.snapshots.find(s=>s.dataset_version===baselineChoice)??current
