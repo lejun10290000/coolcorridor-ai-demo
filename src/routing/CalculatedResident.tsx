@@ -12,7 +12,7 @@ import './routing.css'
 // Normal app integration agreed by Builder 1 in PR #6, issuecomment-6234657305.
 type Commit = (update: (state: WorkflowState) => WorkflowState) => boolean
 export function CalculatedResident({ back, state, commit, notice }: { back: () => void; state: WorkflowState; commit: Commit; notice: string }) {
-  const [selected, setSelected] = useState('DEMO-WALK-01')
+  const [selected, setSelected] = useState('')
   const [fromNode, setFromNode] = useState('')
   const [toNode, setToNode] = useState('')
   const [endpointSelectMode, setEndpointSelectMode] = useState<'from'|'to'>('from')
@@ -77,7 +77,7 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
       {openForm&&<div className="modal" role="dialog" aria-modal="true" aria-labelledby="report-heading" onKeyDown={e=>{
         if(e.key==='Escape')setOpenForm(false)
         if(e.key==='Tab'){const controls=Array.from(e.currentTarget.querySelectorAll<HTMLElement>('button,select,textarea'));const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
-      }}><form className="dialog" onSubmit={e=>{e.preventDefault();if(commit(s=>submitReport(s,{segment_id:selected,category,comment_optional:comment},malaysiaNow()))){setOpenForm(false);setComment('');setMessage('Report submitted with pending review status. Reports are not footfall.')}}}><button type="button" className="close" aria-label="Close report form" autoFocus onClick={()=>setOpenForm(false)}>×</button><h2 id="report-heading">Report walkway issue</h2><p>{selected}. Reports start submitted/pending review and are never pedestrian counts.</p><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}>{['no shade','too hot at a stated time','blocked walkway','unsafe crossing','other'].map(x=><option key={x}>{x}</option>)}</select></label><label>Optional note<textarea maxLength={2000} value={comment} onChange={e=>setComment(e.target.value)}/></label><button type="submit">Submit demo report</button></form></div>}
+      }}><form className="dialog" onSubmit={e=>{e.preventDefault();if(commit(s=>submitReport(s,{segment_id:segment.segment_id,category,comment_optional:comment},malaysiaNow()))){setOpenForm(false);setComment('');setMessage('Report submitted with pending review status. Reports are not footfall.')}}}><button type="button" className="close" aria-label="Close report form" autoFocus onClick={()=>setOpenForm(false)}>×</button><h2 id="report-heading">Report walkway issue</h2><p>{selected}. Reports start submitted/pending review and are never pedestrian counts.</p><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}>{['no shade','too hot at a stated time','blocked walkway','unsafe crossing','other'].map(x=><option key={x}>{x}</option>)}</select></label><label>Optional note<textarea maxLength={2000} value={comment} onChange={e=>setComment(e.target.value)}/></label><button type="submit">Submit demo report</button></form></div>}
     </section>
   </main>
 }
