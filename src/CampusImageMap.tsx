@@ -116,17 +116,19 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             const name=campusNodeName(node)
             const label=node.label
             const labelWidth=label ? Math.max(76,label.length*10.6+14) : 0
+            const labelX=x > campusMap.width * 0.74 ? -labelWidth-17 : 17
             return <g key={node.id} className="campus-route-node" data-campus-node-id={node.id} transform={`translate(${x},${y})`}
               role={onNodeSelect ? 'button' : 'img'} tabIndex={onNodeSelect ? 0 : -1}
               aria-label={`${name}${isFrom?', selected start':''}${isTo?', selected destination':''}. Walkway point is illustrative and unverified.`}
               aria-pressed={onNodeSelect ? Boolean(isFrom||isTo) : undefined}
+              style={{ pointerEvents: onNodeSelect ? 'auto' : 'none' }}
               onKeyDown={onNodeSelect ? e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();onNodeSelect(node.id)} } : undefined}>
               <title>{name}. {isFrom?'Selected start. ':''}{isTo?'Selected destination. ':''}Illustrative point; access and nearby paths are UNSURVEYED.</title>
               <circle r={isFrom||isTo?24:15} fill={isFrom?'#55255b':isTo?'#bd8b16':'#fff'} stroke={isFrom||isTo?'#fff':'#707580'} strokeWidth={isFrom||isTo?6:5}/>
               <circle r={isFrom||isTo?8:4} fill={isFrom||isTo?'#fff':'#707580'}/>
               {label && <g className="campus-route-node-label" pointerEvents="none">
-                <rect x="17" y="-29" width={labelWidth} height="28" rx="4" fill="#fff5b5" stroke="#bd8b16" strokeWidth="1.5"/>
-                <text x="23" y="-10" fontSize="20" fontWeight="700" fill="#a32216">{label}</text>
+                <rect x={labelX} y="-29" width={labelWidth} height="28" rx="4" fill="#fff5b5" stroke="#bd8b16" strokeWidth="1.5"/>
+                <text x={labelX+6} y="-10" fontSize="20" fontWeight="700" fill="#a32216">{label}</text>
               </g>}
             </g>
           })}
