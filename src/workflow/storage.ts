@@ -5,6 +5,7 @@ import type { DataStatus, Lifecycle } from '../types'
 import { mapShadeSource, validMapAssignments } from './mapShade'
 import { routeReportCategories, validReportedRoute } from './routeReports'
 import { validPlanningWorkspace } from './planning'
+import { validFootfallPlanning } from './footfallPlanning'
 
 const statuses: DataStatus[]=['sample_observed','human_reviewed','model_estimate','demo_fixture','simulated','unknown']
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v)
@@ -134,10 +135,12 @@ export function decodeWorkflow(raw:string):WorkflowState {
   assert(currentSnapshot(state))
   // A damaged optional simulation must not discard valid published map/history.
   if(state.planning_workspace!==undefined&&!validPlanningWorkspace(state.planning_workspace,state.items))delete state.planning_workspace
+  if(state.footfall_planning_workspace!==undefined&&!validFootfallPlanning(state.footfall_planning_workspace))delete state.footfall_planning_workspace
+  if(state.planning_mode!==undefined&&state.planning_mode!=='footfall'&&state.planning_mode!=='manual')delete state.planning_mode
   return state
 }
 export function loadWorkflow(raw:string|null):{state:WorkflowState;warning:string} {
   if(raw===null)return {state:initialWorkflow(),warning:''}
-  try{const state=decodeWorkflow(raw);return{state,warning:JSON.parse(raw).planning_workspace!==undefined&&state.planning_workspace===undefined?'Invalid saved planning inputs were reset. Published map and history were preserved.':''}}
+  try{const state=decodeWorkflow(raw),saved=JSON.parse(raw);return{state,warning:(['planning_workspace','footfall_planning_workspace','planning_mode'] as const).some(key=>saved[key]!==undefined&&state[key]===undefined)?'Invalid saved planning inputs were reset. Published map and history were preserved.':''}}
   catch{return{state:initialWorkflow(),warning:'Saved local workflow data is corrupt or incompatible. Recovered the original DEMO baseline for this session. A new successful action will replace that invalid saved state.'}}
 }

@@ -9,7 +9,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     const context=await browser.newContext({viewport:{width:1440,height:1100},reducedMotion:'reduce'}),errors=[]
     context.on('page',p=>{p.setDefaultTimeout(15000);p.on('pageerror',e=>errors.push(e.message))})
     const planner=await context.newPage(),publisher=await context.newPage(),resident=await context.newPage()
-    async function enter(page,role){await page.goto(base+'/');await page.getByLabel('Visual quality').selectOption('fallback');await page.getByRole('button',{name:`Enter ${role} Mode`,exact:true}).click();await page.locator('.campus-map-overlay').waitFor()}
+    async function enter(page,role){await page.goto(base+'/');await page.getByLabel('Visual quality').selectOption('fallback');await page.getByRole('button',{name:`Enter ${role} Mode`,exact:true}).click();await page.locator('.campus-map-overlay').waitFor();if(role==='Developer')await page.getByLabel('Planning method',{exact:true}).selectOption('manual')}
     const stored=()=>planner.evaluate(k=>JSON.parse(localStorage.getItem(k)),key)
     const color=(page,id)=>page.locator(`[data-segment-id="${id}"] .campus-shade-stroke`).getAttribute('stroke')
     const budget=()=>planner.getByLabel('Available budget (whole RM)',{exact:true})

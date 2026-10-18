@@ -1,6 +1,8 @@
 # Budget optimiser and current-map simulation
 
-Enter the normal app, choose Developer Mode, and use the existing Baseline route/path selection to select proposal locations. In Budget optimiser, use a candidate's **Use selected map paths** button. This assigns planning targets only; applying shade to a Developer draft is a separate action.
+The normal app now defaults to [top-ten fictional footfall planning](TOP_FOOTFALL_PLANNING.md). To use the manual-candidate workflow below, enter Developer Mode and choose **Manual candidate planning (saved proposals)** under **Planning method**. Its earlier saved inputs remain separate.
+
+Use the existing Baseline route/path selection to select proposal locations. In Budget optimiser, use a candidate's **Use selected map paths** button. This assigns planning targets only; applying shade to a Developer draft is a separate action.
 
 Keep or edit each proposal's assumed cost and total benefit score, tick eligible proposals, enter a budget and select **Optimise plan**. Further valid input changes automatically recalculate the entire portfolio. Constraints and overlaps affect selection together; individually affordable proposals need not be selected. Unknown field evidence stays unknown. Costs and benefits remain DEMO assumptions.
 
