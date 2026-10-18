@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { useEffect, useId, useRef, useState } from 'react'
 import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './types'
-import { campusMap, displayMidpoint, nearestDisplaySegment, referenceMap, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
+import { campusMap, campusMapPoint, displayMidpoint, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
 import { campusNodeName, campusRouteNodes } from './campusWalkways'
 import { dataStatusText } from './workflow/model'
 import './campus-map.css'
@@ -111,7 +111,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             return count && p ? <g className="campus-report" key={s.segment_id} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} DEMO reports for {s.segment_id}; review status is in the inspector. Not footfall.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null
           })}
           {campusRouteNodes.map(node => {
-            const x=node.x*campusMap.width/referenceMap.width, y=node.y*campusMap.height/referenceMap.height
+            const mapped=campusMapPoint(node), x=mapped.x, y=mapped.y
             const isFrom=node.id===fromNode, isTo=node.id===toNode
             const name=campusNodeName(node)
             const label=node.label
