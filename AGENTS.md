@@ -140,7 +140,9 @@ Adjust names after the operator assigns actual people. These are the default wor
 - **Builder 3 — GIS / route graph:** sourced campus geography, pedestrian network and stable segment IDs, shortest and lower-exposure routing, route metrics, geometry/provenance and deterministic tests.
 - **Builder 4 — Planning / optimisation / map updates:** priority scores, candidate interventions, real budget portfolio solver, scenarios, intervention lifecycle state transitions, report review support and tests.
 
-Ownership does not permit breaking shared contracts. Before editing another builder’s main module, coordinate in a GitHub issue/PR and obtain agreement. Shared files (API contracts, common schemas, dependency manifests, app config) require advance coordination.
+Ownership is a guide to primary responsibility, not an exclusive boundary or permission gate. Any builder may inspect, edit, commit, and push changes to any project file on their own feature branch, and may create or update a pull request, without asking Builder 1 or the file owner for prior permission. This includes changes to another builder's main module and shared files (API contracts, common schemas, dependency manifests, and app config).
+
+For visibility and safe integration, the PR description must explain cross-workstream changes, shared-contract/schema changes, migration or compatibility effects, and tests run/results. Tag or notify affected builders when practical, but notification is informational, not a request for permission or a veto. Preserve other people's work; do not silently overwrite or discard competing changes. If a real conflict occurs, resolve it through Git and the PR discussion rather than blocking a builder from starting or pushing their proposed change.
 
 All builders should run in parallel once the interface contracts are agreed. Use clearly labelled fixture data to unblock UI/testing while real inputs are being collected. Replace fixtures with verified data when available, without disguising fixtures as observations.
 
@@ -148,12 +150,12 @@ All builders should run in parallel once the interface contracts are agreed. Use
 
 - Keep `main` as the integrated, runnable version.
 - Do not commit directly to `main`; work on feature branches and open small pull requests.
-- Suggested branches: `feature/frontend`, `feature/vision`, `feature/gis-routing`, `feature/planning-optimizer`. If a branch already exists, inspect it and coordinate rather than overwriting it.
+- Suggested branches: `feature/frontend`, `feature/vision`, `feature/gis-routing`, `feature/planning-optimizer`. Any builder may push commits to their own feature branch and open/update a PR without Builder 1's permission. If a branch already exists, inspect it first and avoid overwriting or discarding someone else's work; use your own branch when work may conflict.
 - Never force-push shared branches, discard another person's work, reset someone else's changes or automatically merge a PR without operator approval.
 - Every PR must state: purpose, changed files, how to run, tests run/results, known limitations, any schema/API changes and a screenshot or sample output when UI/model relevant.
 - Keep changes focused. Do not combine unrelated modules in one PR.
 - Update README/setup instructions whenever the run process, configuration or dependencies change.
-- Resolve conflicts with the owner; do not silently rewrite their implementation.
+- Resolve genuine merge conflicts openly and preserve other builders' work; the module owner does not have to grant permission for another builder to propose or push a change on a feature branch.
 - The operator approves merge after review and passing checks/manual smoke test.
 
 ## 10. Required test and quality practices
