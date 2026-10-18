@@ -13,7 +13,7 @@ export function SelectedRouteOverlay({segments,routeIds}:{segments:WalkwaySegmen
     return <g key={id} data-route-overlay-id={id} data-route-order={index} data-route-version={segment.dataset_version}>
       <polyline className="campus-line campus-route-halo" points={points} stroke="#fff" strokeWidth="11" vectorEffect="non-scaling-stroke"/>
       <polyline className="campus-line campus-route-outline" points={points} stroke="#55255b" strokeWidth="8" vectorEffect="non-scaling-stroke"/>
-      <polyline className="campus-line campus-route-centre" points={points} stroke={shadeColours[segment.shade_label]} strokeWidth="3" vectorEffect="non-scaling-stroke"/>
+      <polyline className="campus-line campus-route-centre" points={points} stroke={shadeColours[segment.shade_label]} strokeWidth="3" strokeDasharray="8 8" vectorEffect="non-scaling-stroke"/>
     </g>
   })}</g>
 }
