@@ -149,7 +149,7 @@ const pairs: [string, string][] = [
 ]
 
 const nodeById = new Map(campusRouteNodes.map(node => [node.id, node]))
-const sourceNote = 'Illustrative connection visually traced from the supplied campus map. Walkability, crossings, access, width, surface, shade and scale are UNSURVEYED.'
+const sourceNote = 'Illustrative connection visually traced from the supplied campus map; not surveyed. Walkability, crossings, access, width, surface, shade and scale remain UNSURVEYED.'
 
 function lineLength(points: { x: number; y: number }[]) {
   return points.slice(1).reduce((sum, p, index) => sum + Math.hypot(p.x - points[index].x, p.y - points[index].y), 0)
