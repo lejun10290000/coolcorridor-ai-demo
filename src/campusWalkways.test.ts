@@ -3,6 +3,7 @@ import { currentSnapshot, initialWorkflow } from './workflow/model'
 import { campusRouteNodes, campusWalkLinks, campusNodeName } from './campusWalkways'
 import { campusWideGraph } from './routing/graph'
 import { compareRoutes } from './routing/compare'
+import { campusMap, segmentDisplays } from './campusMapDisplay'
 
 describe('campus-wide selectable unsurveyed walkway network', () => {
   it('has a unique, connected set of selectable dots and valid link references', () => {
@@ -59,6 +60,26 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
     expect(route.shortest!.unknown_coverage_pct).toBe(100)
     expect(route.identical_path).toBe(true)
     expect(route.warnings.join(' ')).toContain('Not for navigation')
+  })
+
+
+  it('keeps selectable dots and shaped walkway paths aligned to the native map image', () => {
+    const byId = new Map(campusRouteNodes.map(node => [node.id, node]))
+    for (const node of campusRouteNodes) {
+      expect(node.x).toBeGreaterThanOrEqual(0)
+      expect(node.x).toBeLessThanOrEqual(campusMap.width)
+      expect(node.y).toBeGreaterThanOrEqual(0)
+      expect(node.y).toBeLessThanOrEqual(campusMap.height)
+    }
+    for (const link of campusWalkLinks) {
+      expect(link.points[0]).toEqual(byId.get(link.from))
+      expect(link.points[link.points.length - 1]).toEqual(byId.get(link.to))
+      expect(link.points.length).toBeGreaterThanOrEqual(2)
+      expect(link.points.every(point =>
+        point.x >= 0 && point.x <= campusMap.width && point.y >= 0 && point.y <= campusMap.height
+      )).toBe(true)
+      expect(segmentDisplays[link.segment_id].map_display_geometry).toEqual(link.points)
+    }
   })
 
   it('routes in either direction and refuses the same point as both endpoints', () => {
