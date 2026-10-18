@@ -2,7 +2,7 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto')
 const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183'
-const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/map-without-example-route'),key='coolcorridor-shade-workflow-v1'
+const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/normal-points-alignment'),key='coolcorridor-shade-workflow-v1'
 ;(async()=>{
   await fs.mkdir(out,{recursive:true})
   const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})
@@ -29,8 +29,8 @@ const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/map-without-ex
     await page.goto(base+'/');await enter('Resident');await aligned()
     const imageURL=await page.locator('.campus-map-scene img').getAttribute('src')
     const served=await(await page.request.get(base+imageURL)).body()
-    assert.equal(imageURL,'/maps/utmkul-reference-no-example-route.png')
-    const supplied=await fs.readFile('public/maps/utmkul-reference-no-example-route.png')
+    assert.equal(imageURL,'/maps/utmkul-reference-normal-points.png')
+    const supplied=await fs.readFile('public/maps/utmkul-reference-normal-points.png')
     const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex')
     assert.equal(hash(served),hash(supplied))
     const residentNodes=await nodes(),residentLines=await lines()

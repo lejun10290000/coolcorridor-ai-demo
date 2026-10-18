@@ -220,7 +220,7 @@ describe('saved workflow migration for campus-wide routes', () => {
 
 describe('reference-image alignment upgrade preserves PR7 saved evidence',()=>{
   it('reports the current shared reference image without mutating historical fixtures',()=>{
-    expect(currentStudyArea(initialWorkflow()).source_url).toBe('/maps/utmkul-reference-no-example-route.png')
+    expect(currentStudyArea(initialWorkflow()).source_url).toBe('/maps/utmkul-reference-normal-points.png')
   })
   it('appends the reference network to every old version without changing reports, observations or old segment facts',()=>{
     let state=publishIntervention(verified(),'INT-01','Publisher','Synthetic pre-alignment history',now)

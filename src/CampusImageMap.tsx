@@ -60,7 +60,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
       <button type="button" aria-label="Zoom in campus map" disabled={zoom === 3} onClick={() => changeZoom(.5)}>+</button>
       <button type="button" onClick={reset}>Full map</button>
     </div></div>
-    <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. {scenario ? 'SIMULATED / ASSUMPTION shade overlay.' : 'All walkway geometry and shade labels are UNSURVEYED / UNKNOWN.'} Paths remain unverified.</p>
+    <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. {scenario ? 'SIMULATED / ASSUMPTION shade overlay.' : 'Walkway geometry is UNSURVEYED. Shade provenance is shown per segment.'} Paths remain unverified.</p>
     <div className="campus-map-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Campus map. Zoom with buttons; when zoomed, drag or use arrow keys to pan. Home resets."
       onKeyDown={e => {
         if (e.target !== e.currentTarget) return
@@ -68,14 +68,14 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         if (e.key === 'Home') { e.preventDefault(); reset() }
         else if (keys[e.key] && zoom > 1) { e.preventDefault(); move(pan.x + keys[e.key][0], pan.y + keys[e.key][1]) }
       }}
-      onPointerDown={e => { const target=e.target as Element; pressedSegment.current = target.closest('[data-campus-node-id]') ? null : (target.closest('[data-segment-id]')?.getAttribute('data-segment-id') ?? hitSegment(e.clientX,e.clientY)); if (e.pointerType === 'mouse') e.preventDefault(); if (e.button !== 0 || zoom === 1) return; suppressClick.current = false; drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false } }}
+      onPointerDown={e => { const target=e.target as Element; pressedSegment.current = target.closest('[data-campus-node-id]') ? null : hitSegment(e.clientX,e.clientY); if (e.pointerType === 'mouse') e.preventDefault(); if (e.button !== 0 || zoom === 1) return; suppressClick.current = false; drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false } }}
       onPointerMove={e => {
         const d = drag.current
         if (!d) return
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { d.moved = true; suppressClick.current = true; e.currentTarget.setPointerCapture(e.pointerId) }
         if (d.moved) move(d.px + e.clientX - d.x, d.py + e.clientY - d.y)
       }}
-      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && onNodeSelect) onNodeSelect(nodeId); else if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
+      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && onNodeSelect && !suppressClick.current) onNodeSelect(nodeId); else if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
       onPointerCancel={() => { pressedSegment.current = null; drag.current = null; suppressClick.current = false }}
       style={{ touchAction: zoom > 1 ? 'none' : 'pan-y', cursor: zoom > 1 ? 'grab' : 'auto' }}>
       {imageState === 'loading' && <p className="campus-map-message" role="status">Loading supplied campus image…</p>}
@@ -124,8 +124,9 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
               style={{ pointerEvents: onNodeSelect ? 'auto' : 'none' }}
               onKeyDown={onNodeSelect ? e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();onNodeSelect(node.id)} } : undefined}>
               <title>{name}. {isFrom?'Selected start. ':''}{isTo?'Selected destination. ':''}Illustrative point; access and nearby paths are UNSURVEYED.</title>
-              <circle r={isFrom||isTo?12:7} fill={isFrom?'#55255b':isTo?'#bd8b16':'#fff'} stroke={isFrom||isTo?'#fff':'#707580'} strokeWidth={isFrom||isTo?3:1.5}/>
-              <circle r={isFrom||isTo?4:2} fill={isFrom||isTo?'#fff':'#707580'}/>
+              <circle className="campus-node-hit" r="18" fill="transparent"/>
+              <circle className="campus-point-marker" r="7" fill={isFrom?'#55255b':isTo?'#bd8b16':'#fff'} stroke={isFrom||isTo?'#fff':'#707580'} strokeWidth="1.5"/>
+              <circle r="2" fill={isFrom||isTo?'#fff':'#707580'}/>
 
             </g>
           })}

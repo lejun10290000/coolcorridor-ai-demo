@@ -1,5 +1,7 @@
 # Alignment to the supplied annotated map
 
+Latest update: the displayed asset is now `public/maps/utmkul-reference-normal-points.png`, normalizing the Main Gate/Klinik endpoint circles. The retained1113×1414 coordinate frame and all graph coordinates/IDs are unchanged. Current browser evidence is in `outputs/normal-points-alignment/`; the Developer draft/publication workflow and actual recalculation results are in DEVELOPER_MAP_SHADE.md. Earlier asset/test records below document the preceding alignment and dashed-line removal.
+
 This correction traces the JPEG supplied by the operator on 18 October 2026, rather than the previous PDF crop. The earlier points were not traced to its circles. Both Resident and Developer use the same reference coordinate frame, visible points and corridor geometry through the shared CampusImageMap component. A later operator request removed the printed example route from the displayed background; the original source is preserved.
 
 ## Source and anchors

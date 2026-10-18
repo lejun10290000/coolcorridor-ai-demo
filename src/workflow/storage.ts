@@ -2,6 +2,7 @@ import { candidates, segments, studyArea } from '../fixtures'
 import { currentSnapshot, initialWorkflow, lifecycleNext, shadeLabels, validLocalTime, safeEvidenceReference, validReportTransition } from './model'
 import type { WorkflowState } from './model'
 import type { DataStatus, Lifecycle } from '../types'
+import { mapShadeSource, validMapAssignments } from './mapShade'
 
 const statuses: DataStatus[]=['sample_observed','human_reviewed','model_estimate','demo_fixture','simulated','unknown']
 const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object'&&v!==null&&!Array.isArray(v)
@@ -42,6 +43,12 @@ export function decodeWorkflow(raw:string):WorkflowState {
   migrateLegacyCampusSnapshots(s)
   for(const key of ['snapshots','observations','items','reports','report_events','lifecycle_events'])assert(array(s[key])&&unique(s[key] as unknown[],key==='snapshots'?'dataset_version':key==='items'?'intervention_id':key==='observations'?'observation_id':key==='reports'?'report_id':'event_id'))
   const state=value as WorkflowState
+  // Additive optional fields: older saved observations, versions and reports are preserved.
+  if(state.map_shade_updates===undefined)state.map_shade_updates=[]
+  if(state.map_shade_draft===undefined)state.map_shade_draft=null
+  assert(array(state.map_shade_updates)&&unique(state.map_shade_updates,'publication_id'))
+  assert(state.map_shade_draft===null||object(state.map_shade_draft))
+  if(state.map_shade_draft){const d=state.map_shade_draft;assert(string(d.base_dataset_version)&&state.snapshots.some(s=>s.dataset_version===d.base_dataset_version)&&time(d.updated_at)&&validMapAssignments(d.assignments))}
   assert(state.snapshots.length>0&&state.current_version===state.snapshots[state.snapshots.length-1].dataset_version)
   assert(JSON.stringify(state.snapshots[0])===JSON.stringify(initialWorkflow().snapshots[0]))
   assert(state.items.length===candidates.length)
@@ -76,8 +83,25 @@ export function decodeWorkflow(raw:string):WorkflowState {
     if(o.review_status==='published')assert(time(o.published_at)&&string(o.published_by_label)&&state.snapshots.some(s=>s.dataset_version===o.published_dataset_version&&s.segments.some(segment=>segment.shade_source?.observation_id===o.observation_id)))
     else assert(o.published_at===null&&o.published_by_label===null&&o.published_dataset_version===null)
   })
-  state.snapshots.forEach(snapshot=>snapshot.segments.forEach(segment=>{
+  state.map_shade_updates.forEach(update=>{
+    assert(object(update)&&string(update.publication_id)&&update.publication_id.startsWith('MAP-SHADE-')&&time(update.created_at)&&[update.created_by_label,update.note].every(v=>string(v)&&v.trim().length>0)&&validMapAssignments(update.assignments))
+    const index=state.snapshots.findIndex(s=>s.dataset_version===update.dataset_version),snapshot=state.snapshots[index],prior=state.snapshots[index-1]
+    assert(index>0&&prior.dataset_version===update.base_dataset_version&&snapshot.parent_dataset_version===update.base_dataset_version&&snapshot.created_at===update.created_at&&snapshot.created_by_label===update.created_by_label)
+    // Every changed record must be accounted for; non-selected evidence is carried forward intact.
+    snapshot.segments.forEach(segment=>{
+      const before=prior.segments.find(s=>s.segment_id===segment.segment_id)!,a=update.assignments.find(a=>a.segment_id===segment.segment_id)
+      const expected=a?{...before,dataset_version:update.dataset_version,shade_label:a.shade_label,shade_observed_at:null,shade_data_status:'demo_fixture',shade_source:mapShadeSource(update)}:{...before,dataset_version:update.dataset_version}
+      assert(JSON.stringify(segment)===JSON.stringify(expected))
+    })
+  })
+  assert(new Set(state.map_shade_updates.map(u=>u.dataset_version)).size===state.map_shade_updates.length)
+  state.snapshots.forEach((snapshot,index)=>snapshot.segments.forEach(segment=>{
     if(!segment.shade_source){const original=segments.find(s=>s.segment_id===segment.segment_id)!;assert(segment.shade_data_status===original.shade_data_status&&segment.shade_label===original.shade_label&&segment.shade_observed_at===original.shade_observed_at);return}
+    if(segment.shade_source.map_publication_id!==undefined){
+      const update=state.map_shade_updates!.find(u=>u.publication_id===segment.shade_source!.map_publication_id),a=update?.assignments.find(a=>a.segment_id===segment.segment_id)
+      assert(update&&a&&state.snapshots.findIndex(s=>s.dataset_version===update.dataset_version)<=index&&segment.shade_label===a.shade_label&&segment.shade_data_status==='demo_fixture'&&segment.shade_observed_at===null&&JSON.stringify(segment.shade_source)===JSON.stringify(mapShadeSource(update)))
+      return
+    }
     const o=state.observations.find(o=>o.observation_id===segment.shade_source?.observation_id)
     assert(o?.review_status==='published'&&o.segment_id===segment.segment_id&&o.observed_at===segment.shade_observed_at&&o.reviews[o.reviews.length-1].shade_label===segment.shade_label&&segment.shade_data_status===(o.data_status==='demo_fixture'?'demo_fixture':'human_reviewed'))
     if(o){const source=segment.shade_source,review=o.reviews[o.reviews.length-1];assert(source.method===o.method&&source.source_note===o.source_note&&source.observer_label===o.observer_label&&source.reviewer_label===review.reviewer_label&&source.review_note===review.note&&source.evidence_reference===o.evidence_reference&&source.published_at===o.published_at)}

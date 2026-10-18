@@ -7,7 +7,10 @@ import type { DataStatus, InterventionCandidate, Lifecycle, ReportStatus, Reside
 export const shadeLabels: ShadeLabel[] = ['mostly_exposed', 'mixed', 'mostly_shaded', 'unknown']
 export const storageKey = 'coolcorridor-shade-workflow-v1'
 export const dataStatusText: Record<DataStatus, string> = { sample_observed: 'OBSERVED (manually entered)', human_reviewed: 'HUMAN REVIEWED', model_estimate: 'MODEL ESTIMATE', demo_fixture: 'DEMO', simulated: 'SIMULATED', unknown: 'UNKNOWN' }
-export interface ShadeSource { observation_id: string; method: string; source_note: string; observer_label: string; reviewer_label: string; review_note: string; evidence_reference: string; published_at: string }
+export interface ShadeSource { observation_id: string; method: string; source_note: string; observer_label: string; reviewer_label: string; review_note: string; evidence_reference: string; published_at: string; map_publication_id?: string }
+export interface MapShadeAssignment { segment_id: string; shade_label: ShadeLabel }
+export interface MapShadeDraft { base_dataset_version: string; assignments: MapShadeAssignment[]; updated_at: string }
+export interface MapShadePublication { publication_id: string; base_dataset_version: string; dataset_version: string; assignments: MapShadeAssignment[]; created_at: string; created_by_label: string; note: string }
 export interface CurrentSegment extends WalkwaySegment { shade_source?: ShadeSource }
 export interface DatasetSnapshot { study_area_id: string; dataset_version: string; parent_dataset_version: string | null; created_at: string; created_by_label: string; segments: CurrentSegment[]; change_summary: string; warnings: string[] }
 export interface ObservationReview { action: 'under_review' | 'verified' | 'rejected'; reviewer_label: string; note: string; timestamp: string; shade_label: ShadeLabel; review_policy?: 'separate-field-reviewer-v1' }
@@ -20,7 +23,7 @@ export interface ShadeObservation {
 }
 export interface LifecycleEvent { event_id: string; intervention_id: string; from_status: Lifecycle; to_status: Lifecycle; actor_demo_label: string; timestamp: string; note: string; evidence_reference: string; dataset_version: string }
 export interface ReportEvent { event_id: string; report_id: string; from_status: ReportStatus; to_status: ReportStatus; reviewer_label: string; note: string; timestamp: string }
-export interface WorkflowState { schema_version: 1; revision: number; current_version: string; snapshots: DatasetSnapshot[]; observations: ShadeObservation[]; lifecycle_events: LifecycleEvent[]; items: InterventionCandidate[]; reports: ResidentReport[]; report_events: ReportEvent[] }
+export interface WorkflowState { schema_version: 1; revision: number; current_version: string; snapshots: DatasetSnapshot[]; observations: ShadeObservation[]; lifecycle_events: LifecycleEvent[]; items: InterventionCandidate[]; reports: ResidentReport[]; report_events: ReportEvent[]; map_shade_draft?: MapShadeDraft | null; map_shade_updates?: MapShadePublication[] }
 export interface ObservationInput { intervention_id: string; segment_id: string; record_kind: 'demo' | 'field'; field_attested: boolean; shade_label: ShadeLabel; observed_at: string; method: string; source_note: string; observer_label: string; notes: string; evidence_reference: string }
 export type Plan = ReturnType<typeof optimise>
 export interface Scenario { status: 'simulated'; baseline_version: string; selected_intervention_ids: string[]; projections: {segment_id: string; baseline_label: ShadeLabel; projected_label: ShadeLabel | null; assumption: string}[]; segments: CurrentSegment[]; warnings: string[] }
@@ -38,7 +41,7 @@ function nextId(state: WorkflowState, prefix: string) { return `${prefix}-${Stri
 export function currentSnapshot(state: WorkflowState) { return state.snapshots.find(s => s.dataset_version === state.current_version)! }
 export function currentStudyArea(state: WorkflowState): StudyArea { const snapshot=currentSnapshot(state);return {...studyArea,base_map_source:'Operator-supplied annotated campus reference received 18 October 2026',source_url:`/${referenceMap.asset}`,dataset_version:snapshot.dataset_version,updated_at:snapshot.created_at} }
 export function initialWorkflow(): WorkflowState {
-  return { schema_version: 1, revision: 0, current_version: studyArea.dataset_version, snapshots: [{ study_area_id: studyArea.study_area_id, dataset_version: studyArea.dataset_version, parent_dataset_version: null, created_at: studyArea.updated_at, created_by_label: 'Initial DEMO fixtures', segments: copy(segments), change_summary: 'Original illustrative shade baseline; no field observations.', warnings: ['Campus image/paths and planning inputs are DEMO. No field-verified navigation.'] }], observations: [], lifecycle_events: [], items: copy(candidates), reports: [], report_events: [] }
+  return { schema_version: 1, revision: 0, current_version: studyArea.dataset_version, snapshots: [{ study_area_id: studyArea.study_area_id, dataset_version: studyArea.dataset_version, parent_dataset_version: null, created_at: studyArea.updated_at, created_by_label: 'Initial DEMO fixtures', segments: copy(segments), change_summary: 'Original illustrative shade baseline; no field observations.', warnings: ['Campus image/paths and planning inputs are DEMO. No field-verified navigation.'] }], observations: [], lifecycle_events: [], items: copy(candidates), reports: [], report_events: [], map_shade_draft:null, map_shade_updates:[] }
 }
 export function reportsForSegment(reports: ResidentReport[], id: string) { return reports.filter(r => r.segment_id === id) }
 export function submitReport(state: WorkflowState, input: {segment_id: string; category: string; comment_optional: string}, now: string): WorkflowState {

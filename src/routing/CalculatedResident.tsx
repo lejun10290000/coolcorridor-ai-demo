@@ -41,7 +41,7 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
   const updateTo = (value: string) => setToNode(value)
   return <main className="wf-app"><header><button className="link" onClick={back}>← Home</button><div><span className="chip">DEMO ROUTING</span> <span className="chip wf-version">{current.dataset_version}</span></div></header>
     <section className="workspace resident"><div className="topbar"><div><div className="eyebrow">RESIDENT MODE</div><h1>Find a more comfortable walk</h1></div><button onClick={()=>setRecenter(r=>r+1)}>Recenter map</button></div>
-      <p className="wf-local">Choose any two campus dots as start and destination. All pictured walkways begin GREY / UNSURVEYED. Connections, crossings, shade, accessibility and the distances used for route comparison are illustrative estimates only; this is not a navigation service. Saved state stays in this browser origin/profile only, with no cross-device sync.</p>
+      <p className="wf-local">Choose any two campus dots as start and destination. Routes automatically use the latest published map; unpublished Developer drafts are excluded. Grey means unknown shade. Connections, crossings, accessibility and route distances remain illustrative and unsurveyed; this is not a navigation service. Saved state stays in this browser origin/profile only, with no cross-device sync.</p>
       {notice&&<p className="warning" role="alert">{notice}</p>}
       <div className="endpoint route-endpoint-pickers">
         <label>From
@@ -73,7 +73,7 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
       <div className="main-grid"><MapPanel segments={current.segments} selected={selected} onSelect={setSelected} routeIds={chosen} recenter={recenter} reports={state.reports} fromNode={fromNode} toNode={toNode} endpointSelectMode={endpointSelectMode} onNodeSelect={chooseNode}/><SegmentEvidence segment={segment} version={current.dataset_version} state={state} mode="resident" onAction={()=>setOpenForm(true)}/></div>
       {comparison
         ? <RouteCards comparison={comparison} selected={route} onSelect={setRoute} fromLabel={fromName} toLabel={toName}/>
-        : <section className="route-comparison"><h2>Choose your own campus route</h2><p>The route will be calculated after you choose two different dots. No fixed Main Gate → Klinik UTM journey is preselected.</p><p className="warning">Every route segment is grey and UNSURVEYED. With no reviewed shade observations, both route objectives may choose the same path.</p></section>}
+        : <section className="route-comparison"><h2>Choose your own campus route</h2><p>The route will be calculated after you choose two different dots. No fixed Main Gate → Klinik UTM journey is preselected.</p><p className="warning">Unknown shade is ranked conservatively. Published DEMO classifications affect routing but do not establish observed shade. Both objectives can choose the same path.</p></section>}
       {openForm&&<div className="modal" role="dialog" aria-modal="true" aria-labelledby="report-heading" onKeyDown={e=>{
         if(e.key==='Escape')setOpenForm(false)
         if(e.key==='Tab'){const controls=Array.from(e.currentTarget.querySelectorAll<HTMLElement>('button,select,textarea'));const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
