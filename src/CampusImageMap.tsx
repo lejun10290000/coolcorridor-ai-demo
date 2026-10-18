@@ -74,7 +74,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { d.moved = true; suppressClick.current = true; e.currentTarget.setPointerCapture(e.pointerId) }
         if (d.moved) move(d.px + e.clientX - d.x, d.py + e.clientY - d.y)
       }}
-      onPointerUp={e => { const target=e.target as Element; const id = target.closest('[data-campus-node-id]') ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
+      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && onNodeSelect) onNodeSelect(nodeId); else if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
       onPointerCancel={() => { pressedSegment.current = null; drag.current = null; suppressClick.current = false }}
       style={{ touchAction: zoom > 1 ? 'none' : 'pan-y', cursor: zoom > 1 ? 'grab' : 'auto' }}>
       {imageState === 'loading' && <p className="campus-map-message" role="status">Loading supplied campus image…</p>}
@@ -120,7 +120,6 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
               role={onNodeSelect ? 'button' : 'img'} tabIndex={onNodeSelect ? 0 : -1}
               aria-label={`${name}${isFrom?', selected start':''}${isTo?', selected destination':''}. Walkway point is illustrative and unverified.`}
               aria-pressed={onNodeSelect ? Boolean(isFrom||isTo) : undefined}
-              onClick={onNodeSelect ? () => onNodeSelect(node.id) : undefined}
               onKeyDown={onNodeSelect ? e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();onNodeSelect(node.id)} } : undefined}>
               <title>{name}. {isFrom?'Selected start. ':''}{isTo?'Selected destination. ':''}Illustrative point; access and nearby paths are UNSURVEYED.</title>
               <circle r={isFrom||isTo?24:15} fill={isFrom?'#55255b':isTo?'#bd8b16':'#fff'} stroke={isFrom||isTo?'#fff':'#707580'} strokeWidth={isFrom||isTo?6:5}/>
