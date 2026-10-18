@@ -12,15 +12,10 @@ export const campusMap = {
   source: 'Operator-supplied UTM KL campus illustration from a lecturer-provided PDF. Original creator and reuse licence unconfirmed.',
   origin: { x: 285, y: 1075 }, destination: { x: 884, y: 312 },
 }
-// Node/link coordinates use the same aspect ratio as this map image. Keep one uniform
-// proportional transform: independently anchoring Main Gate and Klinik stretches the
-// drawing and causes the other walkway dots to drift away from their paths. Image pixels
-// only; there is no georeferencing or map-scale claim.
+// Route-node coordinates are now traced directly in the native base-image pixel space.
+// This is a display transform only; it does not georeference the map.
 export function campusMapPoint(point: { x: number; y: number }): MapDisplayPoint {
-  return {
-    x: point.x * campusMap.width / 1088,
-    y: point.y * campusMap.height / 1382,
-  }
+  return { x: point.x, y: point.y }
 }
 const points = (pairs: [number, number][]): MapDisplayPoint[] => pairs.map(([x, y]) => ({ x, y }))
 const source = 'Visually traced on supplied 1290 × 1640 campus illustration; uncertain connections, crossings and building approach are DEMO, not surveyed.'
