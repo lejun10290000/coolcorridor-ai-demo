@@ -26,7 +26,7 @@ On Home, use the chapter controls to inspect three camera views, click **360° t
 
 ## Scope and data status
 
-- Resident and Developer use the exact operator-supplied annotated campus reference (`public/maps/utmkul-reference-2026-10-18.jpeg`,1113×1414) with aligned interactive SVG overlays. No online map tiles are requested. The image is not georeferenced; its original creator/reuse licence is unconfirmed and permission must be checked before public deployment.
+- Resident and Developer use the supplied campus reference with its printed Main Gate–Klinik example route removed (`public/maps/utmkul-reference-no-example-route.png`), fitted to the original1113×1414 coordinate frame with aligned interactive SVG overlays. The original JPEG is retained. See [background edit and prompt](docs/MAP_BACKGROUND_EDIT.md). No online map tiles are requested. The image is not georeferenced; its original creator/reuse licence is unconfirmed and permission must be checked before public deployment.
 - All walkway overlay geometry, route results, shade values, footfall, costs and benefits currently use visibly labelled **DEMO / ILLUSTRATIVE** fixtures. They are not verified navigation or field observations.
 - Optimisation is a deterministic exhaustive subset search that honours budget, exclusions and mutual constraints; overlapping segment benefits are not double-counted.
 - Before/after outputs are **SIMULATED**, retain baseline data, and make no cooling, energy, carbon or beneficiary claim.

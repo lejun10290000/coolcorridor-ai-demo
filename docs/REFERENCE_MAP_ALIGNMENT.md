@@ -1,18 +1,19 @@
 # Alignment to the supplied annotated map
 
-This correction uses the exact JPEG supplied by the operator on 18 October 2026, not the previous PDF crop. The earlier points were not traced to its circles. Both Resident and Developer now use the same reference asset, native coordinate system, visible points and corridor geometry through the shared CampusImageMap component.
+This correction traces the JPEG supplied by the operator on 18 October 2026, rather than the previous PDF crop. The earlier points were not traced to its circles. Both Resident and Developer use the same reference coordinate frame, visible points and corridor geometry through the shared CampusImageMap component. A later operator request removed the printed example route from the displayed background; the original source is preserved.
 
 ## Source and anchors
 
-- Asset: `public/maps/utmkul-reference-2026-10-18.jpeg`,1113×1414 pixels. The original image bytes are unchanged, including its printed labels, circles, dashed example and legend.
-- SHA256: `88fb162710ce201571c382124a61d5f02031b1d636772689398498a87e7f38f6`. The source attachment and served asset match.
+- Preserved original: `public/maps/utmkul-reference-2026-10-18.jpeg`,1113×1414 pixels. Its bytes are unchanged.
+- Original SHA256: `88fb162710ce201571c382124a61d5f02031b1d636772689398498a87e7f38f6`.
+- Current displayed asset: `public/maps/utmkul-reference-no-example-route.png`,1113×1413 pixels; SHA256 `4af68c229360add5614cd85a8b7afa016cebba617219d6f31b20f771f36aea60`. This built-in image edit removes the printed dashed route. It is fitted to the original1113×1414 coordinate frame. See MAP_BACKGROUND_EDIT.md for the full prompt and generative-edit limits.
 - Source anchors read in the image: Main Gate(216,922),Klinik(747,317),rear gate(977,456),Residensi access(939,731),north-east circle(875,100),south parking circle(623,1164).
 - Sixty visible reference circles are selectable. Seventeen internal corridor junctions support connectivity without adding visible dots at arbitrary bends. Access labels describe nearby landmarks, not surveyed building entrances.
 - Ninety-two illustrative corridor links are re-traced. No white/grey line is treated as proof of pedestrian permission or accessibility. PA9's isolated western spur has no documented connection; it can return unavailable instead of creating a shortcut.
 
-The SVG viewBox and image use identical1113×1414 dimensions. The scene's aspect ratio and contained width derive from the shared asset metadata, including at mobile sizes. Zoom/pan transforms apply to the single scene containing both image and SVG, so circles stay over their image locations. There is no two-anchor stretch or geographic coordinate conversion.
+The SVG viewBox and displayed image frame use identical1113×1414 dimensions. The edited bitmap is normalized by one pixel in height to that retained frame. The scene's aspect ratio and contained width derive from shared metadata, including at mobile sizes. Zoom/pan transforms apply to the single scene containing both image and SVG. There is no geographic coordinate conversion.
 
-The source's dashed Main Gate→Klinik path is printed artwork and stays fixed. The live selected route is purple and follows the calculated ordered link IDs. The UI explicitly distinguishes them. Developer uses the same asset/nodes/links as Resident, including during scenario view; only mode-specific selections/evidence differ.
+The source's printed dashed Main Gate→Klinik path has been removed from the displayed background. The live selected route is purple and follows calculated ordered link IDs. Developer uses the same asset/nodes/links as Resident, including during scenario view; only mode-specific selections/evidence differ.
 
 ## Preserve prior work and local data
 
@@ -28,8 +29,8 @@ Original PNG, shared public types, Home/Three.js, planning solver, review/public
 
 - `npm test`: **89 passed in eight files**. Includes source anchors, graph endpoint coordinate equality (without incorrectly comparing x/y points to metadata-rich node objects), connected-component handling, calculated path continuity, unknown handling and history-preserving migration from a published72-record saved workflow. Original planning/review/date/storage/routing tests pass.
 - `npm run build`: passed; existing cinematic chunk-size warning remains.
-- `review/check-reference-alignment.cjs`: passed against the normal production entry at `http://127.0.0.1:4183/`. It verifies exact served JPEG bytes/dimensions, six independent reference anchors within0.01 source pixel after resize/zoom/pan/reset on desktop/mobile, identical Resident/Developer node transforms and path strings, real dot selection, calculated overlay IDs, arbitrary endpoints, safe no-route output for the isolated spur, report persistence/Developer filtering and scenario geometry isolation. No horizontal overflow, external requests or page errors observed.
-- Screenshots in `outputs/reference-map-alignment/` were opened for visual inspection: both modes at desktop/mobile, live route and zoom alignment. `browser-results.json` records the actual check result.
+- `review/check-reference-alignment.cjs`: rerun and passed against the normal production entry at `http://127.0.0.1:4183/` after background removal. It verifies served edited PNG bytes/dimensions, six retained coordinate anchors within0.01 frame pixel after resize/zoom/pan/reset on desktop/mobile, identical Resident/Developer node transforms and path strings, real dot selection, calculated overlay IDs, arbitrary endpoints, safe no-route output for the isolated spur, report persistence/Developer filtering and scenario geometry isolation. This coordinate check does not recognize landmarks in the edited raster. No horizontal overflow, external requests or page errors observed.
+- New screenshots in `outputs/map-without-example-route/` were opened for visual inspection of both modes at desktop/mobile. They confirm the static dashed path is removed and reference circles remain aligned. `browser-results.json` records the actual check result. Previous screenshots in `outputs/reference-map-alignment/` retain historical evidence.
 
 Browser reproduction with separately supplied Playwright/Chrome (no new app dependency):
 

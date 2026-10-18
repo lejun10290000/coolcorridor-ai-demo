@@ -4,7 +4,7 @@
 .campus-map-caution{margin:0;padding:9px 14px;background:#fff4db;font-size:.77rem;font-weight:700;border-top:1px solid #ead6af;border-bottom:1px solid #ead6af;line-height:1.5}
 .campus-map-viewport{--map-height:clamp(460px,70vh,760px);height:var(--map-height);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#efedf0;isolation:isolate}
 .campus-map-scene{width:min(100%,calc(var(--map-height) * 1290 / 1640));aspect-ratio:1290/1640;flex-shrink:0;position:relative;transform-origin:center;user-select:none}
-.campus-map-scene img{width:100%;height:100%;display:block;object-fit:contain}.campus-map-overlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.campus-map-scene img{width:100%;height:100%;display:block;object-fit:fill}.campus-map-overlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .campus-line{fill:none;stroke-linejoin:round;stroke-linecap:round;pointer-events:none}.campus-hit-area{fill:none;stroke:transparent;pointer-events:stroke;cursor:pointer}
 .campus-segment:focus{outline:none}.campus-segment:focus .campus-hit-area{stroke:#17131b55;stroke-dasharray:5 7}.campus-candidate{cursor:pointer}.campus-candidate:focus{outline:6px solid #17131b}.campus-endpoint,.campus-report{pointer-events:none}
 .campus-map-message{position:absolute;inset:20px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center;z-index:1}.campus-map-message button{align-self:center}

@@ -1,8 +1,8 @@
-// Production entry acceptance for the exact annotated reference, not the older map harness.
+// Production entry acceptance for the shared reference map and its edited background.
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto')
 const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183'
-const out=path.resolve('outputs/reference-map-alignment'),key='coolcorridor-shade-workflow-v1'
+const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/map-without-example-route'),key='coolcorridor-shade-workflow-v1'
 ;(async()=>{
   await fs.mkdir(out,{recursive:true})
   const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})
@@ -23,13 +23,14 @@ const out=path.resolve('outputs/reference-map-alignment'),key='coolcorridor-shad
         const error=Object.entries(samples).map(([id,[x,y]])=>{const g=svg.querySelector(`[data-campus-node-id="${id}"]`),m=g.getScreenCTM();return Math.max(Math.abs((m.e-r.x)/r.width*1113-x),Math.abs((m.f-r.y)/r.height*1414-y))})
         return{natural:[img.naturalWidth,img.naturalHeight],viewBox:svg.getAttribute('viewBox'),box:[r.x,r.y,r.width,r.height],svgBox:[s.x,s.y,s.width,s.height],maxPixelError:Math.max(...error),overflow:document.documentElement.scrollWidth>innerWidth}
       })
-      assert.deepEqual(result.natural,[1113,1414]);assert.equal(result.viewBox,'0 0 1113 1414')
+      assert.deepEqual(result.natural,[1113,1413]);assert.equal(result.viewBox,'0 0 1113 1414')
       assert.deepEqual(result.box,result.svgBox);assert.ok(result.maxPixelError<.01,JSON.stringify(result));assert.equal(result.overflow,false)
     }
     await page.goto(base+'/');await enter('Resident');await aligned()
     const imageURL=await page.locator('.campus-map-scene img').getAttribute('src')
     const served=await(await page.request.get(base+imageURL)).body()
-    const supplied=await fs.readFile('public/maps/utmkul-reference-2026-10-18.jpeg')
+    assert.equal(imageURL,'/maps/utmkul-reference-no-example-route.png')
+    const supplied=await fs.readFile('public/maps/utmkul-reference-no-example-route.png')
     const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex')
     assert.equal(hash(served),hash(supplied))
     const residentNodes=await nodes(),residentLines=await lines()
@@ -89,7 +90,7 @@ const out=path.resolve('outputs/reference-map-alignment'),key='coolcorridor-shad
     await page.reload();await enter('Developer')
     assert.equal(await page.evaluate(k=>JSON.parse(localStorage.getItem(k)).reports[0].segment_id,key),'DEMO-REF-001')
     assert.deepEqual(errors,[]);assert.deepEqual(external,[])
-    const result={status:'passed',entry:base+'/',asset:imageURL,sha256:hash(served),referenceDimensions:[1113,1414],visibleCircles:residentNodes.length,referenceLinks:residentLines.length,checks:['exact supplied JPEG bytes served','six independently read image anchors within0.01 source pixel after desktop/mobile/zoom/pan/resize/reset','Resident and Developer identical image/point transforms/path geometry','real dot selection and calculated overlay IDs','arbitrary endpoints and unavailable isolated spur','reference report visible in Developer and persists after reload','scenario keeps shared image/point geometry','zero horizontal overflow/browser errors/external requests'],errors,external}
+    const result={status:'passed',entry:base+'/',asset:imageURL,sha256:hash(served),referenceDimensions:[1113,1414],backgroundDimensions:[1113,1413],visibleCircles:residentNodes.length,referenceLinks:residentLines.length,checks:['edited background bytes served; original coordinate frame retained','six original coordinate anchors within0.01 frame pixel after desktop/mobile/zoom/pan/resize/reset (not an image-recognition check)','Resident and Developer identical image/point transforms/path geometry','real dot selection and calculated overlay IDs','arbitrary endpoints and unavailable isolated spur','reference report visible in Developer and persists after reload','scenario keeps shared image/point geometry','zero horizontal overflow/browser errors/external requests'],errors,external}
     await fs.writeFile(path.join(out,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2))
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)})

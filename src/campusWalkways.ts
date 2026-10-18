@@ -4,7 +4,8 @@
  */
 export interface CampusRouteNode { id:string; x:number; y:number; label?:string; selectable?:boolean }
 export interface CampusWalkLink { edge_id:string; segment_id:string; from:string; to:string; points:{x:number;y:number}[]; estimated_length_m:number; source:string }
-export const referenceMap={width:1113,height:1414,asset:'maps/utmkul-reference-2026-10-18.jpeg'}
+// Keep the original coordinate frame; the edited background removes only the fixed route example.
+export const referenceMap={width:1113,height:1414,asset:'maps/utmkul-reference-no-example-route.png'}
 export const illustrativeMetresPerPixel=0.2
 // Labels describe nearby access, not surveyed building entrances. Unlabelled source circles
 // remain neutral junctions rather than inventing a landmark for every dot.

@@ -9,7 +9,7 @@ export interface SegmentDisplayGeometry {
 }
 export const campusMap = {
   ...referenceMap,
-  source:'Exact operator-supplied annotated campus reference, received 18 October 2026. Original creator/reuse licence unconfirmed. Printed dashed path is a reference example, not a live route.',
+  source:'Operator-supplied campus reference, received 18 October 2026; background edited to remove the printed Main Gate–Klinik example route. Original creator/reuse licence unconfirmed. Paths remain illustrative and unsurveyed.',
   origin:{x:216,y:922},destination:{x:747,y:317},
 }
 // Route-node coordinates are now traced directly in the native base-image pixel space.
