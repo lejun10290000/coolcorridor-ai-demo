@@ -32,7 +32,7 @@ export const campusWideGraph: RouteGraph = {
     source: link.source,
   })),
   warnings: [
-    'Campus-wide graph is a visual planning sketch traced from the supplied map. All links are GREY / UNSURVEYED; pedestrian access and crossings are not verified.',
+    'Not for navigation. Campus-wide graph is a visual planning sketch traced from the supplied map. All links are GREY / UNSURVEYED; pedestrian access and crossings are not verified.',
     'Shown lengths use an assumed 0.20 metres per reference-image pixel because no map scale is supplied. Distances and durations are rough demo estimates, not measurements or navigation directions.',
     'The source image is not georeferenced. No GPS, outdoor routing data, shade survey, surface, slope or accessibility inspection is claimed.',
   ],
