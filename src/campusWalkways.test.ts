@@ -3,7 +3,7 @@ import { currentSnapshot, initialWorkflow } from './workflow/model'
 import { campusRouteNodes, campusWalkLinks, campusNodeName } from './campusWalkways'
 import { campusWideGraph } from './routing/graph'
 import { compareRoutes } from './routing/compare'
-import { campusMap, segmentDisplays } from './campusMapDisplay'
+import { campusMap, legacySegmentDisplayAliases, segmentDisplays } from './campusMapDisplay'
 
 describe('campus-wide selectable unsurveyed walkway network', () => {
   it('has a unique, connected set of selectable dots and valid link references', () => {
@@ -80,6 +80,16 @@ describe('campus-wide selectable unsurveyed walkway network', () => {
       )).toBe(true)
       expect(segmentDisplays[link.segment_id].map_display_geometry).toEqual(link.points)
     }
+  })
+
+
+  it('keeps legacy developer markers on the shared campus network instead of drawing old shortcut paths', () => {
+    const campusIds = new Set(campusWalkLinks.map(link => link.segment_id))
+    expect(Object.keys(legacySegmentDisplayAliases)).toEqual(expect.arrayContaining([
+      'DEMO-S01', 'DEMO-S02', 'DEMO-S03', 'DEMO-S04',
+    ]))
+    expect(Object.values(legacySegmentDisplayAliases).every(id => campusIds.has(id))).toBe(true)
+    expect(Object.values(legacySegmentDisplayAliases).every(id => Boolean(segmentDisplays[id]))).toBe(true)
   })
 
   it('routes in either direction and refuses the same point as both endpoints', () => {
