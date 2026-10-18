@@ -27,8 +27,8 @@ export const campusWideGraph: RouteGraph = {
     from: link.from,
     to: link.to,
     bidirectional: true,
-    data_status: 'demo_fixture',
-    verification: 'pending_verification',
+    data_status: 'demo_fixture' as const,
+    verification: 'pending_verification' as const,
     source: link.source,
   })),
   warnings: [
