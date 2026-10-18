@@ -35,8 +35,8 @@ export const campusRouteNodes: CampusRouteNode[] = [
   { id: 'RESIDENSI-UTMKL', x: 920, y: 733, label: 'Residensi UTMKL' },
   { id: 'FIELD-EAST-SOUTH', x: 904, y: 830 },
   { id: 'EAST-LOWER-01', x: 904, y: 1029 },
-  { id: 'SOUTH-EAST-01', x: 729, y: 1176 },
-  { id: 'SOUTH-BOTTOM-01', x: 610, y: 1230 },
+  { id: 'SOUTH-EAST-01', x: 729, y: 1090 },
+  { id: 'SOUTH-BOTTOM-01', x: 610, y: 1132 },
   { id: 'SOUTH-CENTRE-01', x: 579, y: 1061 },
   { id: 'DEWAN-AZMAN-HASHIM', x: 431, y: 1020, label: 'Dewan Azman Hashim' },
   { id: 'SOUTH-WEST-01', x: 333, y: 976 },
@@ -143,6 +143,7 @@ const pairs: [string, string][] = [
   ['KLINIK-UTM','KLINIK-APPROACH-02'],
   ['KLINIK-APPROACH-02','NORTH-EAST-02'],
   ['KLINIK-APPROACH-02','EAST-CENTRE-02'],
+  ['EAST-CENTRE-02','REAR-GATE'],
   ['EAST-CENTRE-02','EAST-CENTRE-01'],
   ['EAST-CENTRE-01','FIELD-NORTH-WEST'],
 ]
