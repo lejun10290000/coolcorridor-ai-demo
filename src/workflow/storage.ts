@@ -4,6 +4,7 @@ import type { WorkflowState } from './model'
 import type { DataStatus, Lifecycle } from '../types'
 import { mapShadeSource, validMapAssignments } from './mapShade'
 import { routeReportCategories, validReportedRoute } from './routeReports'
+import { validReportPhoto } from './reportPhotos'
 import { validPlanningWorkspace } from './planning'
 import { validFootfallPlanning } from './footfallPlanning'
 
@@ -122,6 +123,7 @@ export function decodeWorkflow(raw:string):WorkflowState {
     if(item.lifecycle==='published')assert(item.segment_ids.every(id=>state.observations.some(o=>o.intervention_id===item.intervention_id&&o.segment_id===id&&o.review_status==='published')))
   })
   state.reports.forEach(r=>{
+    assert(r.reference_photo===undefined||validReportPhoto(r.reference_photo))
     assert(string(r.report_id)&&segments.some(s=>s.segment_id===r.segment_id)&&routeReportCategories.includes(r.category)&&time(r.created_at)&&string(r.comment_optional)&&string(r.review_note)&&r.data_status==='demo_fixture')
     if(r.route!==undefined){
       assert(validReportedRoute(state,r.route)&&r.segment_id===r.route.segment_ids[0]&&r.comment_optional.trim().length>0)
