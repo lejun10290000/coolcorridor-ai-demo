@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { campusRouteNodes } from '../campusWalkways'
 import { initialWorkflow } from '../workflow/model'
 import { seedPointPhotos, seedPhotoAssignments } from './catalog'
-import { decodePhotoLibrary, discardPointPhoto, initialPhotoLibrary, publishedPhotos, publishPointPhoto, rebasePointPhoto, stagePointPhoto } from './model'
+import { decodePhotoLibrary, deletePublishedPointPhoto, discardPointPhoto, initialPhotoLibrary, publishedPhotos, publishPointPhoto, rebasePointPhoto, stagePointPhoto } from './model'
 const now='2026-10-20T14:00:00+08:00'
 const proposed={...seedPointPhotos['MAIN-GATE'],caption:'Replacement reference',publication_id:'unpublished-draft',published_at:null}
 describe('point-photo reference publication',()=>{
@@ -50,5 +50,32 @@ describe('point-photo reference publication',()=>{
   const a=publishPointPhoto(stagePointPhoto(initialPhotoLibrary(),'MAIN-GATE',proposed),'MAIN-GATE','Demo','A',true,now)
   const b=publishPointPhoto(stagePointPhoto(a,'KLINIK-UTM',{...proposed,caption:'Clinic new photo'}),'KLINIK-UTM','Demo','B',true,now)
   expect(Object.keys(b.published).sort()).toEqual(['KLINIK-UTM','MAIN-GATE']);expect(b.history).toHaveLength(2);expect(decodePhotoLibrary(initialPhotoLibrary())).toEqual(initialPhotoLibrary())
+ })
+ it('deletes bundled references without allowing the seed fallback to return after reload',()=>{
+  const s=initialPhotoLibrary(),deleted=deletePublishedPointPhoto(s,'MAIN-GATE',seedPointPhotos['MAIN-GATE'].publication_id,'Demo','Remove outdated reference',now)
+  expect(publishedPhotos(s)['MAIN-GATE']).toEqual(seedPointPhotos['MAIN-GATE'])
+  expect(deleted.published['MAIN-GATE']).toBeNull();expect(publishedPhotos(decodePhotoLibrary(structuredClone(deleted)))['MAIN-GATE']).toBeUndefined()
+  expect(deleted.history[0]).toMatchObject({action:'delete',photo:null,previous:seedPointPhotos['MAIN-GATE'],operator:'Demo',note:'Remove outdated reference',timestamp:now})
+  expect(publishedPhotos(deleted)['KLINIK-UTM']).toEqual(seedPointPhotos['KLINIK-UTM'])
+ })
+ it('preserves unpublished drafts on deletion and requires review before republishing them',()=>{
+  const staged=stagePointPhoto(initialPhotoLibrary(),'MAIN-GATE',proposed)
+  const deleted=deletePublishedPointPhoto(staged,'MAIN-GATE',seedPointPhotos['MAIN-GATE'].publication_id,'Demo','Delete current photo',now)
+  expect(deleted.drafts).toEqual(staged.drafts)
+  expect(()=>publishPointPhoto(deleted,'MAIN-GATE','Demo','Republish',true,now)).toThrow(/changed/)
+  const restored=publishPointPhoto(rebasePointPhoto(deleted,'MAIN-GATE'),'MAIN-GATE','Demo','New reviewed reference',true,now)
+  expect(publishedPhotos(restored)['MAIN-GATE'].caption).toBe(proposed.caption);expect(restored.history[1].previous).toBeNull()
+  const removedAgain=deletePublishedPointPhoto(restored,'MAIN-GATE',publishedPhotos(restored)['MAIN-GATE'].publication_id,'Demo','Remove replacement',now)
+  expect(publishedPhotos(removedAgain)['MAIN-GATE']).toBeUndefined();expect(removedAgain.history).toHaveLength(3)
+ })
+ it('refuses stale, missing, invalid and unrecordable deletions',()=>{
+  const s=initialPhotoLibrary(),current=seedPointPhotos['MAIN-GATE'].publication_id
+  expect(()=>deletePublishedPointPhoto(s,'MAIN-GATE','old-photo','Demo','Remove',now)).toThrow(/changed/)
+  for(const [actor,note,time] of [['','Remove',now],['Demo','',now],['Demo','Remove','invalid']])expect(()=>deletePublishedPointPhoto(s,'MAIN-GATE',current,actor,note,time)).toThrow()
+  expect(()=>deletePublishedPointPhoto(s,'invented',current,'Demo','Remove',now)).toThrow()
+  const deleted=deletePublishedPointPhoto(s,'MAIN-GATE',current,'Demo','Remove',now)
+  expect(()=>deletePublishedPointPhoto(deleted,'MAIN-GATE',current,'Demo','Again',now)).toThrow(/No published/)
+  expect(()=>decodePhotoLibrary({...deleted,history:[{...deleted.history[0],photo:proposed}]})).toThrow()
+  expect(()=>deletePublishedPointPhoto({...s,history:Array(2000).fill(deleted.history[0])},'MAIN-GATE',current,'Demo','Remove',now)).toThrow(/full/)
  })
 })

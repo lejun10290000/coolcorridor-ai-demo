@@ -69,7 +69,7 @@
     "five corridor reference points visible without changing routing endpoints",
     "adjacent Cafe V1 and corridor V1 dots remain individually clickable",
     "click/keyboard photo panel and Close/Escape restore map focus",
-    "Resident has no upload/publication controls",
+    "Resident has no upload/publication/deletion controls",
     "unsupported/corrupt/oversized uploads rejected without mutation",
     "drafts isolated from Resident and retained across tool changes",
     "explicit publication updates open Resident photo panel",
@@ -79,7 +79,12 @@
     "failed IndexedDB write leaves published image/history unchanged",
     "shade publication still recalculates Resident and preserves photo library",
     "published images survive reload; scenario uses published references",
-    "mobile panels can close without horizontal overflow"
+    "mobile panels can close without horizontal overflow",
+    "cancel deletion and failed deletion writes preserve current reference/history",
+    "confirmed deletion removes bundled reference live from Resident and resets marker size",
+    "deleted seed stays absent after reload; unpublished draft and shade state preserved",
+    "retained draft requires rebase before replacement publication",
+    "uploaded references can be deleted and deletion controls disappear after reload"
   ],
   "pageErrors": []
 }

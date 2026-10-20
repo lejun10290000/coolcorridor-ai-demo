@@ -2,7 +2,7 @@
 
 Tested on 20 October 2026 against the normal production app entry at http://127.0.0.1:4183/, using fresh isolated browser contexts. The user's existing browser data was not changed by these tests.
 
-- `npm test`: 138 tests passed across 14 files, including eight new photo model tests.
+- `npm test`: 141 tests passed across 14 files, including eleven photo model tests covering publication and deletion.
 - `npm run build`: passed. The existing 550.74 kB cinematic chunk warning remains.
 - `node review/check-point-photos.cjs`: passed. See browser-results.json for the actual checks.
 - Four existing browser regressions passed: reference alignment, Developer shade editing/publication, Resident route reports, and Resident sidebar layout. See regression-results.json.
@@ -16,8 +16,12 @@ The photo acceptance script checks all 15 corrected source assignments, photo ma
 3. 03-resident-after-photo-publication.png — the same isolated test replacement after explicit publication.
 4. 04-resident-mobile.png — closable photo reference on a phone viewport.
 5. 05-developer-mobile.png — published photo panel in Developer mode on a phone viewport.
+6. 06-developer-delete-confirmation.png — Developer removal confirmation with note and retained private draft.
+7. 07-resident-after-photo-deletion.png — the open Resident panel updates to no published reference.
 
 Screenshots 2 and 3 intentionally use the Klinik preview as a synthetic replacement for Main Gate to make draft/publication isolation observable. This is test data only. The bundled Main Gate and Klinik assignments remain correct; no such replacement was applied to the user's app storage.
+
+Deletion follow-up checks cancel, required notes, a simulated failed write, live Resident removal, normal marker size, persistence without bundled-image fallback, preserved drafts/shade state, explicit rebase before republishing, and deletion of uploaded references. The four regression JSON records above are from the original photo-feature build; the expanded photo browser suite was rerun after adding deletion.
 
 ## Reproduce
 

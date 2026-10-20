@@ -79,8 +79,40 @@ const assignments=[['FIELD-NORTH','reference-20.jpg'],['RAZAK-EAST','reference-0
   await enter(resident,'Resident');await open(resident,'MAIN-GATE');assert.ok((await image(resident).getAttribute('src')).startsWith('data:image/jpeg;base64,'));await close(resident)
   await developer.getByRole('tab',{name:'Budget optimiser',exact:true}).click();await developer.getByRole('button',{name:'Optimise plan',exact:true}).click();await developer.getByRole('tab',{name:'Simulated scenario',exact:true}).click();await open(developer,'J-LIBRARY');assert.ok((await image(developer).getAttribute('src')).endsWith('corridor-library.jpg'));await close(developer)
   for(const page of [resident,developer]){await page.setViewportSize({width:390,height:844});await open(page,'KLINIK-UTM');await panel(page).scrollIntoViewIfNeeded();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.screenshot({path:path.join(out,page===resident?'04-resident-mobile.png':'05-developer-mobile.png')});await close(page)}
+  // Developer deletes published references; a tombstone prevents seed fallback on reload.
+  for(const page of [resident,developer])await page.setViewportSize({width:1440,height:1000})
+  await developer.getByRole('tab',{name:'Edit shade / publish',exact:true}).click()
+  assert.equal(await resident.getByRole('button',{name:'Delete published photo',exact:true}).count(),0)
+  await upload(developer,'KLINIK-UTM');await open(resident,'KLINIK-UTM')
+  const beforeDelete=await state(developer),shadeBeforeDelete=await resident.evaluate(k=>localStorage.getItem(k),workflowKey)
+  await developer.getByLabel('Photo publication note',{exact:true}).fill('')
+  await developer.getByRole('button',{name:'Delete published photo',exact:true}).click()
+  assert.equal(await developer.getByRole('button',{name:'Confirm delete published photo',exact:true}).isEnabled(),false)
+  await developer.getByRole('button',{name:'Cancel photo deletion',exact:true}).click();assert.deepEqual(await state(developer),beforeDelete)
+  await developer.getByLabel('Photo publication note',{exact:true}).fill('Synthetic removal of an outdated supplied reference.')
+  await developer.getByRole('button',{name:'Delete published photo',exact:true}).click()
+  await developer.getByRole('region',{name:'Edit point photos',exact:true}).screenshot({path:path.join(out,'06-developer-delete-confirmation.png')})
+  await developer.evaluate(()=>{window.originalPhotoPut=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(...args){if(this.transaction.db.name==='coolcorridor-point-photos-v1')throw new DOMException('Synthetic deletion quota test','QuotaExceededError');return window.originalPhotoPut.apply(this,args)}})
+  await developer.getByRole('button',{name:'Confirm delete published photo',exact:true}).click();await developer.locator('.point-photo-editor [role=alert]').waitFor();assert.deepEqual(await state(developer),beforeDelete)
+  await developer.evaluate(()=>{IDBObjectStore.prototype.put=window.originalPhotoPut})
+  await developer.getByRole('button',{name:'Confirm delete published photo',exact:true}).click()
+  await panel(resident).getByText('No reference photo published for this point.',{exact:true}).waitFor()
+  const deleted=await state(developer);assert.equal(deleted.published['KLINIK-UTM'],null);assert.deepEqual(deleted.drafts,beforeDelete.drafts);assert.equal(deleted.history.at(-1).action,'delete');assert.ok(deleted.history.at(-1).previous.src.endsWith('klinik.jpg'))
+  assert.equal(await resident.locator('[data-campus-node-id="KLINIK-UTM"] .campus-point-marker').getAttribute('r'),'7')
+  assert.equal(await resident.evaluate(k=>localStorage.getItem(k),workflowKey),shadeBeforeDelete)
+  await resident.screenshot({path:path.join(out,'07-resident-after-photo-deletion.png')});await close(resident)
+  await enter(resident,'Resident');await open(resident,'KLINIK-UTM');await panel(resident).getByText('No reference photo published for this point.',{exact:true}).waitFor();await close(resident)
+  // Retained draft is stale after deletion and can be explicitly reviewed/published again.
+  await developer.getByText('The published photo changed after this draft started. Review the current picture before publishing.',{exact:true}).waitFor()
+  await developer.getByRole('button',{name:'Review latest published photo',exact:true}).click();await publish(developer,'Synthetic reviewed replacement after deletion.')
+  await open(resident,'KLINIK-UTM');assert.ok((await image(resident).getAttribute('src')).startsWith('data:image/jpeg;base64,'));await close(resident)
+  // Uploaded references can also be removed; subsequent shade publications remain independent.
+  await select(developer,'NORTH-WEST');await developer.getByLabel('Photo publication note',{exact:true}).fill('Synthetic uploaded reference removal.');await developer.getByRole('button',{name:'Delete published photo',exact:true}).click();await developer.getByRole('button',{name:'Confirm delete published photo',exact:true}).click()
+  await resident.waitForFunction(()=>document.querySelector('[data-campus-node-id="NORTH-WEST"]')?.getAttribute('data-has-photo')==='false')
+  assert.equal((await state(developer)).published['NORTH-WEST'],null)
+  await enter(developer,'Developer');await select(developer,'NORTH-WEST');assert.equal(await developer.getByRole('button',{name:'Delete published photo',exact:true}).count(),0)
   assert.deepEqual(errors,[])
-  const results={status:'passed',normalEntry:base+'/',confirmedAssignments:checked,checks:['all15 corrected seed photos load at their exact graph points','published photo dots darker and radius9; ordinary dots radius7','five corridor reference points visible without changing routing endpoints','adjacent Cafe V1 and corridor V1 dots remain individually clickable','click/keyboard photo panel and Close/Escape restore map focus','Resident has no upload/publication controls','unsupported/corrupt/oversized uploads rejected without mutation','drafts isolated from Resident and retained across tool changes','explicit publication updates open Resident photo panel','photo publication preserves shade/workflow JSON and route IDs','first photo updates marker in both roles','concurrent different-point drafts/publications preserve both edits','failed IndexedDB write leaves published image/history unchanged','shade publication still recalculates Resident and preserves photo library','published images survive reload; scenario uses published references','mobile panels can close without horizontal overflow'],pageErrors:errors}
+  const results={status:'passed',normalEntry:base+'/',confirmedAssignments:checked,checks:['all15 corrected seed photos load at their exact graph points','published photo dots darker and radius9; ordinary dots radius7','five corridor reference points visible without changing routing endpoints','adjacent Cafe V1 and corridor V1 dots remain individually clickable','click/keyboard photo panel and Close/Escape restore map focus','Resident has no upload/publication/deletion controls','unsupported/corrupt/oversized uploads rejected without mutation','drafts isolated from Resident and retained across tool changes','explicit publication updates open Resident photo panel','photo publication preserves shade/workflow JSON and route IDs','first photo updates marker in both roles','concurrent different-point drafts/publications preserve both edits','failed IndexedDB write leaves published image/history unchanged','shade publication still recalculates Resident and preserves photo library','published images survive reload; scenario uses published references','mobile panels can close without horizontal overflow','cancel deletion and failed deletion writes preserve current reference/history','confirmed deletion removes bundled reference live from Resident and resets marker size','deleted seed stays absent after reload; unpublished draft and shade state preserved','retained draft requires rebase before replacement publication','uploaded references can be deleted and deletion controls disappear after reload'],pageErrors:errors}
   await fs.writeFile(path.join(out,'browser-results.json'),JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results,null,2))
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)})
