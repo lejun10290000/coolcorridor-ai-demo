@@ -10,6 +10,7 @@ export function PointPhotoEditor({controller,nodeId,select,enabled}:{controller:
   const id=nodeId??'MAIN-GATE',draft=controller.library.drafts[id],photo=controller.published[id]
   const [operator,setOperator]=useState('Demo photo operator'),[note,setNote]=useState(''),[reviewed,setReviewed]=useState(''),[message,setMessage]=useState(''),[fileError,setFileError]=useState(''),[preparing,setPreparing]=useState(false)
   const request=useRef(0)
+  const fileInput=useRef<HTMLInputElement>(null)
   const [deleteKey,setDeleteKey]=useState('')
   useEffect(()=>{request.current++;setPreparing(false);setFileError('');setMessage('');setReviewed('');setDeleteKey('')},[id])
   const draftKey=JSON.stringify({id,draft}),confirmed=reviewed===draftKey,stale=!!draft&&draft.base_publication_id!==(photo?.publication_id??null)
@@ -25,20 +26,22 @@ export function PointPhotoEditor({controller,nodeId,select,enabled}:{controller:
     finally{if(sequence===request.current)setPreparing(false)}
   }
   function choosePoint(value:string){request.current++;setPreparing(false);setFileError('');setMessage('');setReviewed('');setDeleteKey('');select(value)}
-  return <section className="wf-panel point-photo-editor" aria-label="Edit point photos"><h2>Point photos / publish references</h2><p>Click a map point to view its reference photo, or choose a point below. Replacements stay in a photo draft until you publish them.</p>
+  return <section className="wf-panel point-photo-editor" aria-label="Edit point photos"><h2>Point photos / publish references</h2><p>Choose a point below or click its map marker. Update or delete an existing photo, or upload a photo for an empty point.</p>
     <label>Point for reference photo<select aria-label="Point for reference photo" value={id} onChange={e=>choosePoint(e.target.value)}>{photoPoints.map(n=><option value={n.id} key={n.id}>{pointName(n.id)}</option>)}</select></label>
     {!enabled&&<p>Return to the current baseline to update point photos.</p>}
     {controller.error&&<div className="warning" role="alert"><p>{controller.error}</p>{!controller.ready&&<button onClick={()=>void controller.retry()}>Retry photo storage</button>}</div>}
-    <label>Upload reference photo<input key={id} aria-label="Upload reference photo" type="file" accept="image/jpeg,image/png,image/webp" disabled={disabled} onChange={e=>{void chooseFile(e.target.files?.[0]);e.target.value=''}}/></label>
-    <p>JPEG, PNG or WebP, up to 10 MB. A smaller preview is saved without location metadata. Remove identifying faces and number plates before uploading.</p>
     {preparing&&<p role="status">Preparing reference photo…</p>}{fileError&&<p role="alert" className="warning">{fileError}</p>}{message&&<p role="status">{message}</p>}
     <div className="point-photo-preview-grid"><div><h3>Published photo</h3>{photo?<img src={photoURL(photo)} alt={`Currently published reference: ${pointName(id)}`}/>:<p>No published photo yet.</p>}</div><div><h3>Developer draft</h3>{draft?<img src={photoURL(draft.photo)} alt={`Unpublished reference draft: ${pointName(id)}`}/>:<p>No unpublished changes.</p>}</div></div>
+    <input ref={fileInput} key={id} hidden aria-label="Upload reference photo" type="file" accept="image/jpeg,image/png,image/webp" disabled={disabled} onChange={e=>{void chooseFile(e.target.files?.[0]);e.target.value=''}}/>
+    <div className="wf-actions" role="group" aria-label="Photo actions"><button type="button" disabled={disabled} onClick={()=>{setDeleteKey('');fileInput.current?.click()}}>{photo?'Update photo':'Upload photo'}</button>{photo&&<button type="button" disabled={disabled} onClick={()=>setDeleteKey(photo.publication_id)}>Delete published photo</button>}</div>
+    <p>{photo?'Update photo selects a replacement directly. The current published photo stays visible to Residents until you publish the replacement.':'Upload photo adds a new reference for this point. Residents see it only after you publish.'}</p>
+    <p>JPEG, PNG or WebP, up to 10 MB. A smaller preview is saved without location metadata. Remove identifying faces and number plates before uploading.</p>
     {(draft||photo)&&<>
       <label>Photo publication operator<input aria-label="Photo publication operator" value={operator} maxLength={1000} disabled={disabled} onChange={e=>{setOperator(e.target.value);setReviewed('')}}/></label>
       <label>Photo publication note<textarea aria-label="Photo publication note" value={note} maxLength={1000} disabled={disabled} onChange={e=>{setNote(e.target.value);setReviewed('')}}/></label>
     </>}
     {photo&&<div className="point-photo-delete">
-      {deleteKey===photo.publication_id?<><p>Delete the published photo for <b>{pointName(id)}</b> from the baseline and Resident map? The previous photo stays in history. Any unpublished draft is kept.</p><p>Enter an operator label and deletion note above, then confirm.</p><div className="wf-actions"><button disabled={disabled||!operator.trim()||!note.trim()} onClick={async()=>{if(await controller.commit(s=>deletePublishedPointPhoto(s,id,deleteKey,operator,note,malaysiaNow()))){setDeleteKey('');setReviewed('');setNote('');setMessage('Published point photo deleted. It is no longer shown on the baseline or Resident map.')}}}>Confirm delete published photo</button><button disabled={disabled} onClick={()=>setDeleteKey('')}>Cancel photo deletion</button></div></>:<button disabled={disabled} onClick={()=>setDeleteKey(photo.publication_id)}>Delete published photo</button>}
+      {deleteKey===photo.publication_id&&<><p>Delete the published photo for <b>{pointName(id)}</b> from the baseline and Resident map? The previous photo stays in history. Any unpublished draft is kept.</p><p>Enter an operator label and deletion note above, then confirm.</p><div className="wf-actions"><button disabled={disabled||!operator.trim()||!note.trim()} onClick={async()=>{if(await controller.commit(s=>deletePublishedPointPhoto(s,id,deleteKey,operator,note,malaysiaNow()))){setDeleteKey('');setReviewed('');setNote('');setMessage('Published point photo deleted. It is no longer shown on the baseline or Resident map.')}}}>Confirm delete published photo</button><button disabled={disabled} onClick={()=>setDeleteKey('')}>Cancel photo deletion</button></div></>}
     </div>}
     {draft&&<>
       {stale&&<div className="warning"><p>The published photo changed after this draft started. Review the current picture before publishing.</p><button disabled={disabled} onClick={()=>{setReviewed('');void controller.commit(s=>rebasePointPhoto(s,id))}}>Review latest published photo</button></div>}

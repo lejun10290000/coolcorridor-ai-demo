@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "checks": [
+    "published points offer Update photo and Delete published photo",
+    "empty points offer Upload photo only",
+    "visible Update/Upload buttons open native file chooser",
+    "direct replacement requires no deletion and keeps current Resident photo until publish",
+    "discard replacement preserves published photo",
+    "one replacement publication with previous image and no deletion history",
+    "Delete remains a separate cancel/confirm action",
+    "deleted point switches immediately to Upload photo",
+    "never-photographed point uploads and publishes its first reference",
+    "saved drafts survive point changes",
+    "photo-only changes preserve shade/report workflow storage",
+    "phone actions have no horizontal overflow; Resident has no editor actions"
+  ],
+  "pageErrors": []
+}
