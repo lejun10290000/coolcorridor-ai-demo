@@ -8,6 +8,7 @@ import './campus-map.css'
 import { PointPhotoPanel } from './pointPhotos/PointPhotoPanel'
 import type { PointPhoto } from './pointPhotos/catalog'
 import { SelectedRouteOverlay } from './routing/SelectedRouteOverlay'
+import { MapLegend } from './MapLegend'
 
 export interface CampusImageMapProps {
   segments: WalkwaySegment[]; selected?: string; onSelect: (id: string) => void
@@ -72,9 +73,12 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
     return nearestDisplaySegment(p, visibleSegments.map(s => s.segment_id))
   }
   const missing=segments.filter(s=>s.segment_id.startsWith('DEMO-REF-')&&!segmentDisplays[s.segment_id])
+  const mapLegend=<MapLegend from={fromNode} to={toNode} photos={!!pointPhotos} reports={showReportNumbers} walk={walkPosition}/>
   const mapInformation=<>
-    <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key, label]) => <span key={key}><i style={{ background: shadeColours[key as keyof typeof shadeColours] }}/>{label}</span>)}<span><i className="campus-route-key"/>Purple casing + shade centre: selected route</span><span>Dots align with the reference circles; names appear in endpoint lists</span><span>Solid grey paths = UNSURVEYED walkway geometry</span><span>Dashed grey centre = illustrative selected route</span><span>□ I: DEMO intervention · ■ S: SIMULATED site</span>{showReportNumbers&&<span>Numbered circles: pending DEMO reports only</span>}</div>
-    <p className="campus-map-note">{scenario?'Select a path to compare its hypothetical shade with the latest published baseline. Proposal sites are marked S; change treatments or proposal settings in the planning panels.':'Choose two reference circles as start and destination. Your active route has a purple casing. The isolated PA9 spur has no documented connection and may return no route.'} Named dots follow the landmarks marked on the supplied map; unnamed dots remain reference junctions. All paths, crossings, distances, shade and accessibility are UNSURVEYED; not for navigation.</p>
+    <p className="campus-map-note">{walkPosition?'The selected walk is locked. Next confirms arrival manually; it does not track your location. Exit the walk to choose another route.':scenario?'SIMULATED preview: hypothetical shade changes do not publish to the baseline. Proposal sites are marked S.':'Use connected From and To points to select a route. Purple outlines show the selected route or Developer path selection; a black dotted outline marks an inspected path.'}</p>
+    <p className="campus-map-note">{pointPhotos?'Click a dot to view its published reference photo, where available. Some corridor photo dots are not route endpoints. ':''}Named dots follow landmarks on the supplied illustration; unnamed dots are reference junctions. The isolated PA9 spur has no documented connection.</p>
+    <p className="campus-map-note">Click a path for its shade category and source when inspection is available. Report photos remain with their reports and do not automatically replace map-point photos. {showReportNumbers?'Only pending reports have numbered map badges; accepted/rejected reports stay in review history.':''}</p>
+    <p className="campus-map-note">□ I: DEMO intervention · ■ S: SIMULATED site. All walkway geometry, crossings and accessibility need field checks. Distances and walking times are demo estimates. NOT FOR NAVIGATION.</p>
     {missing.length > 0 && <p role="status">No image-display geometry for {missing.map(s => s.segment_id).join(', ')}. These segments are not drawn.</p>}
     {candidates.length === 0 && <p className="campus-map-note">No selected intervention sites.</p>}
     <p className="campus-map-source">{campusMap.source} No georeferencing. Reuse permission needs confirmation before public deployment.</p>
@@ -106,9 +110,10 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
       style={{ touchAction: zoom > 1 ? 'none' : 'pan-y', cursor: zoom > 1 ? 'grab' : 'auto' }}>
       {imageState === 'loading' && <p className="campus-map-message" role="status">Loading supplied campus image…</p>}
       {imageState === 'error' && <div className="campus-map-message" role="alert"><p>Campus image could not load. Map overlays are hidden.</p><button type="button" onClick={() => { setImageState('loading'); setRetry(r => r+1) }}>Retry campus image</button></div>}
-      <div className="campus-map-scene" ref={scene} style={{ aspectRatio:`${campusMap.width}/${campusMap.height}`, width:`min(100%, calc(var(--map-height) * ${campusMap.width} / ${campusMap.height}))`, transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, visibility: imageState === 'ready' ? 'visible' : 'hidden' }}>
+      <div className="campus-map-scene" ref={scene} data-map-visible-height={campusMap.visibleHeight} style={{ aspectRatio:`${campusMap.width}/${campusMap.visibleHeight}`, width:`min(100%, calc(var(--map-height) * ${campusMap.width} / ${campusMap.visibleHeight}))`, transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, visibility: imageState === 'ready' ? 'visible' : 'hidden' }}>
+        <div className="campus-map-coordinate-frame" style={{height:`${campusMap.height/campusMap.visibleHeight*100}%`}}>
         <img key={retry} src={`${import.meta.env.BASE_URL}${campusMap.asset}${retry ? `?retry=${retry}` : ''}`} alt="Operator-supplied UTM Kuala Lumpur campus illustration" width={campusMap.width} height={campusMap.height} draggable={false} onLoad={() => setImageState('ready')} onError={() => setImageState('error')} />
-        {imageState === 'ready' && <svg ref={overlay} className="campus-map-overlay" viewBox={`0 0 ${campusMap.width} ${campusMap.height}`} aria-label="Illustrative walkway segments and endpoints">
+        {imageState === 'ready' && <svg ref={overlay} className="campus-map-overlay" preserveAspectRatio="none" viewBox={`0 0 ${campusMap.width} ${campusMap.height}`} aria-label="Illustrative walkway segments and endpoints">
           {visibleSegments.map(s => {
             const display = segmentDisplays[s.segment_id]
             if (!display) return null
@@ -160,11 +165,12 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             </g>
           })}
         </svg>}
+        </div>
       </div>
       {pointPhotos&&activePhotoPoint&&<PointPhotoPanel align={(campusGraphNodes.find(n=>n.id===activePhotoPoint)?.x??0)<campusMap.width/2?'right':'left'} key={activePhotoPoint} nodeId={activePhotoPoint} photo={pointPhotos[activePhotoPoint]} close={closePhoto}/>}
     </div>
+    {mapLegend}
     {compactDetails?<>
-      <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key,label])=><span key={key}><i style={{background:shadeColours[key as keyof typeof shadeColours]}}/>{label}</span>)}<span><i className="campus-route-key"/>Selected route</span>{pointPhotos&&<span><i style={{background:'#55255b',borderRadius:'50%'}}/>Darker dots: reference photos</span>}{walkPosition&&<><span><i style={{background:'#1c4d6b'}}/>Blue ring: last confirmed point</span><span><i style={{background:'#b86205'}}/>Orange ring: next point</span></>}</div>
       <details className="campus-map-details"><summary>Map information and source</summary>{mapInformation}</details>
     </>:mapInformation}
   </section>

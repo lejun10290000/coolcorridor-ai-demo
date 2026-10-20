@@ -9,6 +9,8 @@ export interface SegmentDisplayGeometry {
 }
 export const campusMap = {
   ...referenceMap,
+  // Display only the campus portion; replace the obsolete printed footer with live HTML.
+  visibleHeight:1224,
   source:'Operator-supplied campus reference, received 18 October 2026; background edited to remove the printed Main Gate–Klinik example route and normalize its endpoint circles. Original creator/reuse licence unconfirmed. Paths remain illustrative and unsurveyed.',
   origin:{x:216,y:922},destination:{x:747,y:317},
 }

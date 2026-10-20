@@ -1,0 +1,143 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "unchangedImageSha256": "848ab2273286b8af8ee30142bd5595bd67c8608052b84f99c921edfa8fc5eab5",
+  "nativeCoordinateFrame": [
+    1113,
+    1414
+  ],
+  "visibleCampusHeight": 1224,
+  "measurements": [
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0166501268056,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 1.1368683772161603e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0108790796548,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0180125887236,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 1.1368683772161603e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0180125887236,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0174123337363,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0174123337363,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 1.7053025658242404e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0065710872161,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0065710872161,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0174123337363,
+      "pageOverflow": false
+    },
+    {
+      "maxError": 2.2737367544323206e-13,
+      "viewBox": "0 0 1113 1414",
+      "natural": [
+        1113,
+        1413
+      ],
+      "cropHeight": 1224,
+      "overflow": "hidden",
+      "clipEnd": 1224.0174123337363,
+      "pageOverflow": false
+    }
+  ],
+  "checks": [
+    "same live shade/route/photo key in both roles",
+    "From/To names follow actual selection with no fixed example endpoints",
+    "pending report badge key appears only in Developer",
+    "walk rings appear only during a Resident walkthrough",
+    "obsolete printed footer clipped through layout without modifying bitmap bytes",
+    "image/SVG native alignment retained through crop, desktop/phone resize, zoom and pan",
+    "updated source/interaction/unsurveyed notes; no stale dashed-grey legend",
+    "zero horizontal overflow or page errors"
+  ],
+  "pageErrors": []
+}

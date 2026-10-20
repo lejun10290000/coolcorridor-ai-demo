@@ -109,6 +109,10 @@ PointPhotoEditor chooses actions from the current published library: a photo off
 
 RouteReportForm reuses the browser image preparation pipeline, blocks submission while preparing or after an invalid attachment, and supports clearing the photo. Its existing commit callback can receive optional `onFailure(error)` for visible in-dialog errors. useWorkflow refuses session-only fallback for a newly submitted report with an attachment when the persistent write fails: no report is added, the form stays open and preview/text remain. Other commits keep their existing fallback behavior. Developer ReportReview renders a labelled, expandable reference image; it does not infer validity or automatically publish shade/map photos. See REPORT_REFERENCE_PHOTOS.md.
 
+### Shared map information presentation
+
+The shared map now renders a single live MapLegend for both roles, including actual From/To names, manual shade category labels, selected route/path outline, photo dots and conditional report/walk markers. The printed fixed-route bitmap footer is clipped from display only via `campusMap.visibleHeight: 1224`; the inner1113×1414 image/SVG frame, source asset, graph coordinates and all existing map props remain unchanged. SVG fits the same frame as the image without fractional letterboxing. No storage/API migration. See MAP_INFORMATION.md.
+
 ### Resident walkthrough presentation seam
 
 `CalculatedResident` can begin an in-memory `WalkSession {route: CalculatedRoute, snapshot: DatasetSnapshot, next_index: number}` from the selected comparison route. It copies the route and snapshot, preserving ordered nodes/segments and map version until exit. `beginWalk` validates connectivity and snapshot consistency; `advanceWalk`/`previousWalkPoint` move one confirmed graph point with bounded progress. `walkProgress` derives current/next/completion. Existing comparison APIs and automatic publication recalculation are unchanged outside the locked session. A newer-baseline notice offers exit/replanning; photo references remain the latest published library.

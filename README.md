@@ -87,6 +87,8 @@ See [current routing handoff and exact normal-entry acceptance commands](docs/DY
 
 ## Point photo references
 
+Both maps use a live legend with the current From/To names, shade categories, selected paths and photo markers. The old printed fixed-route key is hidden without modifying the source image or graph coordinates. See [shared map information](docs/MAP_INFORMATION.md).
+
 Click a campus point in either role to open its closable reference photo panel. Darker, slightly larger points have published photos. The15 operator-confirmed photos are included, including the corrected Klinik, Cafe/MJIIT, Library, Reference15 and Reference09 assignments. Photo-only corridor points do not become route endpoints.
 
 In Developer, use **Edit shade / publish → Point photos / publish references**. Existing photos offer **Update photo** or **Delete published photo**; empty points offer **Upload photo**. Updating opens the file picker directly and keeps the current image visible until the replacement is reviewed and explicitly published to Residents. To remove a published reference, add a publication note, choose **Delete published photo**, then confirm. Deletion updates both roles, keeps the previous image in history and preserves any private replacement draft. Drafts remain private to the editor. Publication updates an already-open Resident tab on the same browser origin/profile; it does not change shade or routes. Photos are stored separately from shade/report history in IndexedDB. There is no remote publication service or production authentication.

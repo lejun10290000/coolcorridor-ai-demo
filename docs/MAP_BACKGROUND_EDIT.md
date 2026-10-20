@@ -1,5 +1,7 @@
 # Remove the printed example route
 
+20 October display update: both roles now hide the obsolete printed footer through a campus-only layout crop and show a shared live HTML legend. No further bitmap editing was performed; the current image bytes and original coordinate frame are unchanged. See MAP_INFORMATION.md for the render boundary and alignment tests. The earlier generative edits below remain historical provenance.
+
 Current displayed asset is now `public/maps/utmkul-reference-normal-points.png`, a second built-in edit that replaces the oversized Main Gate/Klinik bullseyes with ordinary reference circles. The first edit described below remains preserved as input/history. Both modes use the new asset; SVG markers also keep the same radius7 when selected. New PNG dimensions1113×1413, SHA256 `848ab2273286b8af8ee30142bd5595bd67c8608052b84f99c921edfa8fc5eab5`; the original1113×1414 coordinate frame is retained. This is a generative bitmap edit, with visual QA rather than a claim of identical untouched pixels.
 
 ## Final prompt for normal endpoint circles (built-in edit)
