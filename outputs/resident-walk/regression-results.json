@@ -1,0 +1,129 @@
+{
+  "reports": {
+    "status": "passed",
+    "normalEntry": "http://127.0.0.1:4183/",
+    "reportedPath": [
+      "DEMO-REF-001",
+      "DEMO-REF-002"
+    ],
+    "reportId": "REPORT-000004",
+    "versions": {
+      "initial": "demo-baseline-2026-10-17-v000001",
+      "accepted": "demo-baseline-2026-10-17-v000002",
+      "manualRepair": "demo-baseline-2026-10-17-v000003"
+    },
+    "exposureRankingCost": {
+      "before": 0,
+      "accepted": 18,
+      "manualRepair": 0
+    },
+    "checks": [
+      "dropdown-only routing cannot seed a report",
+      "manual map endpoints autofill read-only report fields independently of later routing lists/cards",
+      "description required and disconnected map selection cannot be submitted",
+      "exact route IDs, map-point provenance and source version saved",
+      "Resident map never shows report numbers",
+      "Developer pending counts change 2→1→0 after acceptance/rejection, and stay absent after reload",
+      "submission and rejection leave map unchanged",
+      "Developer previews and accepts exact reported path",
+      "acceptance atomically records review and publishes mixed/yellow in both modes",
+      "open Resident tab automatically recalculates version and ranking cost on acceptance",
+      "unrelated draft preserved and not accidentally published",
+      "no repeated acceptance; no automatic repair/green",
+      "later manual edit/publication required for repaired shade",
+      "accepted yellow snapshot and review history retained after repair/reload",
+      "mobile manual point autofill, submit reachable, body scroll restored, inbox without overflow"
+    ],
+    "pageErrors": []
+  },
+  "photos": {
+    "status": "passed",
+    "normalEntry": "http://127.0.0.1:4183/",
+    "confirmedAssignments": [
+      {
+        "node": "FIELD-NORTH",
+        "asset": "reference-20.jpg"
+      },
+      {
+        "node": "RAZAK-EAST",
+        "asset": "reference-06.jpg"
+      },
+      {
+        "node": "RESIDENSI-UTMKL",
+        "asset": "residensi.jpg"
+      },
+      {
+        "node": "REAR-GATE",
+        "asset": "bus-parking.jpg"
+      },
+      {
+        "node": "MAIN-GATE",
+        "asset": "main-gate.jpg"
+      },
+      {
+        "node": "J-V1",
+        "asset": "corridor-v1.jpg"
+      },
+      {
+        "node": "J-CLINIC",
+        "asset": "corridor-clinic.jpg"
+      },
+      {
+        "node": "KLINIK-UTM",
+        "asset": "klinik.jpg"
+      },
+      {
+        "node": "CAFE-MJIIT",
+        "asset": "cafe-mjiit.jpg"
+      },
+      {
+        "node": "MASJID-UTMKL",
+        "asset": "masjid.jpg"
+      },
+      {
+        "node": "J-TENNIS",
+        "asset": "corridor-tennis.jpg"
+      },
+      {
+        "node": "J-PA5",
+        "asset": "corridor-pa5.jpg"
+      },
+      {
+        "node": "J-LIBRARY",
+        "asset": "corridor-library.jpg"
+      },
+      {
+        "node": "RESIDENSI-NORTH-WEST",
+        "asset": "reference-15.jpg"
+      },
+      {
+        "node": "PARKING-WEST",
+        "asset": "reference-09.jpg"
+      }
+    ],
+    "checks": [
+      "all15 corrected seed photos load at their exact graph points",
+      "published photo dots darker and radius9; ordinary dots radius7",
+      "five corridor reference points visible without changing routing endpoints",
+      "adjacent Cafe V1 and corridor V1 dots remain individually clickable",
+      "click/keyboard photo panel and Close/Escape restore map focus",
+      "Resident has no upload/publication/deletion controls",
+      "unsupported/corrupt/oversized uploads rejected without mutation",
+      "drafts isolated from Resident and retained across tool changes",
+      "explicit publication updates open Resident photo panel",
+      "photo publication preserves shade/workflow JSON and route IDs",
+      "first photo updates marker in both roles",
+      "concurrent different-point drafts/publications preserve both edits",
+      "failed IndexedDB write leaves published image/history unchanged",
+      "shade publication still recalculates Resident and preserves photo library",
+      "published images survive reload; scenario uses published references",
+      "mobile panels can close without horizontal overflow",
+      "cancel deletion and failed deletion writes preserve current reference/history",
+      "confirmed deletion removes bundled reference live from Resident and resets marker size",
+      "deleted seed stays absent after reload; unpublished draft and shade state preserved",
+      "retained draft requires rebase before replacement publication",
+      "uploaded references can be deleted and deletion controls disappear after reload"
+    ],
+    "pageErrors": []
+  }
+}

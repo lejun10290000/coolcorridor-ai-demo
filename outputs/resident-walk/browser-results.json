@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "mainGateToKlinikPoints": [
+    "MAIN-GATE",
+    "J-GATE",
+    "J-J4",
+    "J-PA7",
+    "J-TENNIS",
+    "J-PA5",
+    "J-PA1",
+    "J-V1",
+    "J-P3",
+    "P3-NORTH",
+    "J-Y2",
+    "J-CLINIC",
+    "KLINIK-UTM"
+  ],
+  "photoSteps": [
+    {
+      "node": "J-TENNIS",
+      "src": "/point-photos/corridor-tennis.jpg"
+    },
+    {
+      "node": "J-PA5",
+      "src": "/point-photos/corridor-pa5.jpg"
+    },
+    {
+      "node": "J-V1",
+      "src": "/point-photos/corridor-v1.jpg"
+    },
+    {
+      "node": "J-CLINIC",
+      "src": "/point-photos/corridor-clinic.jpg"
+    },
+    {
+      "node": "KLINIK-UTM",
+      "src": "/point-photos/klinik.jpg"
+    }
+  ],
+  "lockedMostShadedBefore": [
+    "DEMO-REF-080"
+  ],
+  "recalculatedAfterExit": [
+    "DEMO-REF-081",
+    "DEMO-REF-082"
+  ],
+  "checks": [
+    "no start for missing/disconnected routes",
+    "chosen overlay stays fixed; endpoint and objective controls locked",
+    "every graph point in order, including internal corridors and destination",
+    "matching reference photo or honest missing-photo state",
+    "map clicks do not change route or manual progress",
+    "Next, Previous, arrival and Finish semantics",
+    "Developer shade publication cannot reroute active walk or alter its map version",
+    "exit recalculates most shaded using latest baseline",
+    "Developer workspace has no walkthrough UI",
+    "phone reverse route, single-link arrival and zero horizontal overflow",
+    "refresh ends only session progress; persistent shade/report state preserved"
+  ],
+  "pageErrors": []
+}
