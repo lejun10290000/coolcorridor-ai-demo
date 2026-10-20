@@ -1,0 +1,93 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "checks": [
+    "Resident map left and selectors/comparison right on desktop",
+    "right column scrolls independently while map position stays fixed",
+    "map image visible within laptop and desktop viewport",
+    "shortest and exposure cards select identical overlay segment IDs",
+    "publication automatically updates right-side cards and shaded route",
+    "manual point-to-point reporting still autofills and submits",
+    "Resident report numbers stay hidden",
+    "selected-path evidence and map source remain accessible",
+    "Developer retains original map height, expanded information and workflow",
+    "desktop 1440, laptop 1366, tablet 1024 and mobile390 checked",
+    "mobile stacks, jump links reach controls/map, no horizontal overflow",
+    "zoom/pan/reset still work"
+  ],
+  "responsiveSizes": [
+    {
+      "width": 1366,
+      "height": 768,
+      "map": {
+        "x": 40.96875,
+        "y": 170,
+        "width": 756.03125,
+        "height": 568.921875,
+        "top": 170,
+        "right": 797,
+        "bottom": 738.921875,
+        "left": 40.96875
+      },
+      "sidebar": {
+        "x": 821,
+        "y": 170,
+        "width": 504.015625,
+        "height": 588,
+        "top": 170,
+        "right": 1325.015625,
+        "bottom": 758,
+        "left": 821
+      }
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "map": {
+        "x": 30.71875,
+        "y": 164,
+        "width": 563.125,
+        "height": 594.9375,
+        "top": 164,
+        "right": 593.84375,
+        "bottom": 758.9375,
+        "left": 30.71875
+      },
+      "sidebar": {
+        "x": 617.84375,
+        "y": 164,
+        "width": 375.4375,
+        "height": 588,
+        "top": 164,
+        "right": 993.28125,
+        "bottom": 752,
+        "left": 617.84375
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "map": {
+        "x": 16,
+        "y": 256,
+        "width": 358,
+        "height": 672.90625,
+        "top": 256,
+        "right": 374,
+        "bottom": 928.90625,
+        "left": 16
+      },
+      "sidebar": {
+        "x": 16,
+        "y": 948.90625,
+        "width": 358,
+        "height": 2710.5625,
+        "top": 948.90625,
+        "right": 374,
+        "bottom": 3659.46875,
+        "left": 16
+      }
+    }
+  ],
+  "pageErrors": []
+}
