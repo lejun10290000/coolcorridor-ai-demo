@@ -31,3 +31,9 @@ All screenshots come from isolated browser contexts with fictional/synthetic DEM
 This branch builds on the unmerged Resident sidebar branch from PR17. Review the Developer-only diff against that branch, then integrate in dependency order. No PR is merged automatically. No schema/storage migration, HTTP API, routing algorithm, campus map asset, fixture count/price formula or Resident component changes. New presentation props are backward compatible; shared changes are detailed in docs/API_CONTRACTS.md and docs/DEVELOPER_SIDEBAR_LAYOUT.md.
 
 Storage remains local to the same browser origin/profile. Footfall and prices are fictional, paths/lengths are unsurveyed, projections are assumptions, and no construction or field verification is claimed. Below960px the map and tools stack; below620px grids become a single column for readability.
+
+## Evidence placement follow-up
+
+Selected map path evidence now appears directly below the left-hand Developer map, outside the five tools. It remains expandable, follows the selected segment and switches to simulated evidence in the scenario view. Desktop map height reserves room for the collapsed evidence header; expanded evidence scrolls within its panel. Phone evidence uses normal document flow between map and tools. Resident layout and data behaviour are unchanged.
+
+The production build passed after this move. A focused browser probe against the normal production entry passed desktop/mobile position, selected-path updates across tabs, simulated comparison, the selected-segment report link and absence of horizontal overflow/JavaScript errors. Actual results and three new screenshots are in map-evidence/. Earlier screenshots above document the original five-tool layout.

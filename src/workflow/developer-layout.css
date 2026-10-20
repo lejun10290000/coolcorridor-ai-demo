@@ -8,7 +8,7 @@
 .developer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(460px,1.1fr);gap:24px;align-items:start}
 .developer-map-pane{position:sticky;top:16px;min-width:0;max-height:calc(100dvh - 190px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
 .developer-map-pane .wf-map-state{font-size:.72rem;margin:0 0 8px;padding:8px 12px}
-.developer-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 425px),800px)}
+.developer-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 485px),800px)}
 .developer-map-pane .campus-map-toolbar{padding:10px;gap:8px}
 .developer-map-pane .campus-map-toolbar h2{font-size:.9rem}
 .developer-map-pane .campus-map-controls{gap:6px}
@@ -48,13 +48,15 @@
 .developer-panel-scroll .wf-footfall-priorities .priority:is(:hover,:focus-visible){background:#55255b;color:#fff}
 .developer-panel-scroll .wf-footfall-priorities :is(b,span,small){color:inherit;font-size:.78rem}
 .developer-planning-configuration,.developer-history,.developer-local,.developer-path-evidence{padding:12px;background:#fff;border:1px solid #d6ced4;border-radius:9px;margin:14px 0;font-size:.8rem;overflow-wrap:anywhere}
+.developer-map-pane .developer-path-evidence{margin:14px 0 0}.developer-path-evidence[open]{max-height:360px;overflow-y:auto;scrollbar-gutter:stable}
 .developer-path-evidence>.inspector{border:0;padding:14px 0 0}
-.developer-path-evidence .wf-evidence{margin:12px 0 0}
+.developer-path-evidence .wf-evidence{margin:12px 0 0;max-width:none}.developer-path-evidence h2{font-size:1.1rem}.developer-path-evidence p,.developer-path-evidence dl{font-size:.8rem;line-height:1.6}
 .developer-panel-scroll .wf-report-order{font-weight:700;color:#55255b}
 @media(max-width:959px){
   .developer-layout{grid-template-columns:1fr}
   .developer-map-pane{position:relative;top:auto;max-height:none;overflow:visible}
   .developer-map-pane .campus-map-viewport{--map-height:clamp(320px,52dvh,540px)}
+  .developer-path-evidence[open]{max-height:none;overflow:visible;scrollbar-gutter:auto}
   .developer-right-pane{height:auto;min-height:0;overflow:visible}
   .developer-panel-scroll{overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto}
 }
