@@ -58,7 +58,7 @@ Use **Baseline / Simulated scenario** and explicit per-segment projection contro
 
 Use **Edit map shade** to select point-to-point paths, apply a category to the Developer draft, review the changes and choose **Publish to Resident map**. Accepting a valid route report also publishes its saved links as mixed shade. A repair requires a later manual update. Previous snapshots and stored evidence history remain inspectable; removing the old installation panel does not clear saved data.
 
-State is persisted only in this browser under `coolcorridor-shade-workflow-v1`, with guarded schema validation and visible corruption/storage-failure warnings. It is not a central database, production authentication or tamper-proof audit log. Evidence is a text reference only; no photos are uploaded. No GPS or location permissions are used.
+State is persisted only in this browser under `coolcorridor-shade-workflow-v1`, with guarded schema validation and visible corruption/storage-failure warnings. It is not a central database, production authentication or tamper-proof audit log. Observation evidence remains a text reference. Point reference photos are prepared and saved separately in local IndexedDB; no photo is uploaded to a server. No GPS or location permissions are used.
 
 See the [manual map workflow](docs/DEVELOPER_MAP_SHADE.md), [route reports](docs/ROUTE_REPORT_SYSTEM.md) and [schema/provenance](docs/DATA_DICTIONARY.md). The [older observation workflow handoff](docs/DEVELOPER_SHADE_WORKFLOW.md) documents retained historical functionality, not the current Developer screen.
 
@@ -84,3 +84,11 @@ Shortest uses distance alone, then stable IDs. Practical searches all loop-free 
 Only current published snapshots drive Resident routes. Publication automatically recalculates the open Resident view, including another tab on the **same origin/profile**; scenarios and historical Developer views cannot change it. Publishing DEMO S03 as exposed gives shortestS03/190m and practicalS01+S02/198m, a4.2% detour. A genuine field record requires a different trimmed/case-folded reviewer alias after under_review; aliases are not authentication. Data never synchronises to another device/profile/person. Full/blocked storage is session-only with a warning.
 
 See [current routing handoff and exact normal-entry acceptance commands](docs/DYNAMIC_ROUTING_HANDOFF.md). The separate review pages are optional test harnesses; users do not need them for calculated routing. No GPS, online tiles, backend or dependencies were added.
+
+## Point photo references
+
+Click a campus point in either role to open its closable reference photo panel. Darker, slightly larger points have published photos. The15 operator-confirmed photos are included, including the corrected Klinik, Cafe/MJIIT, Library, Reference15 and Reference09 assignments. Photo-only corridor points do not become route endpoints.
+
+In Developer, use **Edit shade / publish → Point photos / publish references** to upload a replacement, review it and explicitly publish it to Residents. Drafts remain private to the editor. Publication updates an already-open Resident tab on the same browser origin/profile; it does not change shade or routes. Photos are stored separately from shade/report history in IndexedDB. There is no remote publication service or production authentication.
+
+See [point-photo workflow and source mapping](docs/POINT_REFERENCE_PHOTOS.md). Run `node review/check-point-photos.cjs` against the normal production preview for acceptance checks (including upload errors, concurrent edits, failed-save isolation and mobile panel closing).

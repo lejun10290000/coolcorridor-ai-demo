@@ -111,7 +111,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     await developer.getByRole('region',{name:'Resident report inbox',exact:true}).screenshot({path:path.join(out,'06-preserved-review-history.png')})
     // Mobile form, focus/scroll and no-route validation use normal UI too.
     assert.equal(await developer.locator('.campus-report').count(),0);assert.equal(await resident.locator('.campus-report').count(),0)
-    await resident.setViewportSize({width:390,height:844});await resident.getByRole('button',{name:'Choose report points on map',exact:true}).click();await resident.locator('[data-campus-node-id="MAIN-GATE"]').click();await resident.locator('[data-campus-node-id="RAZAK-ENTRANCE"]').click();await resident.getByRole('button',{name:'Report selected route',exact:true}).click()
+    await resident.setViewportSize({width:390,height:844});await resident.getByRole('button',{name:'Choose report points on map',exact:true}).click();await resident.locator('[data-campus-node-id="MAIN-GATE"]').click();await resident.getByRole('button',{name:'Close point photo panel',exact:true}).click();await resident.locator('[data-campus-node-id="RAZAK-ENTRANCE"]').click();await resident.getByRole('button',{name:'Report selected route',exact:true}).click()
     assert.equal(await resident.getByLabel('Report starting point',{exact:true}).inputValue(),'Pintu Masuk Utama');await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic mobile manual-point form preview only; not submitted.')
     assert.equal(await resident.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
     assert.ok(await resident.locator('.route-report-dialog').evaluate(e=>e.getBoundingClientRect().height<=innerHeight-30))

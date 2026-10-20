@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "confirmedAssignments": [
+    {
+      "node": "FIELD-NORTH",
+      "asset": "reference-20.jpg"
+    },
+    {
+      "node": "RAZAK-EAST",
+      "asset": "reference-06.jpg"
+    },
+    {
+      "node": "RESIDENSI-UTMKL",
+      "asset": "residensi.jpg"
+    },
+    {
+      "node": "REAR-GATE",
+      "asset": "bus-parking.jpg"
+    },
+    {
+      "node": "MAIN-GATE",
+      "asset": "main-gate.jpg"
+    },
+    {
+      "node": "J-V1",
+      "asset": "corridor-v1.jpg"
+    },
+    {
+      "node": "J-CLINIC",
+      "asset": "corridor-clinic.jpg"
+    },
+    {
+      "node": "KLINIK-UTM",
+      "asset": "klinik.jpg"
+    },
+    {
+      "node": "CAFE-MJIIT",
+      "asset": "cafe-mjiit.jpg"
+    },
+    {
+      "node": "MASJID-UTMKL",
+      "asset": "masjid.jpg"
+    },
+    {
+      "node": "J-TENNIS",
+      "asset": "corridor-tennis.jpg"
+    },
+    {
+      "node": "J-PA5",
+      "asset": "corridor-pa5.jpg"
+    },
+    {
+      "node": "J-LIBRARY",
+      "asset": "corridor-library.jpg"
+    },
+    {
+      "node": "RESIDENSI-NORTH-WEST",
+      "asset": "reference-15.jpg"
+    },
+    {
+      "node": "PARKING-WEST",
+      "asset": "reference-09.jpg"
+    }
+  ],
+  "checks": [
+    "all15 corrected seed photos load at their exact graph points",
+    "published photo dots darker and radius9; ordinary dots radius7",
+    "five corridor reference points visible without changing routing endpoints",
+    "adjacent Cafe V1 and corridor V1 dots remain individually clickable",
+    "click/keyboard photo panel and Close/Escape restore map focus",
+    "Resident has no upload/publication controls",
+    "unsupported/corrupt/oversized uploads rejected without mutation",
+    "drafts isolated from Resident and retained across tool changes",
+    "explicit publication updates open Resident photo panel",
+    "photo publication preserves shade/workflow JSON and route IDs",
+    "first photo updates marker in both roles",
+    "concurrent different-point drafts/publications preserve both edits",
+    "failed IndexedDB write leaves published image/history unchanged",
+    "shade publication still recalculates Resident and preserves photo library",
+    "published images survive reload; scenario uses published references",
+    "mobile panels can close without horizontal overflow"
+  ],
+  "pageErrors": []
+}

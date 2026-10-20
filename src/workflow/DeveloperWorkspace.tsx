@@ -11,6 +11,9 @@ import type { WorkflowState } from './model'
 import type { ResidentReport } from '../types'
 import { SegmentEvidence } from './SegmentEvidence'
 import { ReportReview } from './ReportReview'
+import { seedPointPhotos } from '../pointPhotos/catalog'
+import { PointPhotoEditor } from '../pointPhotos/PointPhotoEditor'
+import type { PointPhotoController } from '../pointPhotos/usePointPhotos'
 import './workflow.css'
 import './developer-layout.css'
 
@@ -24,7 +27,8 @@ const tools = [
 ] as const
 type Tool = typeof tools[number]['id']
 
-export function DeveloperWorkspace({state,commit,notice,back}:{state:WorkflowState;commit:Commit;notice:string;back:()=>void}){
+export function DeveloperWorkspace({state,commit,notice,back,pointPhotos}:{state:WorkflowState;commit:Commit;notice:string;back:()=>void;pointPhotos?:PointPhotoController}){
+  const [photoPoint,setPhotoPoint]=useState<string|null>(null)
   const [selected,setSelected]=useState(''),[recenter,setRecenter]=useState(0),[tool,setTool]=useState<Tool>('edit')
   const [reportFilter,setReportFilter]=useState<string|undefined>(),[reportPreview,setReportPreview]=useState<ResidentReport|null>(null)
   const [controlsTarget,setControlsTarget]=useState<HTMLDivElement|null>(null),[evidenceOpen,setEvidenceOpen]=useState(false)
@@ -59,7 +63,7 @@ export function DeveloperWorkspace({state,commit,notice,back}:{state:WorkflowSta
     {notice&&<p role="alert" className="warning">{notice}</p>}
     <div className="developer-layout">
       <div className="developer-map-pane" id="developer-campus-map" tabIndex={-1}>
-        <DeveloperMapEditor state={state} commit={commit} controlsTarget={controlsTarget} viewLabel={`${scenarioActive?'SIMULATED / ASSUMPTION':tool==='scenario'?'BASELINE — calculate a plan to preview a scenario':tool==='reports'&&reportPreview?'REPORTED ROUTE — CURRENT PUBLISHED SHADE':tool==='edit'&&baseline.dataset_version===current.dataset_version&&state.map_shade_draft?'DEVELOPER DRAFT PREVIEW — not published to Residents':'BASELINE — PUBLISHED MAP'} · ${scenarioActive?scenario.baseline_version:baseline.dataset_version}${baseline.dataset_version!==current.dataset_version?' · historical; read only':''}`} canEdit={tool==='edit'&&baseline.dataset_version===current.dataset_version} compactDetails segments={mapSegments} selected={selected} onSelect={inspectPath} recenter={recenter} onSelectionChange={setPlanningSelection} candidates={scenarioActive?calculated.result?.items.filter(i=>plan?.ids.includes(i.intervention_id)):[]} scenario={scenarioActive} reports={tool==='scenario'?[]:state.reports} reportPreview={tool==='reports'?reportPreview:null} onCloseReportPreview={()=>setReportPreview(null)}/>
+        <DeveloperMapEditor pointPhotos={pointPhotos?.published??seedPointPhotos} photoPoint={photoPoint} onPhotoPointChange={setPhotoPoint} state={state} commit={commit} controlsTarget={controlsTarget} viewLabel={`${scenarioActive?'SIMULATED / ASSUMPTION':tool==='scenario'?'BASELINE — calculate a plan to preview a scenario':tool==='reports'&&reportPreview?'REPORTED ROUTE — CURRENT PUBLISHED SHADE':tool==='edit'&&baseline.dataset_version===current.dataset_version&&state.map_shade_draft?'DEVELOPER DRAFT PREVIEW — not published to Residents':'BASELINE — PUBLISHED MAP'} · ${scenarioActive?scenario.baseline_version:baseline.dataset_version}${baseline.dataset_version!==current.dataset_version?' · historical; read only':''}`} canEdit={tool==='edit'&&baseline.dataset_version===current.dataset_version} compactDetails segments={mapSegments} selected={selected} onSelect={inspectPath} recenter={recenter} onSelectionChange={setPlanningSelection} candidates={scenarioActive?calculated.result?.items.filter(i=>plan?.ids.includes(i.intervention_id)):[]} scenario={scenarioActive} reports={tool==='scenario'?[]:state.reports} reportPreview={tool==='reports'?reportPreview:null} onCloseReportPreview={()=>setReportPreview(null)}/>
         <details className="developer-path-evidence" open={evidenceOpen} onToggle={e=>setEvidenceOpen(e.currentTarget.open)}><summary>Selected map path evidence</summary>{scenarioActive?<ScenarioEvidence segment={current.segments.find(s=>s.segment_id===selected)??current.segments[0]} scenario={scenario} baseline={returnBaseline}/>:<SegmentEvidence segment={selectedSegment} version={baseline.dataset_version} state={state} mode="developer" historical={baseline.dataset_version!==current.dataset_version} onAction={()=>openReports(selectedSegment.segment_id)}/>}</details>
       </div>
       <aside className="developer-right-pane" id="developer-controls" aria-label="Developer controls" tabIndex={-1}>
@@ -67,6 +71,7 @@ export function DeveloperWorkspace({state,commit,notice,back}:{state:WorkflowSta
         <div className="developer-panel-scroll" ref={scrollPane}>
           <section id="developer-panel-edit" role="tabpanel" aria-labelledby="developer-tool-edit" hidden={tool!=='edit'} tabIndex={0}>
             <div ref={setControlsTarget} className="developer-edit-controls"/>
+            {pointPhotos&&<PointPhotoEditor controller={pointPhotos} nodeId={photoPoint} select={setPhotoPoint} enabled={tool==='edit'&&baseline.dataset_version===current.dataset_version}/> }
             <details className="developer-history"><summary>Baseline dataset and publication history</summary><label>Baseline dataset<select aria-label="Baseline dataset" value={baselineChoice} onChange={e=>setBaselineChoice(e.target.value)}><option value="current">Current published dataset — {current.dataset_version}</option>{state.snapshots.filter(s=>s.dataset_version!==current.dataset_version).map(s=><option key={s.dataset_version} value={s.dataset_version}>Historical — {s.dataset_version}</option>)}</select></label><p data-testid="current-dataset-metadata">{currentStudyArea(state).study_area_id} · {currentStudyArea(state).dataset_version} · updated {currentStudyArea(state).updated_at}</p><ol>{state.snapshots.map(s=><li key={s.dataset_version}>{s.dataset_version} · {s.change_summary} · {s.created_at}</li>)}</ol></details>
             <details className="developer-local"><summary>About this local demo</summary><p className="wf-local">Saved only in this browser origin/profile. Changes do not synchronise with another device, browser profile or person. No central database, authentication or institutional approval. Do not enter personal or identifying evidence.</p></details>
           </section>
