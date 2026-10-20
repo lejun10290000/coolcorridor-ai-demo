@@ -1,6 +1,6 @@
 # Resident map and route sidebar
 
-Resident mode now keeps the campus map on the left at desktop/tablet widths of960px and above. Starting point, destination, map-dot selection mode, shortest/most-shaded route cards and report controls are on the right. The right column scrolls independently, so reviewing routes, reports or evidence does not move the map out of view. Map height fits the available viewport; zoom, pan and reset still use the existing image/overlay transform.
+Resident mode now keeps the campus map on the left at desktop/tablet widths of960px and above, using60% for the map and40% for controls (excluding the gap), matching Developer mode. Starting point, destination, map-dot selection mode, shortest/most-shaded route cards and report controls are on the right. The right column scrolls independently, so reviewing routes, reports or evidence does not move the map out of view. Map height fits the available viewport; zoom, pan and reset still use the existing image/overlay transform.
 
 Route cards show distance/time, detour, unknown shade and ranking cost first. Full segment IDs, dataset metadata, known-label coverage, weights, warnings and provenance remain available under expandable details. Selecting a map path opens its evidence section in the sidebar. Map information/source and the full original legend are expandable beneath a permanently visible compact shade/route legend. The unsurveyed/not-for-navigation caution remains visible.
 

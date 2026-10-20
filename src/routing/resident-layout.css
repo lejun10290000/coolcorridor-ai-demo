@@ -3,7 +3,7 @@
 .resident-topbar{margin-bottom:20px;align-items:center}
 .resident-topbar-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .resident-jump-link{color:#55255b;font-size:.85rem;font-weight:700;text-underline-offset:3px}
-.wf-app .resident-workspace .resident-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(340px,.9fr);gap:24px;align-items:start}
+.wf-app .resident-workspace .resident-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:24px;align-items:start}
 .resident-map-pane{position:sticky;top:16px;align-self:start;min-width:0;max-height:calc(100dvh - 180px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
 .resident-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 400px),790px)}
 .resident-map-pane .campus-map-legend{padding-bottom:10px}

@@ -5,7 +5,7 @@
 .developer-topbar p{margin:0;font-size:.88rem}
 .developer-topbar .wf-actions{align-items:center;margin:0}
 .developer-topbar a{color:#55255b;font-size:.8rem;font-weight:700;text-underline-offset:3px}
-.developer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(460px,1.1fr);gap:24px;align-items:start}
+.developer-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:24px;align-items:start}
 .developer-map-pane{position:sticky;top:16px;min-width:0;max-height:calc(100dvh - 190px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
 .developer-map-pane .wf-map-state{font-size:.72rem;margin:0 0 8px;padding:8px 12px}
 .developer-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 485px),800px)}

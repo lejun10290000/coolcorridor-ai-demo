@@ -1,6 +1,6 @@
 # Developer map and five tools
 
-Developer mode uses a persistent campus map on the left and five accessible buttons/tabs on the right at widths of960px and above. Only the selected tool is visible; its content scrolls independently while the map and five buttons stay in place.
+Developer mode uses a persistent campus map on the left and five accessible buttons/tabs on the right at widths of960px and above. Both Resident and Developer use a60% map /40% controls split of the available column space (excluding the gap). Only the selected tool is visible; its content scrolls independently while the map and five buttons stay in place.
 
 1. **Edit shade / publish:** select one or several point-to-point paths, classify shade in a Developer draft, review and explicitly publish to the Resident baseline. Baseline history remains expandable and historical snapshots are read only.
 2. **Resident reports:** newest creation date first, regardless of stored array order. Equal timestamps use the higher numeric report ID first. Pending counts remain on the Developer map; acceptance/rejection removes their contribution without deleting audit history. Accepting a route still publishes mixed/yellow shade, and repairs still require a separate manual update.

@@ -37,3 +37,7 @@ Storage remains local to the same browser origin/profile. Footfall and prices ar
 Selected map path evidence now appears directly below the left-hand Developer map, outside the five tools. It remains expandable, follows the selected segment and switches to simulated evidence in the scenario view. Desktop map height reserves room for the collapsed evidence header; expanded evidence scrolls within its panel. Phone evidence uses normal document flow between map and tools. Resident layout and data behaviour are unchanged.
 
 The production build passed after this move. A focused browser probe against the normal production entry passed desktop/mobile position, selected-path updates across tabs, simulated comparison, the selected-segment report link and absence of horizontal overflow/JavaScript errors. Actual results and three new screenshots are in map-evidence/. Earlier screenshots above document the original five-tool layout.
+
+## Both-role60/40 layout
+
+Resident and Developer now allocate60% of available column width to the map and40% to the controls, excluding the24px gap. Phones retain the stacked layout. Production build passed. A focused normal-entry browser probe verified the measured ratios at1920,1440,1366 and1024px for both roles, all five Developer tabs without horizontal overflow, and390px stacked phone layouts with no page errors. Current screenshots and exact measurements are in role-widths/.
