@@ -1,0 +1,54 @@
+/* Resident layout only. Developer keeps the existing workspace and map styling. */
+.wf-app .resident-workspace{max-width:1600px;padding:22px clamp(16px,3vw,42px) 40px}
+.resident-topbar{margin-bottom:20px;align-items:center}
+.resident-topbar-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.resident-jump-link{color:#55255b;font-size:.85rem;font-weight:700;text-underline-offset:3px}
+.wf-app .resident-workspace .resident-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(340px,.9fr);gap:24px;align-items:start}
+.resident-map-pane{position:sticky;top:16px;align-self:start;min-width:0;max-height:calc(100dvh - 180px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
+.resident-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 400px),790px)}
+.resident-map-pane .campus-map-legend{padding-bottom:10px}
+.resident-map-pane .campus-map-details{border-top:1px solid #e3dde2;padding:10px 14px;font-size:.78rem}
+.resident-map-pane .campus-map-details[open]{max-height:180px;overflow-y:auto}
+.resident-map-pane .campus-map-details>summary{color:#55255b}
+.resident-sidebar{display:flex;flex-direction:column;gap:16px;min-width:0;max-height:calc(100dvh - 180px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#b9a8bf transparent;padding-right:5px}
+.resident-sidebar>section,.resident-sidebar>details{flex-shrink:0}
+.resident-sidebar>section,.resident-sidebar>details{background:#fff;border:1px solid #d6ced4;border-radius:10px;padding:18px;margin:0;min-width:0}
+.resident-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.resident-sidebar h2{font-size:1.15rem;margin:0 0 10px}
+.resident-panel-heading h2{margin:0}
+.resident-sidebar p{font-size:.85rem;line-height:1.5;overflow-wrap:anywhere}
+.resident-sidebar .endpoint{border:0;background:transparent;padding:0;margin:16px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:14px}
+.resident-sidebar .endpoint>label{min-width:0}
+.resident-sidebar .endpoint .map-point-mode{grid-column:1/-1;min-width:0;flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.resident-sidebar .endpoint .success{grid-column:1/-1}
+.resident-route-controls{scroll-margin-top:18px}
+.resident-sidebar .route-comparison .cards{grid-template-columns:1fr;gap:12px}
+.resident-sidebar .route-card{padding:13px 15px;min-height:0;border-width:2px}
+.resident-sidebar .route-card.selected{border:2px solid #55255b;box-shadow:inset 3px 0 #55255b}
+.resident-sidebar .route-card h3{margin:7px 0;font-size:1rem}
+.resident-sidebar .route-card p{margin:7px 0}
+.resident-sidebar .route-card small{display:block;font-size:.75rem}
+.resident-sidebar .notice,.resident-sidebar .warning{padding:12px;margin:12px 0}
+.resident-sidebar .selected-route-pair{margin-top:0;color:#5d5660}
+.resident-sidebar .resident-version-note{font-size:.75rem;color:#625867}
+.resident-sidebar .route-comparison>details{margin-top:14px}
+.resident-sidebar .resident-route-hint{margin-bottom:0;color:#625867}
+.resident-sidebar .resident-report-panel{display:block}
+.resident-sidebar .wf-route-report-action p{min-width:0}
+.resident-sidebar .resident-path-evidence>.inspector{border:0;padding:16px 0 0}
+.resident-sidebar .resident-about .wf-local{margin:12px 0 0}
+.resident-sidebar>details>summary{color:#55255b;font-size:.9rem}
+@media(max-width:959px){
+  .wf-app .resident-workspace .resident-layout{grid-template-columns:1fr;gap:20px}
+  .resident-map-pane{position:relative;top:auto;max-height:none;overflow:visible}
+  .resident-map-pane .campus-map-viewport{--map-height:clamp(320px,52dvh,540px)}
+  .resident-sidebar{max-height:none;overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto;padding-right:0}
+}
+@media(max-width:620px){
+  .wf-app .resident-workspace{padding:20px 16px 32px}
+  .resident-topbar{align-items:start}
+  .resident-topbar-actions{width:100%;justify-content:space-between}
+  .resident-sidebar>section,.resident-sidebar>details{padding:15px}
+  .resident-sidebar .endpoint{grid-template-columns:1fr}
+  .resident-map-pane .campus-map-viewport{--map-height:clamp(300px,48dvh,440px)}
+}
