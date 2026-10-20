@@ -2,9 +2,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { InterventionCandidate, ResidentReport, WalkwaySegment } from './types'
 import { campusMap, campusMapPoint, displayMidpoint, legacySegmentDisplayAliases, nearestDisplaySegment, segmentDisplays, shadeColours, shadeLabels, svgPoints } from './campusMapDisplay'
-import { campusNodeName, campusRouteNodes, campusWalkLinks } from './campusWalkways'
+import { campusNodeName, campusRouteNodes, campusGraphNodes, campusWalkLinks } from './campusWalkways'
 import { dataStatusText, reportsForSegment } from './workflow/model'
 import './campus-map.css'
+import { PointPhotoPanel } from './pointPhotos/PointPhotoPanel'
+import type { PointPhoto } from './pointPhotos/catalog'
 import { SelectedRouteOverlay } from './routing/SelectedRouteOverlay'
 
 export interface CampusImageMapProps {
@@ -16,9 +18,22 @@ export interface CampusImageMapProps {
   toNode?: string
   endpointSelectMode?: 'from' | 'to'
   onNodeSelect?: (nodeId: string) => void
+  pointPhotos?: Record<string,PointPhoto>
+  photoPoint?: string|null
+  onPhotoPointChange?: (id:string|null)=>void
   compactDetails?: boolean
 }
-export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], showReportNumbers = false, fromNode, toNode, onNodeSelect, compactDetails = false }: CampusImageMapProps) {
+export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], showReportNumbers = false, fromNode, toNode, onNodeSelect, pointPhotos, photoPoint, onPhotoPointChange, compactDetails = false }: CampusImageMapProps) {
+  const [localPhotoPoint,setLocalPhotoPoint]=useState<string|null>(null)
+  const activePhotoPoint=onPhotoPointChange?photoPoint:localPhotoPoint
+  const setPhotoPoint=onPhotoPointChange??setLocalPhotoPoint
+  const closePhoto=()=>{setPhotoPoint(null);requestAnimationFrame(()=>{const node=overlay.current?.querySelector<SVGGElement>(`[data-campus-node-id="${activePhotoPoint}"]`);if(node)node.focus();else viewport.current?.focus({preventScroll:true})})}
+  const photoNodes=pointPhotos?campusGraphNodes.filter(n=>n.selectable===false&&(pointPhotos[n.id]||n.id===activePhotoPoint)):[]
+  function activateNode(id:string){
+    const node=campusGraphNodes.find(n=>n.id===id)
+    if(pointPhotos)setPhotoPoint(id)
+    if(node?.selectable!==false)onNodeSelect?.(id)
+  }
   const labelId = useId()
   const viewport = useRef<HTMLDivElement>(null)
   const scene = useRef<HTMLDivElement>(null)
@@ -85,7 +100,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { d.moved = true; suppressClick.current = true; e.currentTarget.setPointerCapture(e.pointerId) }
         if (d.moved) move(d.px + e.clientX - d.x, d.py + e.clientY - d.y)
       }}
-      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && onNodeSelect && !suppressClick.current) onNodeSelect(nodeId); else if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
+      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && !suppressClick.current) activateNode(nodeId); else if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
       onPointerCancel={() => { pressedSegment.current = null; drag.current = null; suppressClick.current = false }}
       style={{ touchAction: zoom > 1 ? 'none' : 'pan-y', cursor: zoom > 1 ? 'grab' : 'auto' }}>
       {imageState === 'loading' && <p className="campus-map-message" role="status">Loading supplied campus image…</p>}
@@ -123,28 +138,30 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
             const p = displayMidpoint(segmentDisplays[displayId]?.map_display_geometry ?? [])
             return count && p ? <g className="campus-report" key={s.segment_id} data-report-segment-id={s.segment_id} data-report-count={count} transform={`translate(${p.x+38},${p.y-26})`}><title>{count} pending DEMO reports for {s.segment_id}; displayed at illustrative link {displayId}. Not footfall. Accepted/rejected reports remain in history.</title><circle r="20" fill="#fff" stroke="#805107" strokeWidth="4"/><text y="7" textAnchor="middle" fontSize="22" fill="#805107">{count}</text></g> : null
           })}
-          {campusRouteNodes.map(node => {
+          {[...campusRouteNodes,...photoNodes].map(node => {
             const mapped=campusMapPoint(node), x=mapped.x, y=mapped.y
             const isFrom=node.id===fromNode, isTo=node.id===toNode
+            const hasPhoto=!!pointPhotos?.[node.id],interactive=!!pointPhotos||(!!onNodeSelect&&node.selectable!==false)
             const name=campusNodeName(node)
-            return <g key={node.id} className="campus-route-node" data-campus-node-id={node.id} transform={`translate(${x},${y})`}
-              role={onNodeSelect ? 'button' : 'img'} tabIndex={onNodeSelect ? 0 : -1}
-              aria-label={`${name}${isFrom?', selected start':''}${isTo?', selected destination':''}. Walkway point is illustrative and unverified.`}
-              aria-pressed={onNodeSelect ? Boolean(isFrom||isTo) : undefined}
-              style={{ pointerEvents: onNodeSelect ? 'auto' : 'none' }}
-              onKeyDown={onNodeSelect ? e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();onNodeSelect(node.id)} } : undefined}>
+            return <g key={node.id} className={`campus-route-node ${hasPhoto?'campus-photo-point':''}`} data-campus-node-id={node.id} data-has-photo={hasPhoto} transform={`translate(${x},${y})`}
+              role={interactive ? 'button' : 'img'} tabIndex={interactive ? 0 : -1}
+              aria-label={`${name}${isFrom?', selected start':''}${isTo?', selected destination':''}${hasPhoto?', reference photo available':''}${node.selectable===false?', photo reference only; not a route endpoint':''}. Walkway point is illustrative and unverified.`}
+              aria-pressed={interactive?Boolean(isFrom||isTo||node.id===activePhotoPoint):undefined}
+              style={{ pointerEvents: interactive ? 'auto' : 'none' }}
+              onKeyDown={interactive ? e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();activateNode(node.id)} } : undefined}>
               <title>{name}. {isFrom?'Selected start. ':''}{isTo?'Selected destination. ':''}Illustrative point; access and nearby paths are UNSURVEYED.</title>
-              <circle className="campus-node-hit" r="18" fill="transparent"/>
-              <circle className="campus-point-marker" r="7" fill={isFrom?'#55255b':isTo?'#bd8b16':'#fff'} stroke={isFrom||isTo?'#fff':'#707580'} strokeWidth="1.5"/>
-              <circle r="2" fill={isFrom||isTo?'#fff':'#707580'}/>
+              <circle className="campus-node-hit" r={node.selectable===false?10:18} fill="transparent"/>
+              <circle className="campus-point-marker" r={hasPhoto?9:7} fill={isFrom?'#55255b':isTo?'#bd8b16':hasPhoto?'#55255b':'#fff'} stroke={isFrom||isTo?'#fff':hasPhoto?'#2f1638':'#707580'} strokeWidth="1.5"/>
+              <circle r="2" fill={isFrom||isTo||hasPhoto?'#fff':'#707580'}/>
 
             </g>
           })}
         </svg>}
       </div>
+      {pointPhotos&&activePhotoPoint&&<PointPhotoPanel align={(campusGraphNodes.find(n=>n.id===activePhotoPoint)?.x??0)<campusMap.width/2?'right':'left'} key={activePhotoPoint} nodeId={activePhotoPoint} photo={pointPhotos[activePhotoPoint]} close={closePhoto}/>}
     </div>
     {compactDetails?<>
-      <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key,label])=><span key={key}><i style={{background:shadeColours[key as keyof typeof shadeColours]}}/>{label}</span>)}<span><i className="campus-route-key"/>Selected route</span></div>
+      <div className="campus-map-legend" aria-label="Map legend">{Object.entries(shadeLabels).map(([key,label])=><span key={key}><i style={{background:shadeColours[key as keyof typeof shadeColours]}}/>{label}</span>)}<span><i className="campus-route-key"/>Selected route</span>{pointPhotos&&<span><i style={{background:'#55255b',borderRadius:'50%'}}/>Darker dots: reference photos</span>}</div>
       <details className="campus-map-details"><summary>Map information and source</summary>{mapInformation}</details>
     </>:mapInformation}
   </section>

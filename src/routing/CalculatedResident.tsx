@@ -9,13 +9,16 @@ import { campusWideGraph } from './graph'
 import { RouteCards } from './RouteCards'
 import { RouteReportForm } from '../workflow/RouteReportForm'
 import { manualReportRoute, routePointName } from '../workflow/routeReports'
+import { seedPointPhotos } from '../pointPhotos/catalog'
+import type { PointPhotoController } from '../pointPhotos/usePointPhotos'
 import './routing.css'
 import './resident-layout.css'
 
 // Normal app integration agreed by Builder 1 in PR #6, issuecomment-6234657305.
 type Commit = (update: (state: WorkflowState) => WorkflowState) => boolean
-export function CalculatedResident({ back, state, commit, notice }: { back: () => void; state: WorkflowState; commit: Commit; notice: string }) {
+export function CalculatedResident({ back, state, commit, notice, pointPhotos }: { back: () => void; state: WorkflowState; commit: Commit; notice: string; pointPhotos?: PointPhotoController }) {
   const [selected, setSelected] = useState('')
+  const [photoPoint,setPhotoPoint]=useState<string|null>(null)
   const [evidenceOpen,setEvidenceOpen]=useState(false)
   const [fromNode, setFromNode] = useState('')
   const [toNode, setToNode] = useState('')
@@ -42,16 +45,17 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
     if (endpointSelectMode === 'from') {setFromNode(nodeId);setEndpointSelectMode('to');setReportPoints({from:nodeId,to:''})}
     else {setToNode(nodeId);setReportPoints(p=>({...p,to:nodeId}))}
   }
-  const chooseReportPoints=()=>{setOpenForm(false);setReportPoints({from:'',to:''});setEndpointSelectMode('from');requestAnimationFrame(()=>{mapAnchor.current?.scrollIntoView({block:'start'});mapAnchor.current?.querySelector<HTMLElement>('.campus-map-viewport')?.focus({preventScroll:true})})}
+  const chooseReportPoints=()=>{setPhotoPoint(null);setOpenForm(false);setReportPoints({from:'',to:''});setEndpointSelectMode('from');requestAnimationFrame(()=>{mapAnchor.current?.scrollIntoView({block:'start'});mapAnchor.current?.querySelector<HTMLElement>('.campus-map-viewport')?.focus({preventScroll:true})})}
   const updateFrom = (value: string) => setFromNode(value)
   const updateTo = (value: string) => setToNode(value)
   return <main className="wf-app resident-app"><header><button className="link" onClick={back}>← Home</button><div><span className="chip">DEMO ROUTING</span> <span className="chip wf-version">{current.dataset_version}</span></div></header>
     <section className="workspace resident resident-workspace">
       <div className="topbar resident-topbar"><div><div className="eyebrow">RESIDENT MODE</div><h1>Find a more comfortable walk</h1></div><div className="resident-topbar-actions"><a className="resident-jump-link" href="#resident-route-controls">Plan a route</a><button onClick={()=>setRecenter(r=>r+1)}>Recenter map</button></div></div>
       {notice&&<p className="warning" role="alert">{notice}</p>}
+      {pointPhotos?.error&&<p className="warning" role="alert">{pointPhotos.error} Bundled reference photos remain available.</p>}
       <div className="main-grid resident-layout">
         <div className="resident-map-pane" id="resident-campus-map" ref={mapAnchor} tabIndex={-1}>
-          <MapPanel compactDetails segments={current.segments} selected={selected} onSelect={id=>{setSelected(id);setEvidenceOpen(true)}} routeIds={chosen} recenter={recenter} fromNode={fromNode} toNode={toNode} endpointSelectMode={endpointSelectMode} onNodeSelect={chooseNode}/>
+          <MapPanel photoPoint={photoPoint} onPhotoPointChange={setPhotoPoint} pointPhotos={pointPhotos?.published??seedPointPhotos} compactDetails segments={current.segments} selected={selected} onSelect={id=>{setSelected(id);setEvidenceOpen(true)}} routeIds={chosen} recenter={recenter} fromNode={fromNode} toNode={toNode} endpointSelectMode={endpointSelectMode} onNodeSelect={chooseNode}/>
         </div>
         <div className="resident-sidebar" role="region" aria-label="Route planning and comparison" tabIndex={0}>
           <section className="resident-route-controls" id="resident-route-controls" tabIndex={-1} aria-labelledby="resident-plan-heading">
@@ -73,8 +77,8 @@ export function CalculatedResident({ back, state, commit, notice }: { back: () =
               <div className="map-point-mode" role="group" aria-label="Choose what the next map dot sets">
                 <span>Tap map dots to set</span>
                 <div>
-                  <button type="button" className={endpointSelectMode==='from'?'point-mode-active':''} aria-pressed={endpointSelectMode==='from'} onClick={()=>setEndpointSelectMode('from')}>From</button>
-                  <button type="button" className={endpointSelectMode==='to'?'point-mode-active':''} aria-pressed={endpointSelectMode==='to'} onClick={()=>setEndpointSelectMode('to')}>To</button>
+                  <button type="button" className={endpointSelectMode==='from'?'point-mode-active':''} aria-pressed={endpointSelectMode==='from'} onClick={()=>{setPhotoPoint(null);setEndpointSelectMode('from')}}>From</button>
+                  <button type="button" className={endpointSelectMode==='to'?'point-mode-active':''} aria-pressed={endpointSelectMode==='to'} onClick={()=>{setPhotoPoint(null);setEndpointSelectMode('to')}}>To</button>
                 </div>
               </div>
               {message&&<span className="success" role="status">{message}</span>}

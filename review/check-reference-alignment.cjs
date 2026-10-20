@@ -34,7 +34,7 @@ const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/normal-points-
     const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex')
     assert.equal(hash(served),hash(supplied))
     const residentNodes=await nodes(),residentLines=await lines()
-    assert.equal(residentNodes.length,60);assert.equal(residentLines.length,92)
+    assert.equal(residentNodes.length,65);assert.equal(residentLines.length,92)
     await page.locator('.campus-map').screenshot({path:path.join(out,'01-resident-reference-desktop.png')})
     // Actual map dot clicks (including selection mode), not just dropdown/state helpers.
     await page.locator('[data-campus-node-id="MAIN-GATE"]').click()

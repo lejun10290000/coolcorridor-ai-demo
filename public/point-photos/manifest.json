@@ -1,0 +1,368 @@
+[
+  {
+    "node_id": "FIELD-NORTH",
+    "asset": "reference-20.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.43.jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 158440,
+    "privacy_blur_regions": [
+      [
+        0.47,
+        0.58,
+        0.08,
+        0.035
+      ],
+      [
+        0.57,
+        0.645,
+        0.43,
+        0.065
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "RAZAK-EAST",
+    "asset": "reference-06.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.56.15.jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 182837,
+    "privacy_blur_regions": [
+      [
+        0.77,
+        0.51,
+        0.06,
+        0.035
+      ],
+      [
+        0.6,
+        0.48,
+        0.03,
+        0.04
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "RESIDENSI-UTMKL",
+    "asset": "residensi.jpg",
+    "original_filename": "Screenshot 2026-10-20 135834.png",
+    "width": 982,
+    "height": 769,
+    "bytes": 184295,
+    "privacy_blur_regions": [
+      [
+        0.43,
+        0.9,
+        0.08,
+        0.06
+      ],
+      [
+        0.09,
+        0.58,
+        0.055,
+        0.08
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "REAR-GATE",
+    "asset": "bus-parking.jpg",
+    "original_filename": "Screenshot 2026-10-20 135814.png",
+    "width": 1000,
+    "height": 697,
+    "bytes": 128005,
+    "privacy_blur_regions": [
+      [
+        0.14,
+        0.35,
+        0.26,
+        0.035
+      ],
+      [
+        0.43,
+        0.37,
+        0.04,
+        0.035
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "MAIN-GATE",
+    "asset": "main-gate.jpg",
+    "original_filename": "Screenshot 2026-10-20 135744.png",
+    "width": 1000,
+    "height": 735,
+    "bytes": 102194,
+    "privacy_blur_regions": [
+      [
+        0.8,
+        0.62,
+        0.06,
+        0.035
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "J-V1",
+    "asset": "corridor-v1.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.55.45 (1).jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 147665,
+    "privacy_blur_regions": [
+      [
+        0,
+        0.59,
+        0.2,
+        0.04
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "J-CLINIC",
+    "asset": "corridor-clinic.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.41.jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 177366,
+    "privacy_blur_regions": [
+      [
+        0.42,
+        0.59,
+        0.065,
+        0.045
+      ],
+      [
+        0.44,
+        0.44,
+        0.05,
+        0.035
+      ],
+      [
+        0.31,
+        0.49,
+        0.06,
+        0.035
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "KLINIK-UTM",
+    "asset": "klinik.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.41 (1).jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 106335,
+    "privacy_blur_regions": [
+      [
+        0.15,
+        0.645,
+        0.065,
+        0.05
+      ],
+      [
+        0.44,
+        0.635,
+        0.07,
+        0.035
+      ],
+      [
+        0.64,
+        0.65,
+        0.045,
+        0.035
+      ],
+      [
+        0.815,
+        0.675,
+        0.08,
+        0.045
+      ],
+      [
+        0.93,
+        0.66,
+        0.06,
+        0.035
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "CAFE-MJIIT",
+    "asset": "cafe-mjiit.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.43 (1).jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 191165,
+    "privacy_blur_regions": [
+      [
+        0.15,
+        0.53,
+        0.06,
+        0.04
+      ],
+      [
+        0.5,
+        0.51,
+        0.06,
+        0.04
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "MASJID-UTMKL",
+    "asset": "masjid.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.43 (3).jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 156677,
+    "privacy_blur_regions": [
+      [
+        0.91,
+        0.81,
+        0.08,
+        0.05
+      ],
+      [
+        0.88,
+        0.65,
+        0.06,
+        0.035
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "J-TENNIS",
+    "asset": "corridor-tennis.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.55.45.jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 141968,
+    "privacy_blur_regions": [
+      [
+        0.9,
+        0.64,
+        0.065,
+        0.045
+      ],
+      [
+        0.73,
+        0.6,
+        0.07,
+        0.04
+      ],
+      [
+        0.42,
+        0.56,
+        0.03,
+        0.03
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "J-PA5",
+    "asset": "corridor-pa5.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.56.03.jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 245990,
+    "privacy_blur_regions": [
+      [
+        0.95,
+        0.67,
+        0.05,
+        0.04
+      ],
+      [
+        0.8,
+        0.64,
+        0.06,
+        0.04
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "J-LIBRARY",
+    "asset": "corridor-library.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.44.jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 166871,
+    "privacy_blur_regions": [
+      [
+        0.93,
+        0.575,
+        0.025,
+        0.035
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "RESIDENSI-NORTH-WEST",
+    "asset": "reference-15.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.45 (1).jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 150336,
+    "privacy_blur_regions": [
+      [
+        0.1,
+        0.57,
+        0.065,
+        0.04
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  },
+  {
+    "node_id": "PARKING-WEST",
+    "asset": "reference-09.jpg",
+    "original_filename": "WhatsApp Image 2026-10-20 at 12.26.45 (2).jpeg",
+    "width": 750,
+    "height": 1000,
+    "bytes": 125240,
+    "privacy_blur_regions": [
+      [
+        0.23,
+        0.625,
+        0.065,
+        0.04
+      ],
+      [
+        0.65,
+        0.605,
+        0.03,
+        0.04
+      ]
+    ],
+    "source": "Operator supplied; location label confirmed in conversation on 2026-10-20",
+    "capture_time": null
+  }
+]
