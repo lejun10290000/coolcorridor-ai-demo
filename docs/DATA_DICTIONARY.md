@@ -122,6 +122,10 @@ A separate local IndexedDB PhotoLibrary schema1 stores revision, published overr
 
 A published override value of `null` means the Developer deleted that point's published reference; it must not fall back to a bundled seed. A deletion history record has `action: delete`, `photo: null`, and the previous image plus actor/note/time. Existing history records with no action are publications. Deletion retains private drafts and does not alter shade classifications, graph points or routes. Re-uploading and explicitly publishing a replacement clears the deleted state for that point.
 
+## Shared map information (display only)
+
+Current shared-map presentation clips the source bitmap's obsolete legend below native y1224 and shows a live HTML key for both roles. The original bitmap bytes,1113×1414 coordinate frame, graph coordinates and stored evidence remain unchanged. Larger photo markers and optional walk rings are presentation features, not new surveyed points or shade evidence. See MAP_INFORMATION.md.
+
 ## Report reference photo
 
 ResidentReport.reference_photo is optional. If present, it contains a bounded JPEG `data_url`, `source: resident_upload` and `capture_time: null`. It is an unverified Resident-provided reference attached to that report, not a shade observation, map-point publication or confirmed capture timestamp. It is copied on submission, validated on reload and retained after review. Existing reports omit the field. The existing WorkflowState schema1 stores it atomically with the report in localStorage; no separate image/report identifier or migration is needed. See REPORT_REFERENCE_PHOTOS.md for limits and quota handling.
