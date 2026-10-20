@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "photoReportId": "REPORT-000002",
+  "encodedPreviewCharacters": 196863,
+  "checks": [
+    "reports without photos still submit normally",
+    "optional photo preview, removal and larger Developer view",
+    "unsupported/corrupt/oversized files rejected; continue without photo allowed",
+    "failed persistent save keeps modal/attachment and creates no partial report",
+    "attachment binds to its own saved report and survives reload",
+    "photo submission alone leaves baseline unchanged",
+    "Developer acceptance preserves attachment and publishes only saved route mixed shade",
+    "Developer rejection preserves reference without changing baseline",
+    "report attachments never replace published map-point photos",
+    "phone report/review layouts have no horizontal overflow; modal close restores scroll"
+  ],
+  "pageErrors": []
+}

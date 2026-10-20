@@ -103,6 +103,12 @@ Developer deletion extends schema1 published overrides to `PointPhoto|null`: an 
 
 PointPhotoEditor chooses actions from the current published library: a photo offers Update/Delete; no photo offers Upload. Update and Upload trigger the same validated file-input pipeline and stage a private draft. Update never invokes deletion; the current image remains published until replacement publication. The accessible input name remains `Upload reference photo` for existing browser checks. This is presentation-only: no controller, storage, model or HTTP contract change.
 
+### Optional report reference attachment
+
+`ResidentReport` adds optional `reference_photo?: ReportReferencePhoto`, with `data_url: string` (JPEG data URL, max300000 characters), `source: resident_upload`, and `capture_time: null`. `submitRouteReport` accepts and copies the optional field; `validReportPhoto` validates it at submission and decodeWorkflow loading. Older reports remain unchanged. There is no schema-version bump, migration or HTTP endpoint. Attachments stay in WorkflowState/localStorage, separate from the point-photo IndexedDB library, and survive acceptance/rejection.
+
+RouteReportForm reuses the browser image preparation pipeline, blocks submission while preparing or after an invalid attachment, and supports clearing the photo. Its existing commit callback can receive optional `onFailure(error)` for visible in-dialog errors. useWorkflow refuses session-only fallback for a newly submitted report with an attachment when the persistent write fails: no report is added, the form stays open and preview/text remain. Other commits keep their existing fallback behavior. Developer ReportReview renders a labelled, expandable reference image; it does not infer validity or automatically publish shade/map photos. See REPORT_REFERENCE_PHOTOS.md.
+
 ### Resident walkthrough presentation seam
 
 `CalculatedResident` can begin an in-memory `WalkSession {route: CalculatedRoute, snapshot: DatasetSnapshot, next_index: number}` from the selected comparison route. It copies the route and snapshot, preserving ordered nodes/segments and map version until exit. `beginWalk` validates connectivity and snapshot consistency; `advanceWalk`/`previousWalkPoint` move one confirmed graph point with bounded progress. `walkProgress` derives current/next/completion. Existing comparison APIs and automatic publication recalculation are unchanged outside the locked session. A newer-baseline notice offers exit/replanning; photo references remain the latest published library.

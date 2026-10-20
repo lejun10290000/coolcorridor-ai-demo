@@ -93,6 +93,10 @@ In Developer, use **Edit shade / publish → Point photos / publish references**
 
 See [point-photo workflow and source mapping](docs/POINT_REFERENCE_PHOTOS.md). Run `node review/check-point-photos.cjs` against the normal production preview for acceptance checks (including upload errors, concurrent edits, failed-save isolation and mobile panel closing).
 
+## Resident report photos
+
+Resident walkway reports can also include an **optional reference photo**. Preview or remove it before submitting; Developer can view/enlarge it beside the report when deciding to accept or reject. Photo attachments do not update map-point photos or shade automatically. See [report photo workflow and limits](docs/REPORT_REFERENCE_PHOTOS.md).
+
 ## Resident walkthrough
 
 Choose your start and destination, select the shortest or most shaded route, then choose **Start selected route**. The route stays locked while the next graph point and its published photo appear. Press **Next** after reaching that point; use **Previous point** to correct an accidental advance. Confirm the destination and choose **Finish walk**, or **Exit walk / change route** to replan earlier. A new Developer baseline does not silently change a walk in progress; exit to use its recalculated routes. This is a manual illustrative preview without GPS or verified navigation. Refreshing or leaving the role ends walkthrough progress. See [workflow and validation](docs/RESIDENT_WALKTHROUGH.md).

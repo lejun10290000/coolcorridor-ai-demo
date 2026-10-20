@@ -27,7 +27,10 @@ export function useWorkflow(){
       }catch(error){if(error instanceof Error&&error.message.startsWith('Data changed'))throw error}
       const next=update(reference.current)
       let warning=''
-      try{const raw=JSON.stringify(next);localStorage.setItem(storageKey,raw);lastStoredRaw.current=raw}catch{warning='Could not save locally (storage blocked or full). This change is in-session only; do not rely on it after refresh.'}
+      try{const raw=JSON.stringify(next);localStorage.setItem(storageKey,raw);lastStoredRaw.current=raw}catch{
+        if(next.reports.some(r=>r.reference_photo&&!reference.current.reports.some(old=>old.report_id===r.report_id)))throw new Error('Could not save this report with its photo (storage blocked or full). Remove the photo or free browser storage and try again. No report was submitted.')
+        warning='Could not save locally (storage blocked or full). This change is in-session only; do not rely on it after refresh.'
+      }
       reference.current=next;setState(next);setNotice(warning);return true
     }catch(error){const failure=error instanceof Error?error:new Error('Could not apply this action.');setNotice(failure.message);onFailure?.(failure);return false}
   }
