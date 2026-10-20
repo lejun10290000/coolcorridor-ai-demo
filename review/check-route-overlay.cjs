@@ -16,7 +16,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
         assert.equal(await page.locator('.campus-route-halo').first().getAttribute('vector-effect'),'non-scaling-stroke')
         // All base shade paths precede the active overlay; no later shade layer can cover it.
         assert.equal(await page.locator('svg').evaluate(svg=>svg.lastElementChild.classList.contains('campus-active-route')),true)
-        assert.equal(await page.locator('.campus-route-outline').first().getAttribute('stroke-width'), '8')
+        assert.equal(await page.locator('.campus-route-outline').first().getAttribute('stroke-width'), '4')
         await page.screenshot({path:path.join(output,`${label}-${objective==='Shortest'?'shortest':'practical'}.png`),fullPage:true})
       }
     }

@@ -41,3 +41,7 @@ The production build passed after this move. A focused browser probe against the
 ## Both-role60/40 layout
 
 Resident and Developer now allocate60% of available column width to the map and40% to the controls, excluding the24px gap. Phones retain the stacked layout. Production build passed. A focused normal-entry browser probe verified the measured ratios at1920,1440,1366 and1024px for both roles, all five Developer tabs without horizontal overflow, and390px stacked phone layouts with no page errors. Current screenshots and exact measurements are in role-widths/.
+
+## Thinner route highlight
+
+The shared selected-route overlay now uses a4px purple casing (previously8px),6px white halo (previously11px) and2px shade centre (previously3px). Map geometry, selected IDs, colours, click targets and dashed-line spacing are unchanged. Four routing UI tests and the production build passed. A normal-entry browser probe verified both roles at100% and300% zoom, matching all12 selected Main Gate–Klinik links and reporting no page errors. Actual screenshots and results are in thin-route/. The isolated legacy specimen's expected purple width was updated but that older separate specimen server was not rerun.
