@@ -1,0 +1,41 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "purpleWidthBefore": 8,
+  "purpleWidthAfter": 4,
+  "checks": [
+    {
+      "role": "Resident",
+      "zoom": 100,
+      "routeLinks": 12,
+      "halo": 6,
+      "purple": 4,
+      "shadeCentre": 2
+    },
+    {
+      "role": "Resident",
+      "zoom": 300,
+      "routeLinks": 12,
+      "halo": 6,
+      "purple": 4,
+      "shadeCentre": 2
+    },
+    {
+      "role": "Developer",
+      "zoom": 100,
+      "routeLinks": 12,
+      "halo": 6,
+      "purple": 4,
+      "shadeCentre": 2
+    },
+    {
+      "role": "Developer",
+      "zoom": 300,
+      "routeLinks": 12,
+      "halo": 6,
+      "purple": 4,
+      "shadeCentre": 2
+    }
+  ],
+  "pageErrors": []
+}

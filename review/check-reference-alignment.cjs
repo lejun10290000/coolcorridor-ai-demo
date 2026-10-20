@@ -83,8 +83,9 @@ const out=path.resolve(process.env.ALIGNMENT_OUTPUT_DIR||'outputs/normal-points-
     await page.locator('[data-segment-id="DEMO-REF-001"]').focus();await page.keyboard.press('Enter')
     await page.getByRole('button',{name:'View reports for this segment',exact:true}).click()
     assert.match(await page.getByRole('region',{name:'Reports for selected segment',exact:true}).innerText(),/DEMO alignment browser test/)
+    await page.getByRole('tab',{name:'Budget optimiser',exact:true}).click()
     await page.getByRole('button',{name:'Optimise plan',exact:true}).click()
-    await page.getByRole('button',{name:'Simulated scenario',exact:true}).click()
+    await page.getByRole('tab',{name:'Simulated scenario',exact:true}).click()
     assert.deepEqual(await nodes(),residentNodes);assert.equal(await page.locator('.campus-map-scene img').getAttribute('src'),imageURL)
     await page.getByRole('button',{name:'Return to baseline',exact:true}).click()
     for(const [width,height,label] of [[1440,1100,'desktop'],[390,844,'mobile']]){

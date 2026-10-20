@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "desktop": {
+    "underMap": true,
+    "sameColumn": true,
+    "inMapColumn": true,
+    "notInTools": true,
+    "overflow": false
+  },
+  "mobile": {
+    "underMap": true,
+    "sameColumn": true,
+    "inMapColumn": true,
+    "notInTools": true,
+    "overflow": false
+  },
+  "checks": [
+    "evidence directly below the Developer map, outside all five right-side tools",
+    "collapsed evidence header visible on desktop",
+    "selected path updates the same expandable inspector",
+    "evidence remains under map while switching tabs",
+    "scenario uses simulated comparison in the same inspector",
+    "View reports still opens the selected-segment inbox",
+    "mobile evidence between map and tool tabs, without horizontal overflow"
+  ],
+  "pageErrors": []
+}
