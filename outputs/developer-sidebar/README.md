@@ -45,3 +45,9 @@ Resident and Developer now allocate60% of available column width to the map and4
 ## Thinner route highlight
 
 The shared selected-route overlay now uses a4px purple casing (previously8px),6px white halo (previously11px) and2px shade centre (previously3px). Map geometry, selected IDs, colours, click targets and dashed-line spacing are unchanged. Four routing UI tests and the production build passed. A normal-entry browser probe verified both roles at100% and300% zoom, matching all12 selected Main Gate–Klinik links and reporting no page errors. Actual screenshots and results are in thin-route/. The isolated legacy specimen's expected purple width was updated but that older separate specimen server was not rerun.
+
+## Compact vertical spacing
+
+Header/workspace/heading gaps are smaller in both roles, with the freed height returned to the desktop map area. At1440×1000, Resident map top moves from170px to134px and its image viewport grows from600px to636px. Developer map pane top moves from185px to153px and its image viewport grows from515px to549px. Workspace padding is12px above and16px below; phones retain readable wrapped headers and normal stacked scrolling.
+
+Production build passed. Normal-entry browser measurements at1920/1440/1366/1024/390px confirmed compact spacing, retained60/40 desktop columns, mobile stacking, five Developer tabs without horizontal overflow and no page errors. Screenshots and actual measured results are in compact-spacing/.

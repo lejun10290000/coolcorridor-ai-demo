@@ -1,16 +1,18 @@
-/* Resident layout only. Developer keeps the existing workspace and map styling. */
-.wf-app .resident-workspace{max-width:1600px;padding:22px clamp(16px,3vw,42px) 40px}
-.resident-topbar{margin-bottom:20px;align-items:center}
+/* Resident-only layout and compact page spacing. */
+.wf-app.resident-app>header{min-height:46px;padding-top:4px;padding-bottom:4px}
+.wf-app .resident-workspace{max-width:1600px;padding:12px clamp(16px,3vw,42px) 16px}
+.resident-topbar{margin-bottom:10px;align-items:center}
+.wf-app .resident-topbar h1{margin:2px 0}
 .resident-topbar-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .resident-jump-link{color:#55255b;font-size:.85rem;font-weight:700;text-underline-offset:3px}
 .wf-app .resident-workspace .resident-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:24px;align-items:start}
-.resident-map-pane{position:sticky;top:16px;align-self:start;min-width:0;max-height:calc(100dvh - 180px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
-.resident-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 400px),790px)}
+.resident-map-pane{position:sticky;top:16px;align-self:start;min-width:0;max-height:calc(100dvh - 144px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
+.resident-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 364px),790px)}
 .resident-map-pane .campus-map-legend{padding-bottom:10px}
 .resident-map-pane .campus-map-details{border-top:1px solid #e3dde2;padding:10px 14px;font-size:.78rem}
 .resident-map-pane .campus-map-details[open]{max-height:180px;overflow-y:auto}
 .resident-map-pane .campus-map-details>summary{color:#55255b}
-.resident-sidebar{display:flex;flex-direction:column;gap:16px;min-width:0;max-height:calc(100dvh - 180px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#b9a8bf transparent;padding-right:5px}
+.resident-sidebar{display:flex;flex-direction:column;gap:16px;min-width:0;max-height:calc(100dvh - 144px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#b9a8bf transparent;padding-right:5px}
 .resident-sidebar>section,.resident-sidebar>details{flex-shrink:0}
 .resident-sidebar>section,.resident-sidebar>details{background:#fff;border:1px solid #d6ced4;border-radius:10px;padding:18px;margin:0;min-width:0}
 .resident-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -45,7 +47,7 @@
   .resident-sidebar{max-height:none;overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto;padding-right:0}
 }
 @media(max-width:620px){
-  .wf-app .resident-workspace{padding:20px 16px 32px}
+  .wf-app .resident-workspace{padding:12px 16px 16px}
   .resident-topbar{align-items:start}
   .resident-topbar-actions{width:100%;justify-content:space-between}
   .resident-sidebar>section,.resident-sidebar>details{padding:15px}
