@@ -58,7 +58,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     assert.equal(report.category,'broken shade structure');assert.deepEqual(report.route.segment_ids,chosen);assert.equal(submitted.current_version,initialVersion)
     for(const link of chosen)assert.equal(await line(resident,link).getAttribute('stroke'),'#35745A')
     await resident.getByRole('button',{name:'Report selected route',exact:true}).click();await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic overlapping report to test count reduction and rejection.');await resident.getByRole('button',{name:'Submit route report',exact:true}).click()
-    await developer.getByRole('button',{name:/Review Resident reports \(2 pending\)/}).click()
+    await developer.getByRole('tab',{name:/^Resident reports/}).click()
     const second=(await stored()).reports[1].report_id
     for(const link of chosen)assert.equal(await developer.locator(`[data-report-segment-id="${link}"]`).getAttribute('data-report-count'),'2')
     assert.equal(await resident.locator('.campus-report').count(),0)
@@ -93,6 +93,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     await developer.locator('.campus-map').screenshot({path:path.join(out,'04b-developer-reviewed-no-counts.png')})
     // Merely accepting never makes a path green. Only a later explicit manual edit does.
     await developer.getByRole('button',{name:'Close reported route preview',exact:true}).click()
+    await developer.getByRole('tab',{name:'Edit shade / publish',exact:true}).click()
     await developer.getByRole('button',{name:'Use latest map as draft baseline',exact:true}).click()
     await chooseDeveloperRoute('MAIN-GATE','RAZAK-ENTRANCE');await stage('mostly_shaded')
     for(const link of chosen)assert.equal(await line(resident,link).getAttribute('stroke'),'#BD8B16')
@@ -106,6 +107,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     await resident.locator('.campus-map').screenshot({path:path.join(out,'05-resident-after-manual-repair-publication.png')})
     for(const page of [resident,developer]){await page.reload();await enter(page,page===resident?'Resident':'Developer');assert.equal(await line(page,chosen[0]).getAttribute('stroke'),'#35745A')}
     assert.equal((await stored()).reports[0].review_status,'verified')
+    await developer.getByRole('tab',{name:/^Resident reports/}).click()
     await developer.getByRole('region',{name:'Resident report inbox',exact:true}).screenshot({path:path.join(out,'06-preserved-review-history.png')})
     // Mobile form, focus/scroll and no-route validation use normal UI too.
     assert.equal(await developer.locator('.campus-report').count(),0);assert.equal(await resident.locator('.campus-report').count(),0)

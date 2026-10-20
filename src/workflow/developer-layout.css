@@ -1,0 +1,72 @@
+/* Developer-only layout. The map stays beside independently scrolling tools. */
+.wf-app .developer-workflow{max-width:1800px;padding:20px clamp(16px,2.5vw,40px) 30px}
+.developer-topbar{margin-bottom:18px;align-items:center}
+.developer-topbar h1{margin:4px 0 6px}
+.developer-topbar p{margin:0;font-size:.88rem}
+.developer-topbar .wf-actions{align-items:center;margin:0}
+.developer-topbar a{color:#55255b;font-size:.8rem;font-weight:700;text-underline-offset:3px}
+.developer-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(460px,1.1fr);gap:24px;align-items:start}
+.developer-map-pane{position:sticky;top:16px;min-width:0;max-height:calc(100dvh - 190px);overflow-y:auto;border-radius:10px;scroll-margin-top:16px}
+.developer-map-pane .wf-map-state{font-size:.72rem;margin:0 0 8px;padding:8px 12px}
+.developer-map-pane .campus-map-viewport{--map-height:clamp(220px,calc(100dvh - 425px),800px)}
+.developer-map-pane .campus-map-toolbar{padding:10px;gap:8px}
+.developer-map-pane .campus-map-toolbar h2{font-size:.9rem}
+.developer-map-pane .campus-map-controls{gap:6px}
+.developer-map-pane .campus-map-controls button{padding:7px 10px;font-size:.8rem}
+.developer-map-pane .campus-map-caution{font-size:.7rem;padding:9px 12px}
+.developer-map-pane .campus-map-legend{font-size:.72rem;padding:10px 12px}
+.developer-map-pane .campus-map-details{font-size:.75rem;padding:10px 12px;border-top:1px solid #ded5e4}
+.developer-map-pane .campus-map-details[open]{max-height:150px;overflow-y:auto}
+.developer-map-pane .wf-report-path{font-size:.75rem;padding:10px;margin:0 0 8px}
+.developer-map-pane .wf-report-path p{margin:4px 0}
+.developer-right-pane{min-width:0;display:flex;flex-direction:column;height:calc(100dvh - 190px);min-height:380px;border:1px solid #d6ced4;border-radius:12px;background:#faf8fb;overflow:hidden;scroll-margin-top:16px}
+.developer-tool-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:10px;border-bottom:1px solid #ded5e4;background:#fff;flex-shrink:0}
+.developer-tool-tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:1px solid #d8ccdc;background:#f7f3f8;color:#55255b;padding:9px 8px;text-align:left;font-size:.75rem;line-height:1.35;border-radius:8px;min-width:0;overflow-wrap:anywhere}
+.developer-tool-tabs button[aria-selected=true]{background:#55255b;color:#fff;border-color:#55255b;box-shadow:inset 0 -3px #bd8b16}
+.developer-tool-tabs small{display:block;font-size:.65rem;font-weight:500;margin-top:3px}
+.developer-tool-number{font-size:.65rem;opacity:.8;font-weight:700}
+.developer-panel-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-color:#b9a8bf transparent;padding:14px;flex:1}
+.developer-panel-scroll [role=tabpanel][hidden]{display:none}
+.developer-panel-scroll .wf-panel{margin:0 0 16px;padding:16px}
+.developer-panel-scroll .wf-panel h2{font-size:1.15rem}
+.developer-panel-scroll .wf-panel p,.developer-panel-scroll .wf-panel li{font-size:.8rem}
+.developer-panel-scroll .wf-panel label{font-size:.8rem}
+.developer-edit-controls fieldset{min-width:0;border:1px solid #dcd2dd;border-radius:10px;padding:12px}
+.developer-edit-controls fieldset:disabled{opacity:.6}
+.developer-edit-controls [data-testid=developer-selection]{font-weight:700}
+.developer-edit-controls .wf-actions{align-items:center}
+.developer-panel-scroll .wf-single-panel{min-width:0}
+.developer-panel-scroll .wf-budget-candidates,.developer-panel-scroll .wf-footfall-priorities{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.developer-panel-scroll .wf-candidate{margin:0;padding:12px;min-width:0}
+.developer-panel-scroll .wf-candidate h3{font-size:.88rem;margin-top:0}
+.developer-panel-scroll .wf-candidate p{font-size:.75rem;line-height:1.5}
+.developer-panel-scroll .wf-candidate strong{font-size:.75rem}
+.developer-panel-scroll .wf-candidate button{font-size:.75rem;padding:8px 10px}
+.developer-panel-scroll .wf-treatment-prices{grid-template-columns:1fr;gap:6px;margin:10px 0}
+.developer-panel-scroll .wf-treatment-prices p{margin:0;padding:8px}
+.developer-panel-scroll .wf-footfall-priorities .priority{padding:14px;display:flex;flex-direction:column;gap:10px;background:#fff;color:#3e2348;border:1px solid #d8d0dc}
+.developer-panel-scroll .wf-footfall-priorities .priority:is(:hover,:focus-visible){background:#55255b;color:#fff}
+.developer-panel-scroll .wf-footfall-priorities :is(b,span,small){color:inherit;font-size:.78rem}
+.developer-planning-configuration,.developer-history,.developer-local,.developer-path-evidence{padding:12px;background:#fff;border:1px solid #d6ced4;border-radius:9px;margin:14px 0;font-size:.8rem;overflow-wrap:anywhere}
+.developer-path-evidence>.inspector{border:0;padding:14px 0 0}
+.developer-path-evidence .wf-evidence{margin:12px 0 0}
+.developer-panel-scroll .wf-report-order{font-weight:700;color:#55255b}
+@media(max-width:959px){
+  .developer-layout{grid-template-columns:1fr}
+  .developer-map-pane{position:relative;top:auto;max-height:none;overflow:visible}
+  .developer-map-pane .campus-map-viewport{--map-height:clamp(320px,52dvh,540px)}
+  .developer-right-pane{height:auto;min-height:0;overflow:visible}
+  .developer-panel-scroll{overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto}
+}
+@media(max-width:620px){
+  .wf-app .developer-workflow{padding:18px 16px 30px}
+  .developer-topbar .wf-actions{margin-top:10px}
+  .developer-panel-scroll{padding:10px}
+  .developer-panel-scroll .wf-panel{padding:12px}
+  .developer-panel-scroll .wf-budget-candidates,.developer-panel-scroll .wf-footfall-priorities{grid-template-columns:1fr}
+  .developer-tool-tabs{gap:4px;padding:8px}
+  .developer-tool-tabs button{padding:8px 5px;font-size:.65rem}
+  .developer-tool-tabs small{font-size:.6rem}
+}
+
+.developer-planning-configuration{margin:0 0 14px}.developer-planning-configuration label{margin-top:12px}.wf-planning-assumptions{margin:12px 0}

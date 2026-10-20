@@ -1,0 +1,298 @@
+{
+  "status": "passed",
+  "normalEntry": "http://127.0.0.1:4183/",
+  "checks": [
+    "five accessible tool tabs, default shade editor",
+    "map remains left while right tool panel scrolls; tabs stay visible",
+    "budget and footfall each form two columns by five rows on desktop",
+    "map selection, draft note, treatment choices and report notes persist across tabs",
+    "budget/footfall maps exclude drafts; scenarios exclude drafts and never publish",
+    "publication from another tab refreshes scenario baseline and inherited shade",
+    "Resident reports sorted by actual date descending without mutating stored order",
+    "report acceptance still publishes mixed shade and recalculates Resident routes",
+    "legacy manual candidate assignment and explicit scenario projections preserved",
+    "invalid/unavailable scenario shows baseline with no report markers or draft leakage",
+    "keyboard Arrow/Home/End tab navigation",
+    "1440,1366,1024 desktop and390 mobile; no horizontal overflow in all five sections",
+    "mobile stacks map above tools and cards into one column"
+  ],
+  "budgetGrid": [
+    {
+      "x": 696.796875,
+      "y": 770.765625,
+      "width": 324.09375,
+      "height": 524.59375,
+      "top": 770.765625,
+      "right": 1020.890625,
+      "bottom": 1295.359375,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 770.765625,
+      "width": 324.109375,
+      "height": 524.59375,
+      "top": 770.765625,
+      "right": 1357,
+      "bottom": 1295.359375,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 1307.359375,
+      "width": 324.09375,
+      "height": 524.59375,
+      "top": 1307.359375,
+      "right": 1020.890625,
+      "bottom": 1831.953125,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 1307.359375,
+      "width": 324.109375,
+      "height": 524.59375,
+      "top": 1307.359375,
+      "right": 1357,
+      "bottom": 1831.953125,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 1843.953125,
+      "width": 324.09375,
+      "height": 524.59375,
+      "top": 1843.953125,
+      "right": 1020.890625,
+      "bottom": 2368.546875,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 1843.953125,
+      "width": 324.109375,
+      "height": 524.59375,
+      "top": 1843.953125,
+      "right": 1357,
+      "bottom": 2368.546875,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 2380.546875,
+      "width": 324.09375,
+      "height": 524.59375,
+      "top": 2380.546875,
+      "right": 1020.890625,
+      "bottom": 2905.140625,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 2380.546875,
+      "width": 324.109375,
+      "height": 524.59375,
+      "top": 2380.546875,
+      "right": 1357,
+      "bottom": 2905.140625,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 2917.140625,
+      "width": 324.09375,
+      "height": 524.59375,
+      "top": 2917.140625,
+      "right": 1020.890625,
+      "bottom": 3441.734375,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 2917.140625,
+      "width": 324.109375,
+      "height": 524.59375,
+      "top": 2917.140625,
+      "right": 1357,
+      "bottom": 3441.734375,
+      "left": 1032.890625
+    }
+  ],
+  "footfallGrid": [
+    {
+      "x": 696.796875,
+      "y": 453.421875,
+      "width": 324.09375,
+      "height": 130,
+      "top": 453.421875,
+      "right": 1020.890625,
+      "bottom": 583.421875,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 453.421875,
+      "width": 324.109375,
+      "height": 130,
+      "top": 453.421875,
+      "right": 1357,
+      "bottom": 583.421875,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 611.421875,
+      "width": 324.09375,
+      "height": 130,
+      "top": 611.421875,
+      "right": 1020.890625,
+      "bottom": 741.421875,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 611.421875,
+      "width": 324.109375,
+      "height": 130,
+      "top": 611.421875,
+      "right": 1357,
+      "bottom": 741.421875,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 769.421875,
+      "width": 324.09375,
+      "height": 130,
+      "top": 769.421875,
+      "right": 1020.890625,
+      "bottom": 899.421875,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 769.421875,
+      "width": 324.109375,
+      "height": 130,
+      "top": 769.421875,
+      "right": 1357,
+      "bottom": 899.421875,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 927.421875,
+      "width": 324.09375,
+      "height": 130,
+      "top": 927.421875,
+      "right": 1020.890625,
+      "bottom": 1057.421875,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 927.421875,
+      "width": 324.109375,
+      "height": 130,
+      "top": 927.421875,
+      "right": 1357,
+      "bottom": 1057.421875,
+      "left": 1032.890625
+    },
+    {
+      "x": 696.796875,
+      "y": 1085.421875,
+      "width": 324.09375,
+      "height": 130,
+      "top": 1085.421875,
+      "right": 1020.890625,
+      "bottom": 1215.421875,
+      "left": 696.796875
+    },
+    {
+      "x": 1032.890625,
+      "y": 1085.421875,
+      "width": 324.109375,
+      "height": 130,
+      "top": 1085.421875,
+      "right": 1357,
+      "bottom": 1215.421875,
+      "left": 1032.890625
+    }
+  ],
+  "responsiveSizes": [
+    {
+      "width": 1366,
+      "height": 768,
+      "map": {
+        "x": 34.140625,
+        "y": 224,
+        "width": 573.171875,
+        "height": 558,
+        "top": 224,
+        "right": 607.3125,
+        "bottom": 782,
+        "left": 34.140625
+      },
+      "right": {
+        "x": 631.3125,
+        "y": 185,
+        "width": 700.546875,
+        "height": 578,
+        "top": 185,
+        "right": 1331.859375,
+        "bottom": 763,
+        "left": 631.3125
+      }
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "map": {
+        "x": 25.59375,
+        "y": 218,
+        "width": 426.953125,
+        "height": 602.796875,
+        "top": 218,
+        "right": 452.546875,
+        "bottom": 820.796875,
+        "left": 25.59375
+      },
+      "right": {
+        "x": 476.546875,
+        "y": 179,
+        "width": 521.859375,
+        "height": 578,
+        "top": 179,
+        "right": 998.40625,
+        "bottom": 757,
+        "left": 476.546875
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "map": {
+        "x": 16,
+        "y": 320,
+        "width": 358,
+        "height": 698.671875,
+        "top": 320,
+        "right": 374,
+        "bottom": 1018.671875,
+        "left": 16
+      },
+      "right": {
+        "x": 16,
+        "y": 1042.671875,
+        "width": 358,
+        "height": 8814.015625,
+        "top": 1042.671875,
+        "right": 374,
+        "bottom": 9856.6875,
+        "left": 16
+      }
+    }
+  ],
+  "pageErrors": []
+}

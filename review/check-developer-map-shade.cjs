@@ -45,7 +45,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     assert.equal(await developer.getByRole('button',{name:'Publish to Resident map',exact:true}).isEnabled(),false)
     await developer.getByLabel('Map publication note',{exact:true}).fill('Synthetic browser demo: two unshaded, one mixed, two fully shaded links. No field observation.')
     await developer.getByRole('checkbox',{name:'I reviewed these DEMO shade changes and want to publish them to Resident routing.',exact:true}).check()
-    await developer.locator('.wf-map-editor > .wf-panel').screenshot({path:path.join(out,'02-developer-review-before-publish.png')})
+    await developer.locator('.developer-edit-controls > .wf-panel').screenshot({path:path.join(out,'02-developer-review-before-publish.png')})
     await developer.getByRole('button',{name:'Publish to Resident map',exact:true}).click()
     const published=await stored(),version=published.current_version
     assert.notEqual(version,versionBefore);assert.equal(published.map_shade_draft,null);assert.equal(published.snapshots.length,2)
@@ -62,7 +62,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     }
     await resident.locator('.campus-map').screenshot({path:path.join(out,'03-resident-after-publication.png')})
     await resident.getByRole('region',{name:'Calculated route comparison',exact:true}).screenshot({path:path.join(out,'04-recalculated-routes.png')})
-    await developer.getByRole('button',{name:'Baseline',exact:true}).click();await developer.getByLabel('Baseline dataset',{exact:true}).selectOption(versionBefore)
+    await developer.getByRole('tab',{name:'Edit shade / publish',exact:true}).click();await developer.locator('.developer-history>summary').click();await developer.getByLabel('Baseline dataset',{exact:true}).selectOption(versionBefore)
     assert.equal(await developer.getByRole('button',{name:'Add route to selection',exact:true}).isEnabled(),false)
     assert.equal(await developer.locator(`[data-segment-id="${shaded[0]}"] .campus-shade-stroke`).getAttribute('stroke'),'#707580')
     await developer.getByLabel('Baseline dataset',{exact:true}).selectOption('current')

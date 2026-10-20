@@ -30,13 +30,13 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     await resident.waitForFunction(()=>document.querySelector('.resident-sidebar').scrollTop>100)
     const after=(await coordinates(resident)).map;assert.ok(Math.abs(before.x-after.x)<1&&Math.abs(before.y-after.y)<1)
     await sidebar().evaluate(el=>el.scrollTop=0);await resident.screenshot({path:path.join(out,'01-resident-desktop-split.png')})
-    // The shared map has not switched Developer into the compact Resident variant.
+    // Developer now opts into its own five-tool layout; Resident styles remain scoped.
     await enter(developer,'Developer')
-    assert.equal(await developer.locator('.resident-layout,.resident-sidebar,.campus-map-details').count(),0)
-    assert.equal(await developer.locator('.campus-map-viewport').evaluate(el=>el.clientHeight),700)
+    assert.equal(await developer.locator('.resident-layout,.resident-sidebar').count(),0);assert.equal(await developer.getByRole('tab').count(),5)
+    assert.ok(await developer.locator('.campus-map-viewport').evaluate(el=>el.clientHeight)>0)
     assert.equal(await developer.getByRole('heading',{name:'Edit map shade',exact:true}).count(),1)
     assert.equal(await developer.locator('[data-footfall-rank]').count(),10)
-    await developer.locator('.campus-map').screenshot({path:path.join(out,'02-developer-map-unchanged.png')})
+    await developer.locator('.campus-map').screenshot({path:path.join(out,'02-developer-sidebar-map.png')})
     // Published updates still recalculate both route cards in the right column.
     async function chooseRoute(from,to){await developer.getByLabel('Developer route from',{exact:true}).selectOption(from);await developer.getByLabel('Developer route to',{exact:true}).selectOption(to);await developer.getByRole('button',{name:'Add route to selection',exact:true}).click()}
     const oldVersion=await card('exposure').getAttribute('data-route-version')
@@ -72,7 +72,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
     await resident.getByRole('button',{name:'Zoom in campus map',exact:true}).click();await resident.locator('.campus-map-viewport').focus();await resident.keyboard.press('ArrowRight');await resident.keyboard.press('Home')
     assert.equal(await resident.getByLabel('Campus map zoom',{exact:true}).innerText(),'100%')
     assert.deepEqual(errors,[])
-    const results={status:'passed',normalEntry:base+'/',checks:['Resident map left and selectors/comparison right on desktop','right column scrolls independently while map position stays fixed','map image visible within laptop and desktop viewport','shortest and exposure cards select identical overlay segment IDs','publication automatically updates right-side cards and shaded route','manual point-to-point reporting still autofills and submits','Resident report numbers stay hidden','selected-path evidence and map source remain accessible','Developer retains original map height, expanded information and workflow','desktop 1440, laptop 1366, tablet 1024 and mobile390 checked','mobile stacks, jump links reach controls/map, no horizontal overflow','zoom/pan/reset still work'],responsiveSizes:sizes,pageErrors:errors}
+    const results={status:'passed',normalEntry:base+'/',checks:['Resident map left and selectors/comparison right on desktop','right column scrolls independently while map position stays fixed','map image visible within laptop and desktop viewport','shortest and exposure cards select identical overlay segment IDs','publication automatically updates right-side cards and shaded route','manual point-to-point reporting still autofills and submits','Resident report numbers stay hidden','selected-path evidence and map source remain accessible','Developer five-tool layout uses the same image map without Resident style leakage','desktop 1440, laptop 1366, tablet 1024 and mobile390 checked','mobile stacks, jump links reach controls/map, no horizontal overflow','zoom/pan/reset still work'],responsiveSizes:sizes,pageErrors:errors}
     await fs.writeFile(path.join(out,'browser-results.json'),JSON.stringify(results,null,2)+'\n');console.log(JSON.stringify(results,null,2))
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)})
