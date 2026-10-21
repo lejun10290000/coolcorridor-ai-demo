@@ -35,3 +35,6 @@
 .campus-from-key{background:#55255b}.campus-to-key{background:#bd8b16}
 .campus-map-key-note{font-size:.72rem;line-height:1.5;color:#625867;margin:8px 14px 12px}
 @media(max-width:620px){.route-endpoint-pickers>label{min-width:100%}.map-point-mode{min-width:100%}}
+
+/* Resident-only Living Amethyst route and photo inspector. */
+.resident-app .campus-active-route .campus-route-halo{stroke:#c65bff;stroke-width:13;opacity:.62;filter:drop-shadow(0 0 5px #d16cff);animation:resident-route-glow 5.8s ease-in-out infinite}.resident-app .campus-active-route .campus-route-outline{stroke:#f5c8ff;stroke-width:6;filter:drop-shadow(0 0 4px #9a27f0)}.resident-app .campus-active-route .campus-route-centre{stroke:#fff;stroke-width:2.5;stroke-dasharray:10 11;animation:resident-route-dash 1.4s linear infinite}.resident-app .campus-map-legend .campus-route-key{background:#b84dff;border-color:#f6c6ff;box-shadow:0 0 10px #c34aff}@keyframes resident-route-glow{50%{opacity:1;stroke-width:16}}@keyframes resident-route-dash{to{stroke-dashoffset:-42}}@media(prefers-reduced-motion:reduce){.resident-app .campus-active-route .campus-route-halo,.resident-app .campus-active-route .campus-route-centre{animation:none}}

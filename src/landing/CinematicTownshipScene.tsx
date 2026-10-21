@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { createCosmicSky } from './CosmicSky'
 import { createTownshipWorld, type LandingChapter, type LandingQuality } from './world'
 
 interface Props {
@@ -50,6 +51,8 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
     renderer.domElement.setAttribute('role', 'img')
     mount.appendChild(renderer.domElement)
     const world = createTownshipWorld()
+    const sky = createCosmicSky()
+    world.scene.add(sky.mesh)
     world.setQuality(qualityRef.current)
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 130)
     camera.position.set(25, 20, 27)
@@ -70,6 +73,7 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
     let previous = performance.now()
     let lastRender = 0
     let sceneSeconds = 0
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let orbitAngle = 0.73
     let observedTourToken = orbitTourTokenRef.current
     let tourRemaining = 0
@@ -136,6 +140,7 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
       camera.updateProjectionMatrix()
       camera.position.set(currentTarget.x + Math.cos(orbitAngle + currentYawOffset) * currentRadius, currentElevation, currentTarget.z + Math.sin(orbitAngle + currentYawOffset) * currentRadius)
       camera.lookAt(currentTarget)
+      sky.update(reducedMotion.matches ? 0 : sceneSeconds, camera)
       world.update(sceneSeconds, chapterRef.current)
       renderer.render(world.scene, camera)
       if (!hasRendered) { hasRendered = true; setReady(true) }

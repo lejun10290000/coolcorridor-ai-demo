@@ -12,6 +12,6 @@ export default function App() {
   const pointPhotos = usePointPhotos()
   if (mode === 'home') return <LandingHero onEnter={setMode}/>
   return mode === 'resident'
-    ? <CalculatedResident back={()=>setMode('home')} state={state} commit={commit} notice={notice} pointPhotos={pointPhotos}/>
-    : <DeveloperWorkspace back={()=>setMode('home')} state={state} commit={commit} notice={notice} pointPhotos={pointPhotos}/>
+    ? <CalculatedResident back={()=>setMode('home')} openDeveloper={()=>setMode('developer')} state={state} commit={commit} notice={notice} pointPhotos={pointPhotos}/>
+    : <DeveloperWorkspace back={()=>setMode('home')} openResident={()=>setMode('resident')} state={state} commit={commit} notice={notice} pointPhotos={pointPhotos}/>
 }
