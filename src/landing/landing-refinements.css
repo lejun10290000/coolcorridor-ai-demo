@@ -1,14 +1,42 @@
 .concept-legend{margin-top:7px!important;white-space:nowrap}
 .concept-legend i{display:inline-block;width:6px;height:6px;border-radius:50%;vertical-align:middle;margin:0 3px 0 6px}
 .cue-shaded{background:#70e8bc}.cue-mixed{background:#f9be66}.cue-exposed{background:#f0766b}.cue-unknown{background:#9ba0a8}
+.cinematic-home .route-callout{right:clamp(22px,4vw,76px);top:40%;width:min(380px,32vw);gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;box-sizing:border-box}
+.cinematic-home .route-callout__line{width:14px;height:14px;flex:0 0 14px;margin-top:4px;box-sizing:border-box;box-shadow:0 0 10px #70e8a155}
+.cinematic-home .route-callout>span:last-child{min-width:0;flex:1}
+.cinematic-home .route-callout b{font-size:15px;line-height:1.4;font-weight:650}
+.cinematic-home .route-callout small{font-size:12px;line-height:1.5;margin-top:4px;color:#e3d5e8}
+.cinematic-home .route-callout .concept-legend{display:flex;flex-wrap:wrap;gap:4px 12px;white-space:normal;margin-top:10px!important}
+.route-callout .legend-title{flex-basis:100%;color:#c7b6d0}
+.route-callout .legend-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.route-callout .legend-item i{width:7px;height:7px;flex:none;margin:0}
 .mode-portal::before{z-index:1;opacity:.16;mix-blend-mode:screen;pointer-events:none}
 .mode-portal--developer::before{opacity:.19}
 .motion-controls .orbit-tour{border-color:#edbd8c91;background:#64435fa8;color:#fff2e8;cursor:pointer}
 .motion-controls .orbit-tour:hover:not(:disabled),.motion-controls .orbit-tour:focus-visible{background:#875582;border-color:#f6d9bd;box-shadow:0 0 18px #bd79ac73}
 .motion-controls .orbit-tour:disabled{opacity:.45;cursor:not-allowed}
+.cinematic-home .scene-note{width:min(440px,34vw);padding:14px;border:1px solid #d4b1d05c;border-radius:14px;background:#211628b8;pointer-events:auto}
+.landing-context{position:absolute;right:clamp(22px,4vw,76px);top:clamp(110px,17vh,220px);width:min(440px,34vw);display:grid;gap:14px}
+.cinematic-home .landing-context>.scene-note,.cinematic-home .landing-context>.route-callout{position:relative;inset:auto;width:100%;height:auto;min-width:0;margin:0;padding:14px;box-sizing:border-box;border:1px solid #d4b1d05c;border-radius:14px;background:#211628b8;box-shadow:none;backdrop-filter:blur(14px)}
+.scene-note .chapter-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.scene-note .chapter-nav button{min-width:0;min-height:44px;padding:8px 7px;white-space:normal;line-height:1.4;border-radius:8px;cursor:pointer}
+.scene-note .chapter-nav button:focus-visible{outline:3px solid #e8c3f2;outline-offset:2px}
+.scene-note-copy{display:grid;gap:5px;border-top:1px solid #d4b1d047;padding-top:12px}
+.cinematic-home .cinematic-footer{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px}
+.cinematic-home .honesty-note{grid-column:1;grid-row:1;justify-self:start;text-align:left;min-width:0}
+.cinematic-home .motion-controls{grid-column:2;grid-row:1;justify-self:end}
+.cinematic-home .motion-controls button{min-height:34px}
+@media(max-width:840px){.cinematic-home .scene-note{width:auto}.cinematic-home .cinematic-footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center}.cinematic-home .honesty-note{order:-1;width:auto;flex:1 1 250px}.cinematic-home .motion-controls{flex:0 1 auto}}
+@media(max-width:840px){.landing-context{position:relative;inset:auto;width:auto;margin:24px 24px 0}}
+@media(max-width:610px){.scene-note .chapter-nav{overflow:visible}.scene-note .chapter-nav button{font-size:11px}}
 @media(max-width:1350px) and (min-width:841px){.orbit-hint{display:none}}
 @media(max-width:1000px){.route-callout{display:none}}
 @media(min-width:841px) and (max-height:820px){
+  .landing-context{top:110px}
+  .cinematic-home .route-callout{padding:10px 12px}
+  .cinematic-home .route-callout b{font-size:14px}
+  .cinematic-home .route-callout small{font-size:11px;line-height:1.4}
+  .cinematic-home .route-callout .concept-legend{gap:2px 10px;margin-top:6px!important}
   .hero-copy{top:88px}
   .hero-copy h1{font-size:clamp(3.5rem,5.2vw,6rem);margin:15px 0 11px}
   .hero-tagline{font-size:clamp(1.25rem,2.2vw,2.45rem);margin-bottom:10px}

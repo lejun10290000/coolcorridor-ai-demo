@@ -5,6 +5,11 @@ import { DeveloperWorkspace } from './workflow/DeveloperWorkspace'
 import { CalculatedResident } from './routing/CalculatedResident'
 import { usePointPhotos } from './pointPhotos/usePointPhotos'
 import './styles.css'
+import './usability.css'
+import './readability.css'
+import './alignment.css'
+import './selects.css'
+import './checkboxes.css'
 
 export default function App() {
   const [mode, setMode] = useState<'home'|'resident'|'developer'>('home')

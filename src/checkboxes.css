@@ -1,0 +1,20 @@
+/* Keep real checkbox inputs and label activation, with a quiet amethyst finish. */
+.wf-app.wf-app input[type=checkbox]{
+  appearance:none;box-sizing:border-box;display:inline-block;flex:0 0 20px;
+  width:20px;height:20px;min-height:20px;min-width:20px;margin:0;padding:0;
+  vertical-align:middle;border:1px solid #ad80c9;border-radius:4px;
+  background:#1b0e2e center/14px 14px no-repeat;box-shadow:none;
+  cursor:pointer;animation:none;transition:none;
+}
+.wf-app.wf-app input[type=checkbox]:checked{
+  border-color:#c99be8;background-color:#773ca0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 8 3 3 7-7' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.wf-app.wf-app input[type=checkbox]:hover:not(:disabled){border-color:#e2b9f8}
+.wf-app.wf-app input[type=checkbox]:focus-visible{outline:3px solid #dbadf5;outline-offset:3px}
+.wf-app.wf-app input[type=checkbox]:disabled{opacity:.45;cursor:not-allowed}
+.wf-app .wf-check{min-height:44px;align-items:center;cursor:pointer}
+.wf-app .wf-check:has(input:disabled){cursor:not-allowed}
+@media(forced-colors:active){
+  .wf-app.wf-app input[type=checkbox]{appearance:auto;background:none;border-color:ButtonText;accent-color:auto}
+}

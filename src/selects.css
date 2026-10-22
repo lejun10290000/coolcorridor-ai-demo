@@ -1,0 +1,46 @@
+/* Native selection and keyboard behavior, with the same surface as our cards. */
+.wf-app.wf-app select,.cinematic-home select{
+  appearance:none;box-sizing:border-box;display:block;width:100%;min-width:0;
+  height:auto;min-height:44px;padding:11px 36px 11px 12px;border:1px solid #a878c7;
+  border-radius:8px;background-color:#241139;color:#fbf5ff;font:inherit;
+  font-size:14px;font-weight:500;line-height:1.5;letter-spacing:0;
+  text-align:left;text-overflow:ellipsis;cursor:pointer;color-scheme:dark;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%23e4c4f7' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px;
+  box-shadow:none;animation:none;transition:none;transform:none;
+}
+.wf-app.wf-app select:hover:not(:disabled),.cinematic-home select:hover:not(:disabled){border-color:#d5a1f2;background-color:#30194a}
+.wf-app.wf-app select:focus-visible,.cinematic-home select:focus-visible{outline:3px solid #dbadf5;outline-offset:3px}
+.wf-app.wf-app select:disabled{opacity:.5;cursor:not-allowed}
+.wf-app select option,.cinematic-home select option{background:#241139;color:#fbf5ff;font-size:14px;line-height:1.5}
+.wf-app select option[hidden]{display:none}
+.cinematic-home .quality-control select{width:112px;min-width:112px;min-height:34px;padding:5px 30px 5px 11px;border-radius:999px;background-size:14px;background-position:right 10px center;font-size:13px;line-height:1.5}
+.ultimate-resident .route-endpoint-pickers label>span{display:block;margin-bottom:7px;font-size:14px;line-height:1.45;font-weight:650;white-space:normal}
+.ultimate-resident .route-endpoint-pickers{gap:10px}
+.route-options-link{display:inline-flex;align-items:center;min-height:40px;margin-top:3px;color:#edcaff;font-size:14px;font-weight:650;text-decoration:underline;text-underline-offset:4px}
+.route-options-link:focus-visible{outline:3px solid #dbadf5;outline-offset:3px}
+
+@supports(appearance:base-select){
+  .wf-app.wf-app select,.cinematic-home select{appearance:base-select;display:flex;white-space:normal;overflow-wrap:anywhere;text-overflow:clip;align-items:center;gap:12px}
+  .wf-app select::picker(select),.cinematic-home select::picker(select){
+    appearance:base-select;box-sizing:border-box;min-width:anchor-size(width);
+    max-width:calc(100vw - 24px);max-height:min(380px,55dvh);margin-block:7px;
+    padding:6px;border:1px solid #b485d2;border-radius:12px;background:#1c0e2d;
+    color:#fbf5ff;box-shadow:0 18px 44px #0009;overflow:auto;scrollbar-width:none;animation:none;transition:none;
+  }
+  .wf-app select::picker-icon,.cinematic-home select::picker-icon{display:none}
+  .wf-app select option,.cinematic-home select option{
+    display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;
+    margin:2px 0;border:1px solid transparent;border-radius:7px;background:transparent;
+    font-size:14px;font-weight:450;white-space:normal;overflow-wrap:anywhere;cursor:pointer;
+  }
+  .wf-app select option:is(:hover,:focus),.cinematic-home select option:is(:hover,:focus){background:#48265f;border-color:#9c70b6;outline:none}
+  .wf-app select option:checked,.cinematic-home select option:checked{background:#66318d;border-color:#c599e1;color:#fff;font-weight:650}
+  .wf-app select option::checkmark,.cinematic-home select option::checkmark{color:#edcaff}
+  .wf-app select option[hidden]{display:none}
+}
+@media(forced-colors:active){
+  .wf-app.wf-app select,.cinematic-home select{border:1px solid ButtonText;background:Canvas;color:CanvasText}
+  .wf-app select::picker(select),.cinematic-home select::picker(select){background:Canvas;color:CanvasText;border-color:ButtonText}
+  .wf-app select option:checked,.cinematic-home select option:checked{background:Highlight;color:HighlightText}
+}

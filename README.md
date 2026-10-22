@@ -8,7 +8,7 @@ Phase 0B adds an approved cinematic Home screen with a genuine Three.js 360° or
 
 ## Run locally
 
-Prerequisite: Node.js 20+.
+Prerequisite: Node.js 24 LTS (the Vercel deployment also uses Node 24).
 
 ```powershell
 npm install
@@ -23,6 +23,10 @@ npm test
 ```
 
 On Home, use the chapter controls to inspect three camera views, click **360° tour** for a ten-second full camera revolution, drag the uncovered 3D world to orbit, pause motion, or choose High, Balanced or Fallback quality. The static fallback keeps both mode portals usable if WebGL is unavailable. Reduced-motion settings pause the camera and animated button surfaces on first load, and disable the automatic orbit tour.
+
+## Public hosting
+
+The Vercel configuration builds with Node.js 24 and publishes only `dist/`, with a restrictive content security policy and browser security headers. Never expose the Vite development/preview server publicly. See [deployment instructions, security checks and limitations](docs/DEPLOYMENT_SECURITY.md). This remains a browser-local DEMO: Developer actions and reports do not synchronize between different visitors.
 
 ## Scope and data status
 
@@ -102,3 +106,24 @@ Resident walkway reports can also include an **optional reference photo**. Previ
 ## Resident walkthrough
 
 Choose your start and destination, select the shortest or most shaded route, then choose **Start selected route**. The route stays locked while the next graph point and its published photo appear. Press **Next** after reaching that point; use **Previous point** to correct an accidental advance. Confirm the destination and choose **Finish walk**, or **Exit walk / change route** to replan earlier. A new Developer baseline does not silently change a walk in progress; exit to use its recalculated routes. This is a manual illustrative preview without GPS or verified navigation. Refreshing or leaving the role ends walkthrough progress. See [workflow and validation](docs/RESIDENT_WALKTHROUGH.md).
+
+
+## Usability and accessible controls
+
+Resident routes recalculate as soon as both endpoints are connected; there is no extra Find routes step. Full endpoint prompts stay above the dropdowns, while only actual places appear in the open lists. Search accepts campus names and common English aliases. Clear route resets only the planned route selection.
+
+Reports use their own map-point selection. Description, category and optional photo survive changing those points within the open report journey. Identical/disconnected points explain how to recover. A successful submission clears the next report's point selection. Closing the form, refreshing, or leaving the mode ends an unsaved report draft. Reports remain local to the same browser profile; no campus team is notified.
+
+Developer shortcuts bring the target map/tool into view. Report filters retain unsubmitted reviewer notes. Disclosures, dropdowns and checkboxes share the amethyst styling and retain keyboard interaction. Scrollbar tracks are hidden while content remains scrollable; forced-color accessibility mode restores native controls/scrollbars. Browsers supporting customizable native selects receive styled popup lists; other browsers retain their native picker with themed fields.
+
+Homepage explanation buttons sit above their copy and do not move the 3D camera. Camera drag, ambient motion and the explicit tour remain available. Top About links are removed; the bottom About sections remain. The pilot-context and explanation cards share aligned edges and matching width, without forcing identical content heights.
+
+Additional local acceptance scripts (set `PLAYWRIGHT_MODULE`, `CHROME_PATH`, and the corresponding output directory variable):
+
+- `node review/check-usability.cjs`: search, automatic routing, report review/photo, filters and mobile shortcuts.
+- `node review/check-user-flow.cjs`: report recovery, acceptance/publication, historical read-only baseline, budget recovery and simulation isolation.
+- `node review/check-dropdowns.cjs`: styled pickers, keyboard controls, complete prompts and mobile width.
+- `node review/check-landing-controls.cjs`: actual WebGL camera isolation from explanation tabs, drag/tour, control sizing and navigation.
+- `node review/check-readability.cjs` and `node review/check-alignment.cjs`: disclosure and workspace layout checks.
+
+These scripts use isolated browser storage and default to the static preview at `http://127.0.0.1:4183/`. The existing `check-public-deployment.cjs` also accepts `ALIGNMENT_APP_URL` for the public deployment.

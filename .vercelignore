@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+node_modules
+dist
+outputs
+work
+docs
+review
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts

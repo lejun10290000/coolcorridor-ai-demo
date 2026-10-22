@@ -1,0 +1,62 @@
+/* Readable native disclosures, without changing their keyboard semantics. */
+.wf-app{color-scheme:dark}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details{
+  min-width:0;margin-top:14px;padding:0;border:1px solid #82619e;border-radius:12px;
+  background:#1b102b;color:#eee4f6;box-shadow:none;overflow-wrap:anywhere;
+}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary{
+  position:relative;display:block;min-height:54px;margin:0;padding:15px 44px 15px 16px;
+  border-radius:11px;background:#2c1a40;color:#faf4ff;font-size:15px;font-weight:650;
+  line-height:1.55;letter-spacing:0;text-align:left;list-style:none;cursor:pointer;
+}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary::-webkit-details-marker{display:none}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary::marker{content:''}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary::after{
+  content:'';position:absolute;right:19px;top:50%;width:9px;height:9px;
+  border-right:2px solid #e2c9f5;border-bottom:2px solid #e2c9f5;
+  transform:translateY(-70%) rotate(45deg);pointer-events:none;
+}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details[open]{border-color:#b28bce;background:#1c112c}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details[open]>summary{
+  border-bottom:1px solid #745488;border-radius:11px 11px 0 0;background:#38214f;
+}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details[open]>summary::after{transform:translateY(-20%) rotate(225deg)}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary:hover{background:#442a5a}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary:focus-visible{outline:3px solid #e1bafa;outline-offset:3px}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary :is(strong,.disclosure-title){display:block;color:#faf4ff;font-size:15px;font-weight:650;line-height:1.5}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary small{display:block;margin-top:4px;color:#d5c2e3;font-size:14px;font-weight:400;line-height:1.55;letter-spacing:0}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>summary .eyebrow{display:block;margin-bottom:4px;color:#d4acec;font-size:12px;line-height:1.5}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>:is(p,ul,ol,dl,article,div,label,pre){margin:16px}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details :is(p,li,dt,dd){color:#e8ddec;font-size:15px;line-height:1.75}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details :is(h2,h3){color:#faf4ff;font-size:16px;line-height:1.5}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details :is(small,code){color:#d4c1e1;font-size:14px;line-height:1.65}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details li+li{margin-top:10px}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details>div{padding-top:4px;padding-bottom:4px}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details article{padding:16px 0;border-color:#725381}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details .warning{padding:12px 14px;background:#60432a50;color:#ffe6c7;border-color:#dba56b;font-size:14px;line-height:1.7}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details label{color:#f0e2f8;font-size:14px;line-height:1.6}
+.wf-app:is(.ultimate-resident,.developer-ultimate) details a{color:#edc9ff;text-underline-offset:3px}
+.wf-app:is(.ultimate-resident,.developer-ultimate) .campus-map-details[open]{max-height:none;overflow:visible}
+.wf-app:is(.ultimate-resident,.developer-ultimate) .campus-map-details{margin:12px;border:1px solid #82619e}
+.wf-app:is(.ultimate-resident,.developer-ultimate) .resident-route-metadata{padding:0}
+.wf-app:is(.ultimate-resident,.developer-ultimate) .resident-path-evidence{padding:0}
+.wf-app:is(.ultimate-resident,.developer-ultimate) .resident-path-evidence>.wf-evidence{margin:0;padding:18px}
+.wf-app:is(.ultimate-resident,.developer-ultimate) .resident-about,
+.wf-app:is(.ultimate-resident,.developer-ultimate) .developer-about{padding:0}
+
+/* Hide the chrome, not the scrolling. Existing overflow/height rules remain intact. */
+html{scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+.wf-app,.wf-app *{scrollbar-width:none;scrollbar-gutter:auto;-ms-overflow-style:none}
+.wf-app::-webkit-scrollbar,.wf-app *::-webkit-scrollbar{display:none;width:0;height:0}
+.wf-app :is(.developer-panel-scroll,.resident-sidebar,.developer-path-evidence,.place-search-results,.resident-journey-rail):focus-visible{
+  outline:2px solid #d5a7f4;outline-offset:-3px;
+}
+@media(forced-colors:active){
+  html,.wf-app,.wf-app *{scrollbar-width:auto}
+  html::-webkit-scrollbar,.wf-app::-webkit-scrollbar,.wf-app *::-webkit-scrollbar{display:revert;width:revert;height:revert}
+}
+@media(max-width:680px){
+  .wf-app:is(.ultimate-resident,.developer-ultimate) details>summary{min-height:56px;padding:15px 40px 15px 14px;font-size:15px}
+  .wf-app:is(.ultimate-resident,.developer-ultimate) details>:is(p,ul,ol,dl,article,div,label,pre){margin:14px}
+}

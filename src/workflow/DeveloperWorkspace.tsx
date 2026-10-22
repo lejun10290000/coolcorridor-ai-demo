@@ -28,6 +28,13 @@ const tools = [
   {id:'footfall',label:'Footfall'},
 ] as const
 type Tool = typeof tools[number]['id']
+const toolGuidance:Record<Tool,{title:string;description:string}>={
+  edit:{title:'Select → Apply to draft → Review & publish',description:'Draft edits stay private until you publish. The Resident map keeps the last published version.'},
+  reports:{title:'Find a report, then review its exact path',description:'Use status filters to focus on pending issues. Acceptance changes shade; it does not confirm a repair.'},
+  budget:{title:'Set a budget and compare eligible proposals',description:'Optimise once to see a plan. Later price and budget edits recalculate it automatically.'},
+  scenario:{title:'Preview your plan without publishing',description:'Explore hypothetical shade. Return to Edit shade to make an actual map publication.'},
+  footfall:{title:'Inspect demand before choosing an intervention',description:'These passage counts are fictional demo records. Use the map links to inspect each candidate path.'},
+}
 
 export function DeveloperWorkspace({state,commit,notice,back,openResident,pointPhotos}:{state:WorkflowState;commit:Commit;notice:string;back:()=>void;openResident?:()=>void;pointPhotos?:PointPhotoController}){
   const [photoPoint,setPhotoPoint]=useState<string|null>(null)
@@ -53,22 +60,24 @@ export function DeveloperWorkspace({state,commit,notice,back,openResident,pointP
     const next=e.key==='ArrowRight'?(index+1)%tools.length:e.key==='ArrowLeft'?(index+tools.length-1)%tools.length:e.key==='Home'?0:e.key==='End'?tools.length-1:null
     if(next===null)return;e.preventDefault();chooseTool(tools[next].id);document.getElementById(`developer-tool-${tools[next].id}`)?.focus()
   }
-  function openReports(id?:string){chooseTool('reports');setReportFilter(id)}
-  function showReportedRoute(report:ResidentReport){if(!report.route)return;setReportPreview(report);setSelected(report.route.segment_ids[0]);setBaselineChoice('current');setRecenter(r=>r+1)}
-  function previewScenario(){chooseTool('scenario')}
-  function returnBaseline(){chooseTool('edit')}
-  function locatePath(id:string){setSelected(id);setReportPreview(null);setRecenter(r=>r+1)}
+  function openReports(id?:string){chooseTool('reports');setReportFilter(id);showArea('developer-controls')}
+  function showArea(id:string){requestAnimationFrame(()=>{const target=document.getElementById(id);target?.scrollIntoView({block:'start'});target?.focus({preventScroll:true})})}
+  function showReportedRoute(report:ResidentReport){if(!report.route)return;setReportPreview(report);setSelected(report.route.segment_ids[0]);setBaselineChoice('current');setRecenter(r=>r+1);showArea('developer-campus-map')}
+  function previewScenario(){chooseTool('scenario');showArea('developer-campus-map')}
+  function returnBaseline(){chooseTool('edit');showArea('developer-campus-map')}
+  function locatePath(id:string){setSelected(id);setReportPreview(null);setRecenter(r=>r+1);showArea('developer-campus-map')}
   function inspectPath(id:string){setSelected(id)}
   const planningProps={state,commit,plan,error:calculated.error,scenario,preview:previewScenario,baseline:returnBaseline}
   return <main className="wf-app developer-app developer-ultimate"><ResidentAtmosphere/>
-    <header className="developer-header"><span className="developer-header-space" aria-hidden="true"/><nav className="developer-nav" aria-label="Main navigation"><button type="button" onClick={back}>⌂ <span>Home</span></button>{openResident&&<button type="button" onClick={openResident}>✧ <span>Resident</span></button>}<span className="developer-nav-active" aria-current="page">▣ <span>Developer</span></span><a href="#developer-about">ⓘ <span>About</span></a></nav><div className="developer-header-meta"><span className="chip">DEMO PLANNING</span><span className="developer-dataset">{state.current_version}</span></div></header>
+    <header className="developer-header"><span className="developer-header-space" aria-hidden="true"/><nav className="developer-nav" aria-label="Main navigation"><button type="button" onClick={back}>⌂ <span>Home</span></button>{openResident&&<button type="button" onClick={openResident}>✧ <span>Resident</span></button>}<span className="developer-nav-active" aria-current="page">▣ <span>Developer</span></span></nav><div className="developer-header-meta"><span className="chip">DEMO PLANNING</span><span className="developer-dataset">{state.current_version}</span></div></header>
     <section className="workspace developer-workflow">
     {notice&&<p role="alert" className="warning">{notice}</p>}
+    <nav className="workspace-jumps" aria-label="Developer workspace shortcuts"><span>Jump to</span><a href="#developer-campus-map">Campus map</a><a href="#developer-controls">Planning tools</a><a href="#developer-map-evidence">Path evidence</a></nav>
     <div className="developer-layout">
       <div className="topbar developer-topbar">
         <div className="developer-intro-content"><div className="eyebrow">DEVELOPER MODE <span className="developer-eyebrow-line"/></div><h1>Plan, test and <em>optimise cooler routes</em></h1><p>Review reports, refine map shade and test planning scenarios.</p></div>
-        <section className={`developer-path-evidence ${selectedSegment?'developer-evidence-selected':'developer-evidence-empty'}`} aria-label="Map evidence" tabIndex={0}>
-          <div className="developer-evidence-heading"><span className="eyebrow">MAP EVIDENCE</span><div className="developer-evidence-controls"><span className="developer-evidence-status" title={selectedSegment?'Updates with the selected segment; not live field measurements.':undefined}>{selectedSegment?'Live evidence':'Ready to inspect'}</span>{selectedSegment&&<button type="button" className="developer-evidence-reset" aria-label="Reset Map Evidence inspection" onClick={()=>setSelected('')}><span aria-hidden="true">↶</span> Reset</button>}</div></div>
+        <section id="developer-map-evidence" className={`developer-path-evidence ${selectedSegment?'developer-evidence-selected':'developer-evidence-empty'}`} aria-label="Map evidence" tabIndex={0}>
+          <div className="developer-evidence-heading"><span className="eyebrow">MAP EVIDENCE</span><div className="developer-evidence-controls"><span className="developer-evidence-status" title={selectedSegment?'Updates with the selected segment; not live field measurements.':undefined}>{selectedSegment?'Selected path':'Ready to inspect'}</span>{selectedSegment&&<button type="button" className="developer-evidence-reset" aria-label="Reset Map Evidence inspection" onClick={()=>setSelected('')}><span aria-hidden="true">↶</span> Reset</button>}</div></div>
           <div className="developer-evidence-state" key={selectedSegment?.segment_id??'empty'}>
             {selectedSegment?(scenarioActive?<ScenarioEvidence segment={current.segments.find(s=>s.segment_id===selected)??selectedSegment} scenario={scenario} baseline={returnBaseline}/>:<SegmentEvidence segment={selectedSegment} version={baseline.dataset_version} state={state} mode="developer" historical={baseline.dataset_version!==current.dataset_version} onAction={()=>openReports(selectedSegment.segment_id)}/>):<DeveloperEvidenceEmpty/>}
           </div>
@@ -79,12 +88,13 @@ export function DeveloperWorkspace({state,commit,notice,back,openResident,pointP
       </div>
       <aside className="developer-right-pane" id="developer-controls" aria-label="Developer controls" tabIndex={-1}>
         <div className="developer-tool-tabs" role="tablist" aria-label="Developer tools">{tools.map((t,i)=><button key={t.id} id={`developer-tool-${t.id}`} role="tab" aria-selected={tool===t.id} aria-controls={`developer-panel-${t.id}`} tabIndex={tool===t.id?0:-1} onClick={()=>chooseTool(t.id)} onKeyDown={e=>tabKeys(e,i)}><span className="developer-tool-number" aria-hidden="true">0{i+1}</span><span>{t.label}{t.id==='reports'&&<small>{pending} pending</small>}</span></button>)}</div>
-        <div className="developer-panel-scroll" ref={scrollPane}>
+        <div className="developer-task-guide" role="status"><strong>{toolGuidance[tool].title}</strong><p>{toolGuidance[tool].description}</p></div>
+        <div className="developer-panel-scroll" ref={scrollPane} role="region" tabIndex={0} aria-label="Scrollable Developer tool content">
           <section id="developer-panel-edit" role="tabpanel" aria-labelledby="developer-tool-edit" hidden={tool!=='edit'} tabIndex={0}>
             <div ref={setControlsTarget} className="developer-edit-controls"/>
             {pointPhotos&&<PointPhotoEditor controller={pointPhotos} nodeId={photoPoint} select={setPhotoPoint} enabled={tool==='edit'&&baseline.dataset_version===current.dataset_version}/> }
-            <details className="developer-history"><summary>Baseline dataset and publication history</summary><label>Baseline dataset<select aria-label="Baseline dataset" value={baselineChoice} onChange={e=>setBaselineChoice(e.target.value)}><option value="current">Current published dataset — {current.dataset_version}</option>{state.snapshots.filter(s=>s.dataset_version!==current.dataset_version).map(s=><option key={s.dataset_version} value={s.dataset_version}>Historical — {s.dataset_version}</option>)}</select></label><p data-testid="current-dataset-metadata">{currentStudyArea(state).study_area_id} · {currentStudyArea(state).dataset_version} · updated {currentStudyArea(state).updated_at}</p><ol>{state.snapshots.map(s=><li key={s.dataset_version}>{s.dataset_version} · {s.change_summary} · {s.created_at}</li>)}</ol></details>
-            <details className="developer-local"><summary>About this local demo</summary><p className="wf-local">Saved only in this browser origin/profile. Changes do not synchronise with another device, browser profile or person. No central database, authentication or institutional approval. Do not enter personal or identifying evidence.</p></details>
+            <details className="developer-history"><summary><span className="disclosure-title">Baseline dataset and publication history</span><small>Compare the published map with earlier versions</small></summary><label>Baseline dataset<select aria-label="Baseline dataset" value={baselineChoice} onChange={e=>setBaselineChoice(e.target.value)}><option value="current">Current published dataset — {current.dataset_version}</option>{state.snapshots.filter(s=>s.dataset_version!==current.dataset_version).map(s=><option key={s.dataset_version} value={s.dataset_version}>Historical — {s.dataset_version}</option>)}</select></label><p data-testid="current-dataset-metadata">{currentStudyArea(state).study_area_id} · {currentStudyArea(state).dataset_version} · updated {currentStudyArea(state).updated_at}</p><ol>{state.snapshots.map(s=><li key={s.dataset_version}>{s.dataset_version} · {s.change_summary} · {s.created_at}</li>)}</ol></details>
+            <details className="developer-local"><summary><span className="disclosure-title">About this local demo</span><small>How saving and sharing work in this prototype</small></summary><p className="wf-local">Saved only in this browser origin/profile. Changes do not synchronise with another device, browser profile or person. No central database, authentication or institutional approval. Do not enter personal or identifying evidence.</p></details>
           </section>
           <section id="developer-panel-reports" role="tabpanel" aria-labelledby="developer-tool-reports" hidden={tool!=='reports'} tabIndex={0}>
             {reportFilter&&<button onClick={()=>setReportFilter(undefined)}>Show all Resident reports</button>}
@@ -105,7 +115,7 @@ export function DeveloperWorkspace({state,commit,notice,back,openResident,pointP
         </div>
       </aside>
     </div>
-    <div className="developer-support-row"><section className="developer-publication-summary" aria-label="Published dataset and review status"><span className="eyebrow">PUBLICATION STATE</span><h2>What Residents currently see</h2><p className="developer-current-version">{current.dataset_version}</p><div className="developer-status-grid"><span><b>{pending}</b> pending reports</span><span><b>{state.map_shade_draft?.assignments.length??0}</b> draft links</span></div><p>Drafts and simulations are not published. The current Resident map changes only after the existing review and publication workflow.</p><button type="button" onClick={()=>chooseTool('edit')}>Open publication workflow ↗</button></section></div>
+    <div className="developer-support-row"><section className="developer-publication-summary" aria-label="Published dataset and review status"><span className="eyebrow">PUBLICATION STATE</span><h2>What Residents currently see</h2><p className="developer-current-version">{current.dataset_version}</p><div className="developer-status-grid"><span><b>{pending}</b> pending reports</span><span><b>{state.map_shade_draft?.assignments.length??0}</b> draft links</span></div><p>Drafts and simulations are not published. The current Resident map changes only after the existing review and publication workflow.</p><button type="button" onClick={()=>{chooseTool('edit');showArea('developer-controls')}}>Open publication workflow ↗</button></section></div>
     <details className="developer-about" id="developer-about"><summary>About this demo and its data</summary><p>This is a local illustrative planning workspace. Campus paths remain unsurveyed; fictional footfall, assumed prices and simulated shade are labelled in their tools. Nothing here represents a construction approval or live measurement.</p></details>
     </section>
   </main>

@@ -42,24 +42,11 @@ export function LandingHero({ onEnter }: { onEnter: (mode: 'resident' | 'develop
   const [chapter, setChapter] = useState<LandingChapter>(0)
   const [paused, setPaused] = useState(reducedMotion)
   const [orbitTourToken, setOrbitTourToken] = useState(0)
-  const [tourActive, setTourActive] = useState(false)
   const [quality, setQuality] = useState<LandingQuality>(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 840px)').matches ? 'balanced' : 'high')
   useEffect(() => { if (reducedMotion) setPaused(true) }, [reducedMotion])
-  useEffect(() => {
-    if (paused || reducedMotion || tourActive) return
-    const timer = window.setInterval(() => setChapter(value => ((value + 1) % 3) as LandingChapter), 12000)
-    return () => window.clearInterval(timer)
-  }, [paused, reducedMotion, chapter, tourActive])
-  useEffect(() => {
-    if (orbitTourToken === 0) return
-    const timer = window.setTimeout(() => setTourActive(false), 11000)
-    return () => window.clearTimeout(timer)
-  }, [orbitTourToken])
   const selectChapter = (value: LandingChapter) => setChapter(value)
   const startOrbitTour = () => {
-    setChapter(0)
     setPaused(false)
-    setTourActive(true)
     setOrbitTourToken(value => value + 1)
   }
 
@@ -83,8 +70,11 @@ export function LandingHero({ onEnter }: { onEnter: (mode: 'resident' | 'develop
       <div className="hero-credentials"><span>◉ &nbsp; UTM KL pilot</span><span>✳ &nbsp; Concept visualisation</span></div>
     </div>
 
-    <div className="scene-note" aria-live="polite"><span className="scene-note__eyebrow">{chapters[chapter].number} / 03 · {chapters[chapter].kicker}</span><strong>{chapters[chapter].marker}</strong><small>{chapters[chapter].detail}</small></div>
-    <div className="route-callout"><span className="route-callout__line" /><span><b>Main Gate → Klinik UTM</b><small>Pilot journey · route verification pending</small><small className="concept-legend">Concept cues: <i className="cue-shaded" />shaded <i className="cue-mixed" />mixed <i className="cue-exposed" />exposed <i className="cue-unknown" />unknown</small></span></div>
+    <div className="landing-context">
+    <div className="scene-note"><div className="chapter-nav" aria-label="Cinematic chapters">{chapters.map((item, index) => <button key={item.number} type="button" className={chapter === index ? 'active' : ''} onClick={() => selectChapter(index as LandingChapter)} aria-pressed={chapter === index}><span>{item.number}</span> {item.title}</button>)}</div><div className="scene-note-copy" aria-live="polite"><span className="scene-note__eyebrow">{chapters[chapter].number} / 03 · {chapters[chapter].kicker}</span><strong>{chapters[chapter].marker}</strong><small>{chapters[chapter].detail}</small></div></div>
+    <div className="route-callout"><span className="route-callout__line" aria-hidden="true"/><span><b>Main Gate → Klinik UTM</b><small>Pilot journey · route verification pending</small><small className="concept-legend"><span className="legend-title">Concept colours</span><span className="legend-item"><i className="cue-shaded"/>shaded</span><span className="legend-item"><i className="cue-mixed"/>mixed</span><span className="legend-item"><i className="cue-exposed"/>exposed</span><span className="legend-item"><i className="cue-unknown"/>unknown</span></small></span></div>
+
+    </div>
 
     <section className="portal-section" aria-label="Choose a demo mode">
       <div className="portal-section__heading"><span>EXPLORE THE PROTOTYPE</span><span>Two ways to see a cooler future <i aria-hidden="true">↘</i></span></div>
@@ -92,7 +82,6 @@ export function LandingHero({ onEnter }: { onEnter: (mode: 'resident' | 'develop
     </section>
 
     <footer className="cinematic-footer">
-      <div className="chapter-nav" aria-label="Cinematic chapters">{chapters.map((item, index) => <button key={item.number} type="button" className={chapter === index ? 'active' : ''} onClick={() => selectChapter(index as LandingChapter)} aria-pressed={chapter === index}><span>{item.number}</span> {item.title}</button>)}</div>
       <div className="motion-controls">
         <span className="orbit-hint">{quality === 'fallback' ? 'STATIC PREVIEW · 3D UNAVAILABLE' : 'DRAG WORLD TO ORBIT 360°'}</span>
         <button type="button" className="orbit-tour" onClick={startOrbitTour} disabled={quality === 'fallback' || reducedMotion} aria-label="Play a ten-second 360-degree camera orbit">↻ 360° tour</button>
