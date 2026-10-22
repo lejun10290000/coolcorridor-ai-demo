@@ -1,129 +1,279 @@
-> Current map alignment: both modes now use the exact 1113 × 1414 annotated reference supplied on 18 October 2026. See [reference alignment and saved-data compatibility](docs/REFERENCE_MAP_ALIGNMENT.md). Earlier 1290 × 1640 map notes below describe the previous image. The old asset and evidence remain preserved.
+# CoolCorridor AI
 
-# CoolCorridor AI — Phase 0 prototype
+**A campus shade-awareness, pedestrian route-planning and improvement-planning prototype.**
 
-An interactive, laptop-first prototype for the UTM Kuala Lumpur pilot: Resident route/evidence/report flow and Developer manual map updates, report review, budget optimisation and scenarios.
+[**Open the live demo**](https://coolcorridor-ai-demo.vercel.app/) · [GitHub repository](https://github.com/lejun10290000/coolcorridor-ai-demo)
 
-Phase 0B adds an approved cinematic Home screen with a genuine Three.js 360° orbit around an original fictional township. Its two portals enter the existing Resident and Developer modes. See the [Home implementation and provenance notes](docs/LANDING_PHASE0B.md), [desktop screenshot](outputs/phase0b-desktop-1440.png), [mobile screenshot](outputs/phase0b-mobile-390.png) and [motion preview](outputs/phase0b-motion-preview.mp4).
+> **Project status:** Interactive demo / prototype. The current application demonstrates Resident and Developer workflows using illustrative data. It is not a surveyed navigation system, a live campus monitoring service, or a production multi-user administration platform.
 
-## Run locally
+![CoolCorridor AI — Royal Amethyst 3D homepage](docs/screenshots/royal-amethyst-homepage.png)
 
-Prerequisite: Node.js 24 LTS (the Vercel deployment also uses Node 24).
+## Table of contents
 
-```powershell
-npm install
+- [Overview](#overview)
+- [Problem and proposed approach](#problem-and-proposed-approach)
+- [Features](#features)
+- [User journeys](#user-journeys)
+- [Technology stack](#technology-stack)
+- [System design](#system-design)
+- [Getting started](#getting-started)
+- [Tests and quality checks](#tests-and-quality-checks)
+- [Data, privacy and important limitations](#data-privacy-and-important-limitations)
+- [Deployment](#deployment)
+- [Repository structure](#repository-structure)
+- [Team](#team)
+- [Further documentation](#further-documentation)
+
+## Overview
+
+CoolCorridor AI is an interactive prototype focused on helping people explore campus walking routes and helping campus managers review shade information and plan potential improvements. The prototype uses a shared campus illustration and a common set of segment IDs across two modes:
+
+- **Resident mode** helps users select a starting point and destination, compare route options, inspect map evidence, follow a manual point-by-point walkthrough, and submit a walkway report.
+- **Developer mode** lets a reviewer inspect map evidence, edit shade classifications, publish a reviewed map version, review Resident reports, and explore budget and scenario-planning tools.
+
+The experience opens with a cinematic 3D concept-township homepage called **Royal Amethyst**. Its two portals lead to Resident and Developer mode.
+
+## Problem and proposed approach
+
+Finding a comfortable pedestrian route can involve more than choosing the shortest distance. A route may be shorter but have less shade, while a slightly longer route may be preferable under the prototype's assumed shade-ranking rules. Campus managers also need a way to review reported walkway problems and explore where proposed shade interventions might be placed.
+
+CoolCorridor AI demonstrates this workflow through a shared illustrated map, deterministic route calculations, review-gated map updates, route reports and budget/scenario planning.
+
+The prototype is intended to demonstrate the product workflow and identify what a future field-validated system would need. It does **not** claim that the campus paths, measurements or shade classifications have been verified on site.
+
+## Features
+
+### 1. Royal Amethyst 3D homepage
+
+- Interactive Three.js township scene with camera orbit and chapter/view controls.
+- A timed 360-degree camera tour, pause controls and visual-quality options.
+- Home portals for Resident and Developer mode.
+- Static fallback when WebGL is unavailable and support for reduced-motion preferences.
+
+![Royal Amethyst homepage](docs/screenshots/royal-amethyst-homepage.png)
+
+### 2. Resident mode
+
+- Shared illustrated campus map with selectable route points and connected-path handling.
+- Place search and automatic route comparison after valid endpoints are selected.
+- **Shortest route**, based on configured distance values.
+- **Most shaded practical route**, which minimises the prototype's exposure-ranking cost subject to a maximum 25% detour over the shortest route.
+- Route highlighting, map zoom/pan/reset controls and an evidence panel.
+- Published point-reference photos where available.
+- A point-by-point walkthrough with progress, previous/next controls and a completion step.
+- Walkway problem reports with a category, description, selected route and optional reference photo.
+- Route and walking context that explains the map's DEMO/unsurveyed status.
+
+![Resident route-planning screen](docs/screenshots/royal-amethyst-resident.png)
+
+**Important:** the walkthrough is manually advanced. It does not use GPS, detect actual pedestrian arrival or provide verified turn-by-turn navigation.
+
+### 3. Developer mode
+
+The Developer workspace contains five main tools:
+
+1. **Edit shade / publish** — select routes or links, stage shade classifications, review a draft and publish a new map version.
+2. **Resident reports** — review submitted reports, inspect their routes and optional photos, and accept or reject reports.
+3. **Budget optimiser** — explore candidate interventions within a configured budget, subject to the planner's constraints.
+4. **Simulated scenario** — preview a hypothetical change separately from the published baseline.
+5. **Footfall planning** — explore the prototype's top-ten illustrative footfall paths and tree/roof treatment assumptions.
+
+The workspace also includes a map-evidence inspector. Its welcome/reset state is for inspecting evidence; it does not reset shade drafts, reports or published data.
+
+![Developer workspace](docs/screenshots/royal-amethyst-developer.png)
+
+### 4. Shared map information and photos
+
+- Both roles use the same reference frame, displayed path geometry and segment IDs.
+- The live legend shows shade classes, selected route/path outlines, endpoint names, photo availability and walkthrough markers when relevant.
+- Clicking a point with a published reference opens its photo panel.
+- Developer photo updates are staged and require explicit publication. Photo publication is separate from shade-map publication.
+- Resident report photos are optional attachments for the specific report; they do not automatically determine shade or replace map-point photos.
+
+### 5. Map publication, reports and planning
+
+- Developer shade edits remain drafts until reviewed and published.
+- Publishing creates a new versioned snapshot; Resident routing uses the current published snapshot, not an unpublished draft.
+- Accepting a valid route report currently publishes **mixed/yellow DEMO shade** for its saved path. Rejecting a report leaves the published shade unchanged.
+- Acceptance is not proof of repair. A later repair or shade correction must be handled through a separate manual update and publication.
+- Budget and scenario results are deterministic calculations over configured candidate data and declared assumptions. They are not measured cooling or sustainability outcomes.
+
+## User journeys
+
+### Resident: compare and follow a route
+
+1. Open the live demo and enter **Resident** mode.
+2. Search for or select the start and destination points.
+3. Compare the shortest and most-shaded-practical route cards.
+4. Select a route to highlight it on the map and inspect its evidence.
+5. Optionally start the manual walkthrough, advance through points, and finish at the destination.
+6. To report a problem, select the report route points on the map, describe the issue and optionally attach a reference photo before submitting.
+
+### Developer: review a report or publish a map update
+
+1. Enter **Developer** mode and inspect the map or a segment's evidence.
+2. Open **Resident reports** to review a submitted report and its route/photo, then accept or reject it with a review note.
+3. Open **Edit shade / publish** to select links and stage shade edits.
+4. Review the draft changes and enter the required publication details before publishing.
+5. Use **Budget optimiser**, **Simulated scenario** and **Footfall planning** to explore alternative plans. Scenario previews do not automatically publish changes to Resident mode.
+
+## Technology stack
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Front end | React, TypeScript, Vite | Web application and UI |
+| 3D homepage | Three.js / WebGL | Interactive township scene and camera controls |
+| Map presentation | Shared campus image with SVG overlays | Display configured route links and interactive points |
+| Route logic | Deterministic graph/path calculations | Compare configured shortest and practical routes |
+| Browser persistence | `localStorage` and IndexedDB | Save demo workflow state and photo references locally |
+| Test framework | Vitest | Unit and component tests |
+| Public hosting | Vercel static deployment | Serve the compiled browser app |
+
+The current deployed application is a static browser application. There is no application server or central database for cross-user synchronisation.
+
+## System design
+
+At a high level, the application is organised into these parts:
+
+- **App shell:** selects Home, Resident or Developer mode and shares the workflow and photo controllers.
+- **Landing scene:** renders the interactive 3D homepage.
+- **Resident workspace:** handles endpoint selection, calculated routes, map interaction, walkthrough and report submission.
+- **Developer workspace:** handles map-shade drafts/publication, report review, budget planning, scenarios, footfall planning and map evidence.
+- **Shared map components:** render the campus illustration, routes, markers, live legend and optional photos.
+- **Domain/workflow modules:** validate and persist the demo records and apply deterministic route/planning rules.
+
+The route algorithms and presentation layer do not make the illustrative campus map geospatially accurate. The display is not calibrated to real-world coordinates.
+
+## Getting started
+
+### Prerequisites
+
+- Node.js **24.x** (the repository's `package.json` specifies Node 24).
+- npm.
+- Git, if cloning the repository.
+
+### Clone the repository
+
+```bash
+git clone https://github.com/lejun10290000/coolcorridor-ai-demo.git
+cd coolcorridor-ai-demo
+```
+
+### Install dependencies and run locally
+
+```bash
+npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. To create a production build and run tests:
+Vite will print a local URL, commonly `http://localhost:5173/`. Open that URL in your browser. Keep the terminal open while using the local app.
 
-```powershell
-npm run build
+### Run tests and build
+
+```bash
 npm test
+npm run build
 ```
 
-On Home, use the chapter controls to inspect three camera views, click **360° tour** for a ten-second full camera revolution, drag the uncovered 3D world to orbit, pause motion, or choose High, Balanced or Fallback quality. The static fallback keeps both mode portals usable if WebGL is unavailable. Reduced-motion settings pause the camera and animated button surfaces on first load, and disable the automatic orbit tour.
+`npm test` runs the Vitest test suite. `npm run build` runs the TypeScript build and creates the production assets in `dist/`.
 
-## Public hosting
+For a production-like local preview:
 
-The Vercel configuration builds with Node.js 24 and publishes only `dist/`, with a restrictive content security policy and browser security headers. Never expose the Vite development/preview server publicly. See [deployment instructions, security checks and limitations](docs/DEPLOYMENT_SECURITY.md). This remains a browser-local DEMO: Developer actions and reports do not synchronize between different visitors.
-
-## Scope and data status
-
-- Resident and Developer use the supplied campus reference with its printed Main Gate–Klinik example route removed and endpoint dots normalized (`public/maps/utmkul-reference-normal-points.png`), fitted to the original1113×1414 coordinate frame with aligned interactive SVG overlays. The original JPEG and earlier edits are retained. See [background edits and prompts](docs/MAP_BACKGROUND_EDIT.md). No online map tiles are requested. The image is not georeferenced; its original creator/reuse licence is unconfirmed and permission must be checked before public deployment.
-- All walkway overlay geometry, route results, shade values, footfall, costs and benefits currently use visibly labelled **DEMO / ILLUSTRATIVE** fixtures. They are not verified navigation or field observations.
-- Developer can select multiple point-to-point routes or individual path links, choose Unshaded / Mixed shaded / Fully shaded (DEMO classes), and save a Developer draft. Review the changes, enter a publication note and choose **Publish to Resident map** to create a new immutable version. Resident routing automatically recalculates from published versions, including in another tab at the same origin; drafts are excluded. See [editing and publication instructions](docs/DEVELOPER_MAP_SHADE.md).
-- Resident reports use only the two points clicked manually on the map. The report form automatically shows those endpoints as read-only fields; routing dropdowns/cards do not set report points. Use **Choose report points on map** to start a fresh pair, then **Report selected route** and describe the problem (for example, a broken shade structure). Developer **Accept report** immediately publishes yellow/mixed shade for the saved path; rejection leaves shade unchanged. Resident maps show no report counts; Developer maps count only pending reports and clear their badges after acceptance/rejection. Reports remain in history. Repairs use the manual shade editor and a separate publication. See [report instructions and actual tests](docs/ROUTE_REPORT_SYSTEM.md).
-- Optimisation is a deterministic exhaustive subset search that honours budget, exclusions and mutual constraints; overlapping segment benefits are not double-counted.
-- Before/after outputs are **SIMULATED**, retain baseline data, and make no cooling, energy, carbon or beneficiary claim.
-- The installation/observation/review/publish panel has been removed from Developer mode at the operator's request. Use manual map updates or accept route reports to publish shade changes; stored observation/lifecycle history is preserved.
-- The AI UI/service contract is reserved but no pretrained inference is yet integrated because no permitted imagery or model environment was supplied. See [data dictionary](docs/DATA_DICTIONARY.md).
-- The Home world's route, buildings and shade cues are fictional concept art, separate from the supplied campus illustration used inside the modes. No UTM or Sime Darby Property logo or photo is used.
-
-## Handoff boundaries
-
-Shared types are in `src/types.ts`, fixtures in `src/fixtures.ts`, domain algorithms in `src/domain.ts`, and endpoint shapes in [API contracts](docs/API_CONTRACTS.md). Builders should preserve those stable IDs and status fields when replacing fixture seams.
-
-## Campus map controls and provenance
-
-Select a route card to outline its segment IDs in purple while retaining the shade colours. Select a segment by click/tap or Enter/Space to update the evidence inspector. Zoom from 100% to 300%, drag or use arrow keys when zoomed, and reset with Full map, Recenter or Home. Image-load errors hide overlays and offer a local retry; there is no online fallback.
-
-Pixel display geometry is in `src/campusMapDisplay.ts`, separate from WGS84 geometry (currently unavailable). Both modes share the same image, segment IDs and display data. All paths and crossings require field checks. The normal Resident entry calculates Shortest route and Most shaded practical route from the current published snapshot. The practical path minimises exposure-ranking cost within 25% of shortest distance; route metrics use legacy DEMO metre fixtures, never image pixels. The current reference network lets users choose two source circles; older S03/190m examples below are historical test fixtures. These are algorithm demonstrations, not surveyed navigation. Image inference and shade measurement remain unavailable.
-
-See [map handoff, tests and source notes](docs/CAMPUS_MAP_HANDOFF.md) and [data dictionary](docs/DATA_DICTIONARY.md). The optional standalone review at `/review/campus-map.html` is available with the dev server; it is a test harness, not the operational app.
-
-## Developer manual map updates and versioned publication
-
-The Developer inbox lists all reports; the inspector can also filter to reports covering its selected link. New reports save the exact route links, endpoints, objective and source dataset. A Developer's explicit Accept action records review and publication atomically; older single-link reports retain their original review history and separate legacy review controls. Reports remain separate from footfall.
-
-“Candidates eligible for optimisation” means checked candidates **may** be selected, not that they are in the calculated portfolio. Enter whole RM (0–1,000,000,000; default RM20,000) and click **Optimise plan**. Changing the budget/eligibility marks the plan stale and hides previous site highlights until recalculation. Benefit values are illustrative scores, never measured shade/cooling results.
-
-Use **Baseline / Simulated scenario** and explicit per-segment projection controls to preview hypothetical shade classifications. No projection is assumed by default. Historical snapshots can be viewed without changing the current published dataset.
-
-Use **Edit map shade** to select point-to-point paths, apply a category to the Developer draft, review the changes and choose **Publish to Resident map**. Accepting a valid route report also publishes its saved links as mixed shade. A repair requires a later manual update. Previous snapshots and stored evidence history remain inspectable; removing the old installation panel does not clear saved data.
-
-State is persisted only in this browser under `coolcorridor-shade-workflow-v1`, with guarded schema validation and visible corruption/storage-failure warnings. It is not a central database, production authentication or tamper-proof audit log. Observation evidence remains a text reference. Point reference photos are prepared and saved separately in local IndexedDB; no photo is uploaded to a server. No GPS or location permissions are used.
-
-See the [manual map workflow](docs/DEVELOPER_MAP_SHADE.md), [route reports](docs/ROUTE_REPORT_SYSTEM.md) and [schema/provenance](docs/DATA_DICTIONARY.md). The [older observation workflow handoff](docs/DEVELOPER_SHADE_WORKFLOW.md) documents retained historical functionality, not the current Developer screen.
-
-To exercise the production workflow with the optional separately supplied Playwright/Chromium runtime:
-
-```sh
+```bash
 npm run build
-npm test
 npx vite preview --host 127.0.0.1 --port 4183 --strictPort
-# In another terminal, with Playwright and Chrome available:
-node review/check-developer-map-shade.cjs
-node review/check-route-reports.cjs
 ```
 
-Set `PLAYWRIGHT_MODULE` / `CHROME_PATH` if they are outside the default lookup locations; `ALIGNMENT_APP_URL` defaults to `http://127.0.0.1:4183`. No app dependency installation changes are required.
+The preview server is for local validation only; do not expose a Vite development or preview server directly to the public internet.
 
-## Calculated Resident routing
+## Tests and quality checks
 
-[Builder 1 approved the v4 App/map/documentation scope](https://github.com/lejun10290000/coolcorridor-ai-demo/pull/6#issuecomment-6234657305). Open the ordinary app URL, enter Resident, and choose **Shortest route** or **Most shaded practical route**. Both cards remain when paths coincide. The selected route text, card IDs/version and final purple casing follow the same calculated result; white halo and shade-coloured centre preserve selection and evidence at full-map zoom.
+The project includes unit/component tests and separate browser acceptance scripts under `review/`. The latest merged usability update (PR #26, 23 October 2026 Malaysia time) reported **164 tests passing across 20 files**, a successful production build, and production-deployment/browser checks without page errors. This is the result reported for that reviewed release; rerun the commands above to verify any newer checkout.
 
-Shortest uses distance alone, then stable IDs. Practical searches all loop-free paths no longer than shortest ×1.25, minimises ranking cost, then distance and stable IDs. Unknown weighs1×length and stays grey/Unknown, with separate unknown coverage/penalty; mixed0.5 is an assumption, not measured shade fraction. If no permitted path improves the shortest score, both cards show shortest with a reason. The small DEMO enumeration needs replacement before a large surveyed network.
+Some browser acceptance scripts require Playwright and Chrome/Edge to be installed separately. Their configuration and use are documented in the repository's deployment documentation and individual review scripts. Browser checks use isolated test data and do not represent field validation of the campus map.
 
-Only current published snapshots drive Resident routes. Publication automatically recalculates the open Resident view, including another tab on the **same origin/profile**; scenarios and historical Developer views cannot change it. Publishing DEMO S03 as exposed gives shortestS03/190m and practicalS01+S02/198m, a4.2% detour. A genuine field record requires a different trimmed/case-folded reviewer alias after under_review; aliases are not authentication. Data never synchronises to another device/profile/person. Full/blocked storage is session-only with a warning.
+## Data, privacy and important limitations
 
-See [current routing handoff and exact normal-entry acceptance commands](docs/DYNAMIC_ROUTING_HANDOFF.md). The separate review pages are optional test harnesses; users do not need them for calculated routing. No GPS, online tiles, backend or dependencies were added.
+This section is important when demonstrating the project or describing it in reports.
 
-## Point photo references
+### Demo data and accuracy
 
-Both maps use a live legend with the current From/To names, shade categories, selected paths and photo markers. The old printed fixed-route key is hidden without modifying the source image or graph coordinates. See [shared map information](docs/MAP_INFORMATION.md).
+- Walkway lengths, links, map geometry, crossings, accessibility attributes and route results have not been field-surveyed. The supplied map is an illustration, not a georeferenced map.
+- Shade classes, footfall counts, tree/roof costs, benefit scores and simulated effects are **DEMO / ILLUSTRATIVE / ASSUMPTION** data. They are not field measurements.
+- The current application does **not** integrate a trained/pretrained image-inference model to measure shade. Its name does not mean live AI shade inference is already implemented.
+- The route graph and costs are small prototype fixtures. Route correctness means correct calculation under the configured graph and rules, not proof of a safe or optimal real-world walkway.
+- Accessibility, path openings, real walking times, cooling effects, energy/carbon savings and the number of beneficiaries have not been measured. Do not present simulated scores as measured outcomes.
+- The 3D township on the homepage is fictional concept art and is separate from the campus illustration used in the Resident and Developer views.
 
-Click a campus point in either role to open its closable reference photo panel. Darker, slightly larger points have published photos. The15 operator-confirmed photos are included, including the corrected Klinik, Cafe/MJIIT, Library, Reference15 and Reference09 assignments. Photo-only corridor points do not become route endpoints.
+### Browser-local storage
 
-In Developer, use **Edit shade / publish → Point photos / publish references**. Existing photos offer **Update photo** or **Delete published photo**; empty points offer **Upload photo**. Updating opens the file picker directly and keeps the current image visible until the replacement is reviewed and explicitly published to Residents. To remove a published reference, add a publication note, choose **Delete published photo**, then confirm. Deletion updates both roles, keeps the previous image in history and preserves any private replacement draft. Drafts remain private to the editor. Publication updates an already-open Resident tab on the same browser origin/profile; it does not change shade or routes. Photos are stored separately from shade/report history in IndexedDB. There is no remote publication service or production authentication.
+- Workflow and report state is stored in the visitor's browser profile/origin; point-photo references use browser IndexedDB.
+- Published shade changes, reports and photos do not synchronise to another person's browser, another device or another browser profile.
+- Developer mode is a **demo role**, not an authenticated or authorised administration service. Anyone who can open the public demo can access its Developer UI and change their own local demo state.
+- Clearing browser/site storage can remove that browser's saved demo data. Use non-sensitive synthetic information only.
+- Report acceptance changes the prototype's published shade according to the documented demo rule; it does not notify a real campus team or confirm that a physical repair has occurred.
 
-See [point-photo workflow and source mapping](docs/POINT_REFERENCE_PHOTOS.md). Run `node review/check-point-photos.cjs` against the normal production preview for acceptance checks (including upload errors, concurrent edits, failed-save isolation and mobile panel closing).
+### Privacy and security
 
-## Resident report photos
+- The app does not request GPS/location permissions and does not provide a backend for uploading photos.
+- Uploaded reference photos are processed and stored locally in the browser. Do not upload sensitive images or personal information.
+- Vercel deployment configuration includes browser security headers and publishes the compiled static application. These controls reduce some risks but do not guarantee that the site is immune to all attacks.
+- A shared multi-user backend, authenticated roles, central storage, or operational use would require a separate design and security review.
 
-Resident walkway reports can also include an **optional reference photo**. Preview or remove it before submitting; Developer can view/enlarge it beside the report when deciding to accept or reject. Photo attachments do not update map-point photos or shade automatically. See [report photo workflow and limits](docs/REPORT_REFERENCE_PHOTOS.md).
+## Deployment
 
-## Resident walkthrough
+**Live demo:** https://coolcorridor-ai-demo.vercel.app/
 
-Choose your start and destination, select the shortest or most shaded route, then choose **Start selected route**. The route stays locked while the next graph point and its published photo appear. Press **Next** after reaching that point; use **Previous point** to correct an accidental advance. Confirm the destination and choose **Finish walk**, or **Exit walk / change route** to replan earlier. A new Developer baseline does not silently change a walk in progress; exit to use its recalculated routes. This is a manual illustrative preview without GPS or verified navigation. Refreshing or leaving the role ends walkthrough progress. See [workflow and validation](docs/RESIDENT_WALKTHROUGH.md).
+The production deployment is hosted on Vercel and publishes the compiled static site from `dist/`. The project uses Node.js 24 for builds and includes security/deployment configuration in `vercel.json` and `.vercelignore`.
 
+For deployment configuration, security headers, browser checks and scope limitations, see [Production deployment and security scope](docs/DEPLOYMENT_SECURITY.md).
 
-## Usability and accessible controls
+A public deployment is not the same as a shared application backend: user state remains local to each browser.
 
-Resident routes recalculate as soon as both endpoints are connected; there is no extra Find routes step. Full endpoint prompts stay above the dropdowns, while only actual places appear in the open lists. Search accepts campus names and common English aliases. Clear route resets only the planned route selection.
+## Repository structure
 
-Reports use their own map-point selection. Description, category and optional photo survive changing those points within the open report journey. Identical/disconnected points explain how to recover. A successful submission clears the next report's point selection. Closing the form, refreshing, or leaving the mode ends an unsaved report draft. Reports remain local to the same browser profile; no campus team is notified.
+```text
+coolcorridor-ai-demo/
+├── public/
+│   └── maps/                 # Campus map assets used by the app
+├── src/
+│   ├── landing/              # Royal Amethyst Three.js homepage
+│   ├── routing/              # Resident route UI, walkthrough and report flows
+│   ├── workflow/             # Developer workspace, review and planning tools
+│   ├── pointPhotos/          # Map-point reference-photo handling
+│   ├── App.tsx               # Application mode selection / shell
+│   ├── domain.ts             # Domain calculations and rules
+│   └── types.ts              # Shared types
+├── docs/                     # Product, data, workflow and deployment documentation
+├── review/                   # Browser acceptance and regression scripts
+├── package.json              # Scripts and dependencies
+├── vercel.json               # Production hosting/security configuration
+└── README.md
+```
 
-Developer shortcuts bring the target map/tool into view. Report filters retain unsubmitted reviewer notes. Disclosures, dropdowns and checkboxes share the amethyst styling and retain keyboard interaction. Scrollbar tracks are hidden while content remains scrollable; forced-color accessibility mode restores native controls/scrollbars. Browsers supporting customizable native selects receive styled popup lists; other browsers retain their native picker with themed fields.
+## Team
 
-Homepage explanation buttons sit above their copy and do not move the 3D camera. Camera drag, ambient motion and the explicit tour remain available. Top About links are removed; the bottom About sections remain. The pilot-context and explanation cards share aligned edges and matching width, without forcing identical content heights.
+- **CHUA LE JUN**
+- **NG PI ZHEN**
+- **LE YONG XIANG**
+- **LAI YAN QI**
+- **WOO YONG KANG**
 
-Additional local acceptance scripts (set `PLAYWRIGHT_MODULE`, `CHROME_PATH`, and the corresponding output directory variable):
+## Further documentation
 
-- `node review/check-usability.cjs`: search, automatic routing, report review/photo, filters and mobile shortcuts.
-- `node review/check-user-flow.cjs`: report recovery, acceptance/publication, historical read-only baseline, budget recovery and simulation isolation.
-- `node review/check-dropdowns.cjs`: styled pickers, keyboard controls, complete prompts and mobile width.
-- `node review/check-landing-controls.cjs`: actual WebGL camera isolation from explanation tabs, drag/tour, control sizing and navigation.
-- `node review/check-readability.cjs` and `node review/check-alignment.cjs`: disclosure and workspace layout checks.
+- [API and component contracts](docs/API_CONTRACTS.md)
+- [Data dictionary and provenance](docs/DATA_DICTIONARY.md)
+- [Shared map information and legend](docs/MAP_INFORMATION.md)
+- [Reference map alignment](docs/REFERENCE_MAP_ALIGNMENT.md)
+- [Resident walkthrough](docs/RESIDENT_WALKTHROUGH.md)
+- [Resident route reports](docs/ROUTE_REPORT_SYSTEM.md)
+- [Resident report photos](docs/REPORT_REFERENCE_PHOTOS.md)
+- [Developer shade editing and publication](docs/DEVELOPER_MAP_SHADE.md)
+- [Point reference photos](docs/POINT_REFERENCE_PHOTOS.md)
+- [Budget and scenario planning](docs/BUDGET_SCENARIO_WORKFLOW.md)
+- [Top-footfall planning](docs/TOP_FOOTFALL_PLANNING.md)
+- [Deployment and security scope](docs/DEPLOYMENT_SECURITY.md)
 
-These scripts use isolated browser storage and default to the static preview at `http://127.0.0.1:4183/`. The existing `check-public-deployment.cjs` also accepts `ALIGNMENT_APP_URL` for the public deployment.
+---
+
+**Last documentation review:** 23 October 2026. Please keep this README and the linked documentation aligned when application behaviour changes.
