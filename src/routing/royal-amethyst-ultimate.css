@@ -215,3 +215,9 @@
 .ultimate-resident .campus-active-route .campus-route-silk-piece{opacity:.98;animation:ultimate-route-silk 5.6s linear infinite}
 @keyframes ultimate-route-silk{0%,100%{stroke:#7440c8}22%{stroke:#b185ed}42%{stroke:#f0ddff}61%{stroke:#a472e7}80%{stroke:#5b2fb1}92%{stroke:#7043ca}}
 @media(prefers-reduced-motion:reduce){.ultimate-resident .campus-active-route .campus-route-silk-piece{animation:none}}
+
+/* Keep the portrait Klinik UTM reference legible in the walk card and map photo panel. */
+.ultimate-resident .resident-walk-panel{overflow:clip}
+.ultimate-resident .resident-walk-photo--klinik{background:#0e071d}
+.ultimate-resident .resident-walk-photo--klinik img{height:clamp(240px,34dvh,330px);object-fit:cover;object-position:center 63%}
+.ultimate-resident .point-photo-panel[data-photo-node="KLINIK-UTM"] .point-photo-image img{height:clamp(220px,30dvh,280px);object-fit:cover;object-position:center 63%}
