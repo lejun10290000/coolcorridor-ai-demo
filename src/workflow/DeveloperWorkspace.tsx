@@ -13,9 +13,11 @@ import { SegmentEvidence } from './SegmentEvidence'
 import { ReportReview } from './ReportReview'
 import { seedPointPhotos } from '../pointPhotos/catalog'
 import { PointPhotoEditor } from '../pointPhotos/PointPhotoEditor'
+import { ResidentAtmosphere } from '../routing/ResidentAtmosphere'
 import type { PointPhotoController } from '../pointPhotos/usePointPhotos'
 import './workflow.css'
 import './developer-layout.css'
+import './developer-ultimate.css'
 
 type Commit=(update:(s:WorkflowState)=>WorkflowState)=>boolean
 const tools = [
@@ -27,11 +29,11 @@ const tools = [
 ] as const
 type Tool = typeof tools[number]['id']
 
-export function DeveloperWorkspace({state,commit,notice,back,pointPhotos}:{state:WorkflowState;commit:Commit;notice:string;back:()=>void;pointPhotos?:PointPhotoController}){
+export function DeveloperWorkspace({state,commit,notice,back,openResident,pointPhotos}:{state:WorkflowState;commit:Commit;notice:string;back:()=>void;openResident?:()=>void;pointPhotos?:PointPhotoController}){
   const [photoPoint,setPhotoPoint]=useState<string|null>(null)
   const [selected,setSelected]=useState(''),[recenter,setRecenter]=useState(0),[tool,setTool]=useState<Tool>('edit')
   const [reportFilter,setReportFilter]=useState<string|undefined>(),[reportPreview,setReportPreview]=useState<ResidentReport|null>(null)
-  const [controlsTarget,setControlsTarget]=useState<HTMLDivElement|null>(null),[evidenceOpen,setEvidenceOpen]=useState(false)
+  const [controlsTarget,setControlsTarget]=useState<HTMLDivElement|null>(null)
   const scrollPane=useRef<HTMLDivElement>(null)
   const [planningSelection,setPlanningSelection]=useState<string[]>([]),[baselineChoice,setBaselineChoice]=useState('current')
   const current=currentSnapshot(state),baseline=tool==='edit'&&baselineChoice!=='current'?state.snapshots.find(s=>s.dataset_version===baselineChoice)??current:current
@@ -44,7 +46,7 @@ export function DeveloperWorkspace({state,commit,notice,back,pointPhotos}:{state
   const scenario=calculated.result?.scenario??buildScenario(current,[],[],{})
   const scenarioActive=tool==='scenario'&&plan!==null
   const mapSegments=scenarioActive?scenario.segments:baseline.segments
-  const selectedSegment=baseline.segments.find(s=>s.segment_id===selected)??baseline.segments.find(s=>s.segment_id==='DEMO-REF-001')??baseline.segments[0]
+  const selectedSegment=baseline.segments.find(s=>s.segment_id===selected)
   const pending=state.reports.filter(r=>r.review_status==='submitted'||r.review_status==='under_review').length
   function chooseTool(next:Tool){setTool(next);if(next!=='reports')setReportPreview(null);if(next!=='edit')setBaselineChoice('current');if(next==='reports')setReportFilter(undefined);if(scrollPane.current)scrollPane.current.scrollTop=0}
   function tabKeys(e:KeyboardEvent<HTMLButtonElement>,index:number){
@@ -55,16 +57,25 @@ export function DeveloperWorkspace({state,commit,notice,back,pointPhotos}:{state
   function showReportedRoute(report:ResidentReport){if(!report.route)return;setReportPreview(report);setSelected(report.route.segment_ids[0]);setBaselineChoice('current');setRecenter(r=>r+1)}
   function previewScenario(){chooseTool('scenario')}
   function returnBaseline(){chooseTool('edit')}
-  function locatePath(id:string){setSelected(id);setEvidenceOpen(true);setReportPreview(null);setRecenter(r=>r+1)}
-  function inspectPath(id:string){setSelected(id);setEvidenceOpen(true)}
+  function locatePath(id:string){setSelected(id);setReportPreview(null);setRecenter(r=>r+1)}
+  function inspectPath(id:string){setSelected(id)}
   const planningProps={state,commit,plan,error:calculated.error,scenario,preview:previewScenario,baseline:returnBaseline}
-  return <main className="wf-app developer-app"><header><button className="link" onClick={back}>← Home</button><div><span className="chip">DEMO PLANNING</span> <span className="chip wf-version">{state.current_version}</span></div></header>
-    <section className="workspace developer-workflow"><div className="topbar developer-topbar"><div><div className="eyebrow">DEVELOPER MODE</div><h1>Campus shade workspace</h1><p>Edit the baseline, review reports and explore planning scenarios beside the map.</p></div><div className="wf-actions"><a href="#developer-controls">Open tools</a><a href="#developer-campus-map">View map</a><button onClick={()=>setRecenter(r=>r+1)}>Recenter</button></div></div>
+  return <main className="wf-app developer-app developer-ultimate"><ResidentAtmosphere/>
+    <header className="developer-header"><span className="developer-header-space" aria-hidden="true"/><nav className="developer-nav" aria-label="Main navigation"><button type="button" onClick={back}>⌂ <span>Home</span></button>{openResident&&<button type="button" onClick={openResident}>✧ <span>Resident</span></button>}<span className="developer-nav-active" aria-current="page">▣ <span>Developer</span></span><a href="#developer-about">ⓘ <span>About</span></a></nav><div className="developer-header-meta"><span className="chip">DEMO PLANNING</span><span className="developer-dataset">{state.current_version}</span></div></header>
+    <section className="workspace developer-workflow">
     {notice&&<p role="alert" className="warning">{notice}</p>}
     <div className="developer-layout">
+      <div className="topbar developer-topbar">
+        <div className="developer-intro-content"><div className="eyebrow">DEVELOPER MODE <span className="developer-eyebrow-line"/></div><h1>Plan, test and <em>optimise cooler routes</em></h1><p>Review reports, refine map shade and test planning scenarios.</p></div>
+        <section className={`developer-path-evidence ${selectedSegment?'developer-evidence-selected':'developer-evidence-empty'}`} aria-label="Map evidence" tabIndex={0}>
+          <div className="developer-evidence-heading"><span className="eyebrow">MAP EVIDENCE</span><div className="developer-evidence-controls"><span className="developer-evidence-status" title={selectedSegment?'Updates with the selected segment; not live field measurements.':undefined}>{selectedSegment?'Live evidence':'Ready to inspect'}</span>{selectedSegment&&<button type="button" className="developer-evidence-reset" aria-label="Reset Map Evidence inspection" onClick={()=>setSelected('')}><span aria-hidden="true">↶</span> Reset</button>}</div></div>
+          <div className="developer-evidence-state" key={selectedSegment?.segment_id??'empty'}>
+            {selectedSegment?(scenarioActive?<ScenarioEvidence segment={current.segments.find(s=>s.segment_id===selected)??selectedSegment} scenario={scenario} baseline={returnBaseline}/>:<SegmentEvidence segment={selectedSegment} version={baseline.dataset_version} state={state} mode="developer" historical={baseline.dataset_version!==current.dataset_version} onAction={()=>openReports(selectedSegment.segment_id)}/>):<DeveloperEvidenceEmpty/>}
+          </div>
+        </section>
+      </div>
       <div className="developer-map-pane" id="developer-campus-map" tabIndex={-1}>
         <DeveloperMapEditor pointPhotos={pointPhotos?.published??seedPointPhotos} photoPoint={photoPoint} onPhotoPointChange={setPhotoPoint} state={state} commit={commit} controlsTarget={controlsTarget} viewLabel={`${scenarioActive?'SIMULATED / ASSUMPTION':tool==='scenario'?'BASELINE — calculate a plan to preview a scenario':tool==='reports'&&reportPreview?'REPORTED ROUTE — CURRENT PUBLISHED SHADE':tool==='edit'&&baseline.dataset_version===current.dataset_version&&state.map_shade_draft?'DEVELOPER DRAFT PREVIEW — not published to Residents':'BASELINE — PUBLISHED MAP'} · ${scenarioActive?scenario.baseline_version:baseline.dataset_version}${baseline.dataset_version!==current.dataset_version?' · historical; read only':''}`} canEdit={tool==='edit'&&baseline.dataset_version===current.dataset_version} compactDetails segments={mapSegments} selected={selected} onSelect={inspectPath} recenter={recenter} onSelectionChange={setPlanningSelection} candidates={scenarioActive?calculated.result?.items.filter(i=>plan?.ids.includes(i.intervention_id)):[]} scenario={scenarioActive} reports={tool==='scenario'?[]:state.reports} reportPreview={tool==='reports'?reportPreview:null} onCloseReportPreview={()=>setReportPreview(null)}/>
-        <details className="developer-path-evidence" open={evidenceOpen} onToggle={e=>setEvidenceOpen(e.currentTarget.open)}><summary>Selected map path evidence</summary>{scenarioActive?<ScenarioEvidence segment={current.segments.find(s=>s.segment_id===selected)??current.segments[0]} scenario={scenario} baseline={returnBaseline}/>:<SegmentEvidence segment={selectedSegment} version={baseline.dataset_version} state={state} mode="developer" historical={baseline.dataset_version!==current.dataset_version} onAction={()=>openReports(selectedSegment.segment_id)}/>}</details>
       </div>
       <aside className="developer-right-pane" id="developer-controls" aria-label="Developer controls" tabIndex={-1}>
         <div className="developer-tool-tabs" role="tablist" aria-label="Developer tools">{tools.map((t,i)=><button key={t.id} id={`developer-tool-${t.id}`} role="tab" aria-selected={tool===t.id} aria-controls={`developer-panel-${t.id}`} tabIndex={tool===t.id?0:-1} onClick={()=>chooseTool(t.id)} onKeyDown={e=>tabKeys(e,i)}><span className="developer-tool-number" aria-hidden="true">0{i+1}</span><span>{t.label}{t.id==='reports'&&<small>{pending} pending</small>}</span></button>)}</div>
@@ -94,6 +105,24 @@ export function DeveloperWorkspace({state,commit,notice,back,pointPhotos}:{state
         </div>
       </aside>
     </div>
+    <div className="developer-support-row"><section className="developer-publication-summary" aria-label="Published dataset and review status"><span className="eyebrow">PUBLICATION STATE</span><h2>What Residents currently see</h2><p className="developer-current-version">{current.dataset_version}</p><div className="developer-status-grid"><span><b>{pending}</b> pending reports</span><span><b>{state.map_shade_draft?.assignments.length??0}</b> draft links</span></div><p>Drafts and simulations are not published. The current Resident map changes only after the existing review and publication workflow.</p><button type="button" onClick={()=>chooseTool('edit')}>Open publication workflow ↗</button></section></div>
+    <details className="developer-about" id="developer-about"><summary>About this demo and its data</summary><p>This is a local illustrative planning workspace. Campus paths remain unsurveyed; fictional footfall, assumed prices and simulated shade are labelled in their tools. Nothing here represents a construction approval or live measurement.</p></details>
     </section>
   </main>
+}
+
+function DeveloperEvidenceEmpty(){
+  return <div className="developer-evidence-welcome">
+    <div className="developer-evidence-welcome-main">
+      <div className="developer-inspection-emblem" aria-hidden="true">
+        <span className="developer-emblem-aura"/><span className="developer-emblem-ring developer-emblem-ring-outer"/><span className="developer-emblem-ring developer-emblem-ring-inner"/>
+        <span className="developer-emblem-orbit developer-emblem-orbit-one"/><span className="developer-emblem-orbit developer-emblem-orbit-two"/>
+        <span className="developer-emblem-core"><svg viewBox="0 0 48 48" fill="none"><path d="M24 42s13-12.1 13-23a13 13 0 0 0-26 0c0 10.9 13 23 13 23Z" fill="currentColor"/><circle cx="24" cy="19" r="5.3" fill="#47216d"/></svg></span>
+      </div>
+      <h2>Explore path intelligence</h2>
+      <p>Select a walkway segment on the campus map to reveal its shade classification, source, history and supporting evidence.</p>
+      <div className="developer-evidence-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 2 2.8 16 3.6-4 4.4 6 2.8-2-4.4-6 5.4-.5L4 2Z" fill="currentColor"/></svg><span>Select a path to begin</span></div>
+    </div>
+    <small>Illustrative campus data · Not field-verified</small>
+  </div>
 }

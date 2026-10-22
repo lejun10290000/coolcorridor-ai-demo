@@ -20,3 +20,5 @@
 @media(max-width:620px){.point-photo-panel{left:8px;top:8px;bottom:8px;width:calc(100% - 16px);padding:10px}.point-photo-heading{top:-10px}.point-photo-image img{height:180px}.point-photo-preview-grid img{height:130px}}
 
 .point-photo-panel.point-photo-right{left:auto;right:12px}@media(max-width:620px){.point-photo-panel.point-photo-right{left:8px;right:8px}}
+
+.resident-app .point-photo-panel{background:linear-gradient(145deg,#29114d,#100621);border-color:#cf83ff;color:#f9f2ff;box-shadow:0 16px 44px #030008cc,0 0 25px #a33cff66;border-radius:16px;padding:14px}.resident-app .point-photo-heading{background:#29114d;color:#fff}.resident-app .point-photo-heading button{background:transparent;box-shadow:none;border-color:transparent}.resident-app .point-photo-image{border:1px solid #c981ff88;background:#0a0514}.resident-app .point-photo-image img{object-fit:cover}.resident-app .point-photo-reference-note{color:#d5c0e6}.resident-app .point-photo-panel details{border-top:1px solid #a867cc66;padding-top:8px}

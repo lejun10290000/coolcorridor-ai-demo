@@ -50,6 +50,13 @@ describe('Resident manual point-by-point walkthrough',()=>{
   const {walk:reverse}=trip('INNER-GATE','MAIN-GATE'),withPhoto=renderToStaticMarkup(<WalkPanel {...props} walk={reverse}/>)
   expect(withPhoto).toContain('/point-photos/main-gate.jpg');expect(withPhoto).toContain('This does not track your location')
  })
+ it('marks the Klinik UTM reference for its portrait-aware presentation',()=>{
+  let {walk}=trip()
+  while(walkProgress(walk).next!=='KLINIK-UTM') walk=advanceWalk(walk)
+  const html=renderToStaticMarkup(<WalkPanel walk={walk} photos={seedPointPhotos} currentVersion={walk.route.dataset_version} next={()=>{}} previous={()=>{}} exit={()=>{}}/>)
+  expect(html).toContain('resident-walk-photo--klinik')
+  expect(html).toContain('/point-photos/klinik.jpg')
+ })
  it('shows completion and newer-map notice without presenting another next step',()=>{
   let {walk}=trip('MAIN-GATE','INNER-GATE');walk=advanceWalk(walk)
   const html=renderToStaticMarkup(<WalkPanel walk={walk} photos={{}} currentVersion="new-version" next={()=>{}} previous={()=>{}} exit={()=>{}}/> )

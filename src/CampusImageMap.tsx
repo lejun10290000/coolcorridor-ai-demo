@@ -9,10 +9,11 @@ import { PointPhotoPanel } from './pointPhotos/PointPhotoPanel'
 import type { PointPhoto } from './pointPhotos/catalog'
 import { SelectedRouteOverlay } from './routing/SelectedRouteOverlay'
 import { MapLegend } from './MapLegend'
+import { clampMapOffset, zoomAroundCursor } from './mapViewport'
 
 export interface CampusImageMapProps {
   segments: WalkwaySegment[]; selected?: string; onSelect: (id: string) => void
-  routeIds?: string[]; candidates?: InterventionCandidate[]; scenario?: boolean; recenter: number
+  routeIds?: string[]; routeNodeIds?: string[]; candidates?: InterventionCandidate[]; scenario?: boolean; recenter: number
   reports?: ResidentReport[]
   showReportNumbers?: boolean
   fromNode?: string
@@ -22,10 +23,11 @@ export interface CampusImageMapProps {
   pointPhotos?: Record<string,PointPhoto>
   photoPoint?: string|null
   onPhotoPointChange?: (id:string|null)=>void
-  walkPosition?: {current:string;next:string|null}
+  walkPosition?: {current:string;next:string|null;confirmed?:number}
   compactDetails?: boolean
+  presentation?: 'default'|'resident'|'developer'
 }
-export function CampusImageMap({ segments, selected, onSelect, routeIds = [], candidates = [], scenario = false, recenter, reports = [], showReportNumbers = false, fromNode, toNode, onNodeSelect, pointPhotos, photoPoint, onPhotoPointChange, walkPosition, compactDetails = false }: CampusImageMapProps) {
+export function CampusImageMap({ segments, selected, onSelect, routeIds = [], routeNodeIds = [], candidates = [], scenario = false, recenter, reports = [], showReportNumbers = false, fromNode, toNode, onNodeSelect, pointPhotos, photoPoint, onPhotoPointChange, walkPosition, compactDetails = false, presentation='default' }: CampusImageMapProps) {
   const [localPhotoPoint,setLocalPhotoPoint]=useState<string|null>(null)
   const activePhotoPoint=onPhotoPointChange?photoPoint:localPhotoPoint
   const setPhotoPoint=onPhotoPointChange??setLocalPhotoPoint
@@ -45,9 +47,11 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
   const pressedSegment = useRef<string | null>(null)
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
+  const zoomRef = useRef(1)
+  const panRef = useRef({ x: 0, y: 0 })
   const [imageState, setImageState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [retry, setRetry] = useState(0)
-  const reset = () => { setZoom(1); setPan({ x: 0, y: 0 }) }
+  const reset = () => { zoomRef.current = 1; panRef.current = { x: 0, y: 0 }; setZoom(1); setPan({ x: 0, y: 0 }) }
   // In the Resident map, show the campus-wide network as the base layer. Legacy edges
   // appear only when selected or when an existing DEMO intervention references them.
   const referenceIds=new Set(campusWalkLinks.map(s=>s.segment_id))
@@ -56,15 +60,56 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
   useEffect(() => { reset() }, [recenter])
   // A resize resets the shared scene so a formerly visible path cannot remain offscreen.
   useEffect(() => { const observer = new ResizeObserver(reset); if (viewport.current) observer.observe(viewport.current); return () => observer.disconnect() }, [])
-  function move(x: number, y: number) {
+  function mapGeometry() {
     if (!viewport.current || !scene.current) return
     const v = viewport.current.getBoundingClientRect()
-    const s = scene.current.getBoundingClientRect()
-    const limitX = Math.max(0, (s.width - v.width) / 2)
-    const limitY = Math.max(0, (s.height - v.height) / 2)
-    setPan({ x: Math.max(-limitX, Math.min(limitX, x)), y: Math.max(-limitY, Math.min(limitY, y)) })
+    const s = scene.current
+    return {
+      view: { x: v.width, y: v.height },
+      scene: { x: s.offsetWidth, y: s.offsetHeight },
+      center: { x: s.offsetLeft + s.offsetWidth / 2, y: s.offsetTop + s.offsetHeight / 2 },
+      origin: { x: v.left, y: v.top },
+    }
   }
-  const changeZoom = (delta: number) => { setZoom(z => Math.max(1, Math.min(3, z + delta))); setPan({ x: 0, y: 0 }) }
+  function move(x: number, y: number) {
+    const geometry = mapGeometry()
+    if (!geometry || zoomRef.current === 1) return
+    const next = clampMapOffset({ x, y }, geometry.view, { x: geometry.scene.x * zoomRef.current, y: geometry.scene.y * zoomRef.current }, geometry.center)
+    panRef.current = next
+    setPan(next)
+  }
+  function changeZoom(delta: number, cursor?: { x: number; y: number }) {
+    const geometry = mapGeometry()
+    if (!geometry) return
+    const previous = zoomRef.current
+    const next = Math.max(1, Math.min(3, Math.round((previous + delta) * 100) / 100))
+    if (next === previous) return
+    const focus = cursor ?? { x: geometry.view.x / 2, y: geometry.view.y / 2 }
+    const nextPan = next === 1 ? { x: 0, y: 0 } : clampMapOffset(
+      zoomAroundCursor(focus, geometry.center, panRef.current, previous, next),
+      geometry.view,
+      { x: geometry.scene.x * next, y: geometry.scene.y * next },
+      geometry.center,
+    )
+    zoomRef.current = next
+    panRef.current = nextPan
+    setZoom(next)
+    setPan(nextPan)
+  }
+  useEffect(() => {
+    const element = viewport.current
+    if (!element) return
+    const wheel = (event: WheelEvent) => {
+      const direction = -Math.sign(event.deltaY)
+      if (!direction || (zoomRef.current === 1 && direction < 0) || (zoomRef.current === 3 && direction > 0)) return
+      event.preventDefault()
+      const rect = element.getBoundingClientRect()
+      const unit = event.deltaMode === 1 ? 18 : event.deltaMode === 2 ? rect.height : 1
+      changeZoom(Math.max(-.35, Math.min(.35, -event.deltaY * unit * .002)), { x: event.clientX - rect.left, y: event.clientY - rect.top })
+    }
+    element.addEventListener('wheel', wheel, { passive: false })
+    return () => element.removeEventListener('wheel', wheel)
+  }, [])
   const choose = (id: string) => { if (!suppressClick.current) onSelect(id) }
   function hitSegment(clientX: number, clientY: number) {
     const matrix = overlay.current?.getScreenCTM()
@@ -83,7 +128,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
     {candidates.length === 0 && <p className="campus-map-note">No selected intervention sites.</p>}
     <p className="campus-map-source">{campusMap.source} No georeferencing. Reuse permission needs confirmation before public deployment.</p>
   </>
-  return <section className="campus-map" aria-labelledby={labelId}>
+  return <section className={`campus-map ${presentation==='resident'?'campus-map-resident':''}`} aria-labelledby={labelId}>
     <div className="campus-map-toolbar"><strong id={labelId}>UTM KL campus illustration</strong><div className="campus-map-controls">
       <button type="button" aria-label="Zoom out campus map" disabled={zoom === 1} onClick={() => changeZoom(-.5)}>−</button>
       <output aria-label="Campus map zoom">{Math.round(zoom * 100)}%</output>
@@ -91,21 +136,21 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
       <button type="button" onClick={reset}>Full map</button>
     </div></div>
     <p className="campus-map-caution">ILLUSTRATIVE ROUTES — NOT FOR NAVIGATION. {scenario ? 'SIMULATED / ASSUMPTION shade overlay.' : 'Walkway geometry is UNSURVEYED. Shade provenance is shown per segment.'} Paths remain unverified.</p>
-    <div className="campus-map-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Campus map. Zoom with buttons; when zoomed, drag or use arrow keys to pan. Home resets."
+    <div className="campus-map-viewport" ref={viewport} tabIndex={0} role="region" aria-label="Campus map. Zoom with mouse wheel or buttons; when zoomed, drag or use arrow keys to pan. Home resets."
       onKeyDown={e => {
         if (e.target !== e.currentTarget) return
         const keys: Record<string, [number, number]> = { ArrowLeft: [60,0], ArrowRight: [-60,0], ArrowUp: [0,60], ArrowDown: [0,-60] }
         if (e.key === 'Home') { e.preventDefault(); reset() }
         else if (keys[e.key] && zoom > 1) { e.preventDefault(); move(pan.x + keys[e.key][0], pan.y + keys[e.key][1]) }
       }}
-      onPointerDown={e => { const target=e.target as Element; pressedSegment.current = target.closest('[data-campus-node-id]') ? null : hitSegment(e.clientX,e.clientY); if (e.pointerType === 'mouse') e.preventDefault(); if (e.button !== 0 || zoom === 1) return; suppressClick.current = false; drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false } }}
+      onPointerDown={e => { const target=e.target as Element; const node=target.closest('[data-campus-node-id]'); if(activePhotoPoint)setPhotoPoint(null); pressedSegment.current = node ? null : hitSegment(e.clientX,e.clientY); if (e.button !== 0 || zoomRef.current === 1 || node) return; if (e.pointerType === 'mouse') e.preventDefault(); suppressClick.current = false; drag.current = { x: e.clientX, y: e.clientY, px: panRef.current.x, py: panRef.current.y, moved: false } }}
       onPointerMove={e => {
         const d = drag.current
         if (!d) return
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5) { d.moved = true; suppressClick.current = true; e.currentTarget.setPointerCapture(e.pointerId) }
         if (d.moved) move(d.px + e.clientX - d.x, d.py + e.clientY - d.y)
       }}
-      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && !suppressClick.current) activateNode(nodeId); else if (e.button === 0 && id) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
+      onPointerUp={e => { const target=e.target as Element; const nodeId=target.closest('[data-campus-node-id]')?.getAttribute('data-campus-node-id'); const id = nodeId ? null : (pressedSegment.current ?? hitSegment(e.clientX,e.clientY)); if (e.button === 0 && nodeId && !suppressClick.current) activateNode(nodeId); else if (e.button === 0 && id && !suppressClick.current) choose(id); pressedSegment.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId); drag.current = null; setTimeout(() => { suppressClick.current = false }, 0) }}
       onPointerCancel={() => { pressedSegment.current = null; drag.current = null; suppressClick.current = false }}
       style={{ touchAction: zoom > 1 ? 'none' : 'pan-y', cursor: zoom > 1 ? 'grab' : 'auto' }}>
       {imageState === 'loading' && <p className="campus-map-message" role="status">Loading supplied campus image…</p>}
@@ -128,7 +173,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ca
               <polyline className="campus-hit-area" points={p} strokeWidth="46" />
             </g>
           })}
-          <SelectedRouteOverlay segments={segments} routeIds={routeIds}/>
+          <SelectedRouteOverlay segments={segments} routeIds={routeIds} routeNodeIds={routeNodeIds} completedCount={walkPosition?.confirmed} living={presentation!=='default'} separateSegments={presentation==='developer'}/>
           {candidates.flatMap(c => c.segment_ids.map(id => {
             const displayId = legacySegmentDisplayAliases[id] ?? id
             const p = displayMidpoint(segmentDisplays[displayId]?.map_display_geometry ?? [])

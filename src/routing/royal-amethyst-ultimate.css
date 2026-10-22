@@ -1,0 +1,223 @@
+/* Ultimate pass: motion and material live outside the evidence-bearing map image. */
+.ultimate-resident{background:#090316;isolation:isolate}
+.ultimate-resident .ultimate-atmosphere{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse 65% 50% at 18% 0%,#42126a79,transparent 70%),radial-gradient(ellipse 38% 45% at 88% 72%,#36108091,transparent 75%),#090316}
+.ultimate-resident::before,.ultimate-resident::after{display:none}
+.ultimate-resident>.resident-header,.ultimate-resident>.resident-workspace{position:relative;z-index:1}
+.ultimate-nebula{position:absolute;width:65vw;height:58vw;max-width:1000px;max-height:850px;border-radius:50%;opacity:.46;will-change:transform,opacity;filter:blur(38px);animation:ultimate-nebula-drift 12s ease-in-out infinite alternate}
+.ultimate-nebula-a{left:-18%;top:-34%;background:radial-gradient(ellipse,#a237e86e 0%,#6a24bb34 42%,transparent 70%)}
+.ultimate-nebula-b{right:-23%;top:4%;background:radial-gradient(ellipse,#762ce09c 0%,#4b15a846 44%,transparent 71%);animation-duration:15s;animation-direction:alternate-reverse}
+.ultimate-nebula-c{left:15%;bottom:-46%;background:radial-gradient(ellipse,#982faf65 0%,#5a17ad2b 47%,transparent 72%);animation-duration:18s}
+.ultimate-starfield{position:absolute;inset:-5%;opacity:.9;background-image:radial-gradient(1.5px 1.5px at 7% 14%,#f0d4ff 98%,transparent),radial-gradient(1px 1px at 46% 25%,#b690ff 98%,transparent),radial-gradient(2px 2px at 91% 68%,#d7adff 98%,transparent),radial-gradient(1px 1px at 28% 79%,#f4dcff 98%,transparent);background-size:320px 230px,460px 330px,570px 410px,690px 520px;animation:ultimate-star-drift 18s linear infinite}
+.ultimate-rivers{position:absolute;inset:0;width:100%;height:100%;overflow:visible;opacity:.92}
+.ultimate-river{animation:ultimate-river-breathe 5.5s ease-in-out infinite alternate}
+.ultimate-river-b{animation-delay:-2.5s}.ultimate-river-c{animation-delay:-4s}
+.ultimate-river path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ultimate-river-haze{stroke-width:46;opacity:.15;filter:blur(14px)}
+.ultimate-river-thread{stroke:#b864ff;stroke-width:1.7;opacity:.53;filter:drop-shadow(0 0 7px #ba5cff)}
+.ultimate-river-traveller{stroke:#f5c4ff;stroke-width:5;opacity:.82;stroke-dasharray:115 2600;filter:drop-shadow(0 0 8px #cc5cff);animation:ultimate-river-travel 6.5s linear infinite}
+.ultimate-river-b .ultimate-river-traveller{animation-duration:8s;animation-delay:-3s}
+.ultimate-river-c .ultimate-river-traveller{animation-duration:9s;animation-delay:-5s}
+.ultimate-orbit{position:absolute;border:1px solid #bd65ff26;border-radius:50%;width:650px;height:650px;transform:rotate(-17deg);animation:ultimate-orbit-turn 32s linear infinite}
+.ultimate-orbit-a{right:-365px;top:-255px;box-shadow:0 0 25px #9f39e727,inset 0 0 25px #9f39e727}
+.ultimate-orbit-b{left:-410px;bottom:-365px;width:760px;height:760px;animation-duration:39s;animation-direction:reverse}
+.ultimate-resident[data-route-active=true] .ultimate-river-traveller{stroke:#ffe0ff;opacity:1}
+.ultimate-resident[data-resident-phase=walk] .ultimate-nebula-b{opacity:.72}
+.ultimate-resident[data-resident-phase=complete] .ultimate-rivers{animation:ultimate-finale-bloom 2.3s ease-out both}
+.ultimate-resident[data-resident-phase=report] .ultimate-nebula-c{background:radial-gradient(ellipse,#147c7c7d 0%,#4b2cbd36 47%,transparent 72%)}
+@keyframes ultimate-nebula-drift{to{transform:translate3d(8%,5%,0) scale(1.13);opacity:.68}}
+@keyframes ultimate-star-drift{to{transform:translate3d(-24px,18px,0)}}
+@keyframes ultimate-river-breathe{to{opacity:.58;transform:translate3d(0,10px,0)}}
+@keyframes ultimate-river-travel{to{stroke-dashoffset:-2715}}
+@keyframes ultimate-orbit-turn{to{transform:rotate(343deg)}}
+@keyframes ultimate-finale-bloom{0%{opacity:1;filter:brightness(1)}35%{opacity:1;filter:brightness(1.8)}100%{opacity:.95;filter:brightness(1.1)}}
+
+/* Three purposeful zones: intent, authentic map, route intelligence. */
+.ultimate-resident .resident-header{background:#100621c2;box-shadow:inset 0 -1px #cf8fff44,0 10px 34px #04000a9c}
+.ultimate-resident .resident-map-pane{display:grid;grid-template-columns:clamp(250px,16vw,290px) minmax(0,1fr);align-items:stretch;min-height:0;overflow:hidden;background:linear-gradient(135deg,#180833e8,#0c061bd9);box-shadow:0 18px 45px #000b,0 0 31px #9a32ef4a,inset 0 1px #ffffff38}
+.ultimate-resident .resident-map-pane::before,.ultimate-resident .resident-map-pane::after{display:none}
+.ultimate-resident .resident-route-controls,.ultimate-resident .resident-map-caption{position:relative;inset:auto;z-index:2;grid-column:1;grid-row:1;max-width:none;width:auto;border:0;border-right:1px solid #b365e67e;border-radius:0;box-shadow:inset 0 1px #ffffff31,12px 0 30px #0005;background:radial-gradient(circle at 15% 0%,#7131a04d,transparent 42%),linear-gradient(160deg,#180833f0,#100620ed);backdrop-filter:none;padding:clamp(20px,2vw,32px)}
+.ultimate-resident .resident-map-caption{align-content:start;gap:12px;padding-top:34px}
+.ultimate-resident .resident-route-controls h1{font-size:clamp(2rem,2.2vw,2.45rem);line-height:1.02;margin:24px 0 14px;letter-spacing:-.055em;text-shadow:0 4px 22px #a849f373}
+.ultimate-resident .resident-hero-description{font-size:.88rem;line-height:1.55;max-width:27ch;color:#e7d8f1;margin:0 0 27px}
+.ultimate-resident .route-endpoint-pickers{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);gap:7px;background:#0a0425ae;border-color:#bc75eb9b;padding:10px}
+.ultimate-resident .route-endpoint-pickers select{min-height:45px;font-size:.75rem;background:#1d0a41;border-color:#ba7dea}
+.ultimate-resident .route-endpoint-pickers .swap-route{width:38px;height:45px}
+.ultimate-resident .map-point-mode{flex-wrap:wrap;font-size:.73rem;margin-top:18px}
+.ultimate-resident .map-point-mode button{min-height:38px;min-width:55px;font-size:.72rem}
+.ultimate-resident .resident-map-pane .campus-map{grid-column:2;grid-row:1;min-width:0;min-height:0;border-radius:0;box-shadow:inset 12px 0 35px #0006}
+.ultimate-resident .resident-map-pane .campus-map-toolbar{position:relative;inset:auto;order:0;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:57px;margin:0;padding:9px 12px;background:linear-gradient(100deg,#170a36,#2d1055);border:0;border-bottom:1px solid #ca83ed8c;border-radius:0;box-shadow:inset 0 1px #ffffff35}
+.ultimate-resident .campus-map-toolbar strong{font-size:.77rem;white-space:nowrap}
+.ultimate-resident .campus-map-controls{flex-wrap:nowrap}
+.ultimate-resident .campus-map-controls button{min-width:39px;min-height:39px;font-size:.8rem;background:#301454;border:1px solid #ad6bdb;box-shadow:inset 0 1px #ffffff32}
+.ultimate-resident .campus-map-controls button:hover:not(:disabled){background:#5d2393}
+.ultimate-resident .campus-map-controls button:disabled{background:#23123b;opacity:.48;box-shadow:none}
+.ultimate-resident .campus-map-controls output{font-size:.76rem;min-width:36px}
+.ultimate-resident .resident-map-pane .campus-map-viewport{order:1;--map-height:clamp(600px,75vh,810px);justify-content:center;background:#140b28;cursor:crosshair}
+.ultimate-resident .resident-map-pane .campus-map-scene{filter:none!important}
+.ultimate-resident .resident-map-pane .campus-map-caution{order:2;position:relative;inset:auto;max-width:none;margin:0;border:0;border-top:1px solid #714494;background:#2c1746;color:#fff0fa;padding:8px 13px;font-size:.68rem;line-height:1.4}
+.ultimate-resident .resident-map-pane .campus-map-key{order:3;position:relative;background:#120827f5;padding:1px 12px 8px}
+.ultimate-resident .resident-map-pane .campus-map-details{order:4}
+.ultimate-resident .campus-map-key-note{font-size:.68rem;color:#d4bde6}
+.ultimate-resident .campus-map-legend{font-size:.69rem;gap:8px 11px}
+.ultimate-resident .resident-route-options,.ultimate-resident .resident-sidebar>.resident-walk-panel,.ultimate-resident .resident-sidebar>.journey-complete{flex:1;min-height:0;background:radial-gradient(circle at 100% 0%,#67249b3d,transparent 38%),linear-gradient(160deg,#1d0b3de8,#0c0521ee 72%);box-shadow:0 18px 42px #000a,inset 0 1px #ffffff2c}
+.ultimate-resident .resident-empty-routes{min-height:390px;gap:8px}
+.ultimate-resident .resident-empty-routes h2{font-size:1.25rem;line-height:1.2}
+.ultimate-resident .resident-empty-routes p{font-size:.77rem;max-width:32ch;justify-self:center}
+.ultimate-resident .resident-empty-routes .planning-steps{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:16px auto 0;color:#e6d2f7;font-size:.67rem}
+.ultimate-resident .planning-steps span{padding:8px;border:1px solid #9b61d39a;border-radius:999px;background:#893bc02c}
+.ultimate-resident .route-comparison .route-card{border-color:#a269d8;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background .25s ease}
+.ultimate-resident .route-comparison .route-card.selected{border-color:#ffc5ff;box-shadow:0 0 0 1px #d179ff,0 0 28px #ad47f2c7,inset 0 1px #fff8}
+.ultimate-resident .route-card h3{font-size:.89rem}
+.ultimate-resident .route-card p{font-size:.72rem}
+.ultimate-resident .route-card small{font-size:.67rem}
+.ultimate-resident button.resident-primary{background-image:linear-gradient(110deg,#6420ce,#b747ef 28%,#e174f7 45%,#8028e9 65%,#bb3df7 82%,#6420ce);background-size:300% 100%;animation:ultimate-liquid 7s ease-in-out infinite;box-shadow:inset 0 1px #fff9,inset 0 -2px #640bb9,0 0 0 1px #e097ff,0 0 24px #c45bffae,0 12px 27px #2c0453c4;font-size:.88rem}
+.ultimate-resident button.resident-primary::after{z-index:0;background:linear-gradient(90deg,transparent,#fff0 18%,#ffffff59 52%,transparent);animation:ultimate-button-sheet 6.4s ease-in-out infinite}
+.ultimate-resident button.resident-primary:hover:not(:disabled){box-shadow:inset 0 1px #fff,0 0 0 2px #f3bfff,0 0 38px #d373ffe0,0 15px 31px #2c0453d9}
+.ultimate-resident button.resident-primary:disabled{background:#513178;border-color:#805aa2;color:#c7b7d3;text-shadow:none;animation:none;box-shadow:none}
+.ultimate-resident button.resident-primary:disabled::after{display:none}
+.ultimate-resident .find-routes,.ultimate-resident .resident-start-walk{min-height:55px;font-size:.99rem}
+@keyframes ultimate-liquid{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
+@keyframes ultimate-button-sheet{0%,13%{transform:translateX(-210%) skewX(-23deg);opacity:0}21%{opacity:.27}60%{transform:translateX(370%) skewX(-23deg);opacity:.27}73%,100%{transform:translateX(420%) skewX(-23deg);opacity:0}}
+
+/* Progress and success: visible motion without changing the manual data contract. */
+.ultimate-resident .walk-progress-track{position:relative;height:14px;border-radius:999px;overflow:hidden;border:1px solid #bc80eb;background:#15072d;box-shadow:inset 0 2px 6px #0008,0 0 12px #9c3ee86b}
+.ultimate-resident .walk-progress-fill{position:relative;display:block;height:100%;min-width:0;border-radius:inherit;background:linear-gradient(90deg,#5a1aba,#a935f6,#f39bff,#9a2dec);background-size:180% 100%;box-shadow:0 0 15px #d272ff;transition:width .55s cubic-bezier(.2,.8,.2,1);animation:ultimate-progress-flow 3s linear infinite}
+@keyframes ultimate-progress-flow{to{background-position:180% 0}}
+.ultimate-resident .walk-progress-fill::after{content:"";position:absolute;right:0;top:0;bottom:0;width:14px;border-radius:50%;background:#fff4ff;box-shadow:0 0 13px 5px #d871ff}
+.ultimate-resident .walk-progress-fill[data-empty=true]::after{display:none}
+.ultimate-resident .resident-walk-panel[data-walk-current] .walk-current-card{animation:ultimate-card-arrive .45s ease-out both}
+.ultimate-resident .journey-ring{position:relative;animation:ultimate-finish-arrive .8s cubic-bezier(.15,.9,.2,1) both,royal-pulse 5s ease-in-out .8s infinite}
+.ultimate-resident .journey-ring::before{content:"";position:absolute;inset:-19px;border:1px solid #d995ff88;border-radius:50%;animation:ultimate-ring-expand 2.5s ease-out .25s both}
+.ultimate-resident .journey-ring::after{content:"";position:absolute;inset:-9px;border:2px solid transparent;border-top-color:#ffdcff;border-right-color:#b95cff;border-radius:50%;animation:ultimate-orbit-turn 8s linear infinite}
+.ultimate-resident .journey-stats{animation:ultimate-card-arrive .55s ease-out .4s both}
+.ultimate-resident .report-success-orbit{animation:ultimate-finish-arrive .7s cubic-bezier(.15,.9,.2,1) both,royal-pulse 5s ease-in-out .7s infinite}
+@keyframes ultimate-card-arrive{from{opacity:.55;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes ultimate-finish-arrive{from{opacity:0;transform:scale(.6) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes ultimate-ring-expand{from{opacity:.9;transform:scale(.5)}to{opacity:.45;transform:scale(1.2)}}
+
+/* The photo sheet occupies part of the viewport and leaves the map tappable. */
+.ultimate-resident .point-photo-panel{top:auto;bottom:12px;left:12px;right:auto;width:min(365px,calc(100% - 24px));max-height:min(420px,67%);padding:13px;background:linear-gradient(150deg,#28104add,#100522f2);backdrop-filter:blur(16px);animation:ultimate-photo-arrive .3s cubic-bezier(.2,.8,.2,1) both}
+.ultimate-resident .point-photo-panel.point-photo-right{left:auto;right:12px}
+.ultimate-resident .point-photo-heading{top:-13px;margin:-13px -13px 7px;padding:13px;background:#210e3deb;border-bottom:1px solid #bd74ed77}
+.ultimate-resident .point-photo-heading button{min-width:44px;min-height:44px;border:1px solid #cc8df1;border-radius:9px;color:#fff;font-size:1.5rem;line-height:1}
+.ultimate-resident .point-photo-image img{height:clamp(115px,22vh,205px);object-fit:cover}
+.ultimate-resident .point-photo-panel p{font-size:.77rem;color:#ecdff5}
+@keyframes ultimate-photo-arrive{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+
+@media(max-width:1180px){
+  .ultimate-resident .resident-map-pane{grid-template-columns:240px minmax(0,1fr)}
+  .ultimate-resident .resident-route-controls h1{font-size:2.4rem}
+  .ultimate-resident .resident-map-pane .campus-map-viewport{--map-height:550px}
+}
+@media(max-width:959px){
+  .ultimate-resident .resident-map-pane{grid-template-columns:1fr}
+  .ultimate-resident .resident-route-controls,.ultimate-resident .resident-map-caption{grid-column:1;grid-row:1;border-right:0;border-bottom:1px solid #b365e67e;padding:22px}
+  .ultimate-resident .resident-map-pane .campus-map{grid-column:1;grid-row:2}
+  .ultimate-resident .resident-hero-description{max-width:none}
+  .ultimate-resident .resident-route-controls h1{max-width:650px;margin:13px 0;font-size:clamp(2.1rem,5vw,3rem)}
+  .ultimate-resident .resident-map-pane .campus-map-viewport{--map-height:570px}
+}
+@media(max-width:650px){
+  .ultimate-resident .resident-route-controls,.ultimate-resident .resident-map-caption{padding:18px 16px}
+  .ultimate-resident .resident-route-controls h1{font-size:2.35rem}
+  .ultimate-resident .resident-map-pane .campus-map-toolbar{min-height:57px;padding:8px;gap:4px}
+  .ultimate-resident .campus-map-toolbar strong{font-size:.66rem;max-width:95px;white-space:normal;line-height:1.2}
+  .ultimate-resident .campus-map-controls{gap:3px}
+  .ultimate-resident .campus-map-controls button{min-width:37px;min-height:39px;padding:3px 5px}
+  .ultimate-resident .campus-map-controls output{display:block;font-size:.65rem;min-width:30px}
+  .ultimate-resident .resident-map-pane .campus-map-viewport{--map-height:430px}
+  .ultimate-resident .point-photo-panel,.ultimate-resident .point-photo-panel.point-photo-right{left:8px;right:8px;bottom:8px;width:auto;max-height:57%}
+  .ultimate-resident .resident-empty-routes{min-height:255px}
+  .ultimate-resident .ultimate-rivers{opacity:.75}
+}
+@media(prefers-reduced-motion:reduce){
+  .ultimate-resident .ultimate-nebula,.ultimate-resident .ultimate-starfield,.ultimate-resident .ultimate-river,.ultimate-resident .ultimate-river-traveller,.ultimate-resident .ultimate-orbit,.ultimate-resident .ultimate-rivers,.ultimate-resident button.resident-primary,.ultimate-resident button.resident-primary::after,.ultimate-resident .walk-progress-fill,.ultimate-resident .journey-ring,.ultimate-resident .journey-ring::before,.ultimate-resident .journey-ring::after,.ultimate-resident .journey-stats,.ultimate-resident .report-success-orbit,.ultimate-resident .point-photo-panel,.ultimate-resident .resident-walk-panel[data-walk-current] .walk-current-card{animation:none!important}
+}
+
+/* A visible moving current joins the homepage and Resident navigation. */
+.ultimate-resident .resident-header{overflow:hidden}
+.ultimate-resident .resident-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.ultimate-resident .resident-header>.resident-nav{grid-column:2}
+.ultimate-resident .resident-header>.resident-header-meta{grid-column:3}
+.ultimate-resident .resident-nav{gap:4px;padding:5px}
+.ultimate-resident .resident-nav button,.ultimate-resident .resident-nav a,.ultimate-resident .resident-nav-active{min-height:43px;min-width:105px;padding:10px 16px;font-size:.84rem}
+.ultimate-header-stream{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.8}
+.ultimate-header-stream path{fill:none;stroke-linecap:round}
+.ultimate-header-stream-base{stroke:#a54bf0;stroke-width:3;opacity:.38;filter:drop-shadow(0 0 7px #c66dff)}
+.ultimate-header-stream-light{stroke:#ffcdff;stroke-width:6;stroke-dasharray:190 1900;filter:drop-shadow(0 0 8px #d560ff);animation:ultimate-header-current 4.8s linear infinite}
+.ultimate-resident .resident-header>.resident-brand,.ultimate-resident .resident-header>.resident-nav,.ultimate-resident .resident-header>.resident-header-meta{position:relative;z-index:1}
+@keyframes ultimate-header-current{to{stroke-dashoffset:-2090}}
+.ultimate-resident .resident-route-controls{isolation:isolate;overflow:hidden}
+.ultimate-resident .resident-route-controls::after{content:"";position:absolute;z-index:0;left:-104px;bottom:-118px;width:370px;height:370px;border-radius:50%;border:1px solid #b65efb62;background:radial-gradient(circle at 50% 50%,#6f2bb524 0%,transparent 47%,#8c3ae23d 50%,transparent 66%);box-shadow:0 0 35px #9d36e73e,inset 0 0 35px #9d36e73e;animation:ultimate-orbit-turn 23s linear infinite;pointer-events:none}
+.ultimate-resident .resident-route-controls>*{position:relative;z-index:1}
+.ultimate-resident .resident-route-controls::before{content:"";position:absolute;right:0;top:-100%;height:100%;width:5px;pointer-events:none;background:linear-gradient(180deg,transparent,#dc89ff 21%,transparent 43%,#bb62f4 67%,transparent);box-shadow:0 0 20px #d15aff;will-change:transform;animation:ultimate-edge-current 5.4s linear infinite}
+@keyframes ultimate-edge-current{to{transform:translate3d(0,200%,0)}}
+.ultimate-resident .route-endpoint-pickers{grid-template-columns:minmax(0,1fr) 43px;grid-template-rows:auto auto;gap:9px 11px}
+.ultimate-resident .route-endpoint-pickers label:first-child{grid-column:1;grid-row:1}
+.ultimate-resident .route-endpoint-pickers label:last-child{grid-column:1;grid-row:2}
+.ultimate-resident .route-endpoint-pickers .swap-route{grid-column:2;grid-row:1/3;align-self:center;width:43px;height:43px}
+.ultimate-resident .route-endpoint-pickers select{font-size:.82rem;padding:7px 10px}
+.ultimate-resident .resident-empty-routes{min-height:0;align-content:center}
+.ultimate-resident .route-preview-principles{display:grid;grid-template-columns:1fr 1fr;gap:9px;max-width:100%;margin:20px auto 12px;text-align:left}
+.ultimate-resident .route-preview-principles p{display:grid;gap:6px;align-content:start;margin:0;min-width:0;padding:12px;border:1px solid #9257ca8c;border-radius:11px;background:#6b2ca72b;font-size:.7rem;line-height:1.4}
+.ultimate-resident .route-preview-principles strong{color:#f0caff;font-size:.77rem}
+.ultimate-resident .route-preview-principles span{color:#dbc9e8}
+.ultimate-resident .route-card .chip{font-size:.62rem;padding:4px 7px}
+.ultimate-resident .route-card p,.ultimate-resident .route-card small{font-size:.75rem;line-height:1.4}
+.ultimate-resident button:disabled:hover{transform:none;box-shadow:none}
+.ultimate-resident .route-comparison .route-card.selected::after{animation:ultimate-selected-light 5s ease-in-out infinite alternate}
+@keyframes ultimate-selected-light{to{transform:translate(-18%,18%) scale(1.25);opacity:.75}}
+@media(max-width:1180px){.ultimate-resident .route-preview-principles{grid-template-columns:1fr}}
+@media(max-width:959px){.ultimate-resident .route-endpoint-pickers{grid-template-columns:minmax(0,1fr) 43px minmax(0,1fr);grid-template-rows:auto}.ultimate-resident .route-endpoint-pickers label:first-child{grid-column:1;grid-row:1}.ultimate-resident .route-endpoint-pickers label:last-child{grid-column:3;grid-row:1}.ultimate-resident .route-endpoint-pickers .swap-route{grid-column:2;grid-row:1}}
+@media(max-width:650px){.ultimate-resident .resident-header{grid-template-columns:minmax(0,1fr)}.ultimate-resident .resident-header>.resident-nav{grid-column:1}.ultimate-resident .resident-nav button,.ultimate-resident .resident-nav a,.ultimate-resident .resident-nav-active{min-width:0;flex:1;min-height:40px;padding:8px 4px;font-size:.72rem}.ultimate-resident .route-endpoint-pickers{grid-template-columns:minmax(0,1fr) 43px;grid-template-rows:auto auto}.ultimate-resident .route-endpoint-pickers label:first-child{grid-column:1;grid-row:1}.ultimate-resident .route-endpoint-pickers label:last-child{grid-column:1;grid-row:2}.ultimate-resident .route-endpoint-pickers .swap-route{grid-column:2;grid-row:1/3}.ultimate-resident .route-preview-principles{grid-template-columns:1fr 1fr}.ultimate-resident .resident-route-controls::after{width:250px;height:250px;left:-80px;bottom:-100px}}
+@media(min-width:960px){
+  .ultimate-resident .resident-route-controls{padding:clamp(20px,1.25vw,24px)}
+  .ultimate-resident .route-endpoint-pickers{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 32px auto;gap:4px}
+  .ultimate-resident .route-endpoint-pickers label:first-child{grid-column:1;grid-row:1}
+  .ultimate-resident .route-endpoint-pickers label:last-child{grid-column:1;grid-row:3}
+  .ultimate-resident .route-endpoint-pickers .swap-route{grid-column:1;grid-row:2;justify-self:center;width:38px;height:32px}
+}
+@media(max-width:390px){.ultimate-resident .route-preview-principles{grid-template-columns:1fr}}
+/* Match the approved Developer stage at desktop widths, including the actual image edge. */
+@media(min-width:1381px){
+  .ultimate-resident .resident-workspace{max-width:1900px;padding-inline:clamp(18px,2vw,38px)}
+  .ultimate-resident .resident-workspace .resident-layout{grid-template-columns:minmax(0,1.7fr) minmax(365px,.87fr);gap:16px}
+  .ultimate-resident .resident-map-pane{grid-template-columns:clamp(240px,15vw,286px) minmax(0,1fr)}
+  .ultimate-resident .route-endpoint-pickers select{font-size:.78rem;padding-inline:6px}
+}
+@media(prefers-reduced-motion:reduce){.ultimate-resident .ultimate-header-stream-light,.ultimate-resident .resident-route-controls::before,.ultimate-resident .resident-route-controls::after,.ultimate-resident .route-comparison .route-card.selected::after{animation:none!important}}
+
+.ultimate-resident .resident-map-caption{overflow:hidden}
+.ultimate-resident .resident-map-caption>.chip{font-size:.68rem}
+.ultimate-resident .resident-map-caption>strong{font-size:1.1rem;line-height:1.3}
+.ultimate-resident .resident-map-caption>small{margin-top:auto;color:#d1bce2;font-size:.72rem;line-height:1.4}
+.ultimate-resident .resident-journey-rail{position:relative;display:grid;gap:3px;list-style:none;padding:8px 0 0;margin:14px 0 12px;max-height:515px;overflow-y:auto;scrollbar-color:#bd75eb #24103d}
+.ultimate-resident .resident-journey-rail::before{content:"";position:absolute;left:16px;top:20px;bottom:16px;width:1px;background:linear-gradient(#c784f5,#6c3299);opacity:.7;pointer-events:none}
+.ultimate-resident .resident-journey-rail li{position:relative;display:flex;align-items:center;gap:10px;min-height:35px;padding:5px 7px;border:1px solid transparent;border-radius:9px;color:#a995c1;font-size:.75rem;line-height:1.2}
+.ultimate-resident .resident-journey-rail .journey-rail-count{position:relative;z-index:1;display:grid;place-items:center;flex:none;width:24px;height:24px;border:1px solid #8555b1;border-radius:50%;background:#2b174c;color:#dbc5ee;font-size:.67rem}
+.ultimate-resident .resident-journey-rail .is-confirmed{color:#e3d3f0}
+.ultimate-resident .resident-journey-rail .is-confirmed .journey-rail-count{background:#8e3bda;border-color:#d995ff;color:#fff;box-shadow:0 0 9px #a64ce987}
+.ultimate-resident .resident-journey-rail .is-next{border-color:#d38aff;background:#8a32d048;color:#fff;font-weight:800;box-shadow:inset 0 1px #ffffff36,0 0 16px #a547e67a}
+.ultimate-resident .resident-journey-rail .is-next .journey-rail-count{border-color:#f0b8ff;background:#bb54f6;box-shadow:0 0 11px #d26afa;animation:royal-checkpoint 3s ease-in-out infinite}
+.ultimate-resident .resident-walk-panel .walk-timeline{display:none}
+@media(max-width:959px){.ultimate-resident .resident-journey-rail{grid-template-columns:repeat(2,minmax(0,1fr));max-height:172px}.ultimate-resident .resident-journey-rail::before{display:none}}
+@media(max-width:650px){.ultimate-resident .resident-journey-rail{max-height:136px}.ultimate-resident .resident-journey-rail li{font-size:.68rem;min-height:32px}.ultimate-resident .resident-map-caption>small{margin-top:0}}
+@media(prefers-reduced-motion:reduce){.ultimate-resident .resident-journey-rail .is-next .journey-rail-count{animation:none!important}}
+
+/* The approved narrow route and halo remain; only its inner colour shifts along the centreline. */
+.ultimate-resident .ultimate-river{animation:none}
+.ultimate-resident .ultimate-river-haze,.ultimate-resident .ultimate-river-traveller,.ultimate-resident .ultimate-header-stream-light{filter:none}
+.ultimate-resident .ultimate-river-haze{stroke-width:34;opacity:.13}
+.ultimate-resident .ultimate-river-traveller{stroke-width:4;opacity:.9}
+.ultimate-resident .ultimate-river-c .ultimate-river-traveller{animation:none;opacity:0}
+.ultimate-resident .campus-active-route .campus-route-halo,.ultimate-resident .campus-active-route .campus-route-centre,.ultimate-resident .campus-active-route .campus-route-checkpoint,.ultimate-resident .campus-route-node .campus-walk-ring{animation:none}
+.ultimate-resident .campus-active-route .campus-route-energy-base{filter:none}
+.ultimate-resident .campus-active-route .campus-route-silk-piece{opacity:.98;animation:ultimate-route-silk 5.6s linear infinite}
+@keyframes ultimate-route-silk{0%,100%{stroke:#7440c8}22%{stroke:#b185ed}42%{stroke:#f0ddff}61%{stroke:#a472e7}80%{stroke:#5b2fb1}92%{stroke:#7043ca}}
+@media(prefers-reduced-motion:reduce){.ultimate-resident .campus-active-route .campus-route-silk-piece{animation:none}}
+
+/* Keep the portrait Klinik UTM reference legible in the walk card and map photo panel. */
+.ultimate-resident .resident-walk-panel{overflow:clip}
+.ultimate-resident .resident-walk-photo--klinik{background:#0e071d}
+.ultimate-resident .resident-walk-photo--klinik img{height:clamp(240px,34dvh,330px);object-fit:cover;object-position:center 63%}
+.ultimate-resident .point-photo-panel[data-photo-node="KLINIK-UTM"] .point-photo-image img{height:clamp(220px,30dvh,280px);object-fit:cover;object-position:center 63%}
