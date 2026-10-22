@@ -10,20 +10,20 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
   const resident=await context.newPage(),developer=await context.newPage()
   async function enter(page,role){await page.goto(base+'/');await page.getByLabel('Visual quality').selectOption('fallback');await page.getByRole('button',{name:`Enter ${role} Mode`,exact:true}).click();await page.locator('.campus-map-overlay').waitFor()}
   const stored=()=>resident.evaluate(k=>JSON.parse(localStorage.getItem(k)),key)
-  const modal=()=>resident.getByRole('dialog',{name:'Report a point-to-point route',exact:true})
+  const modal=()=>resident.getByRole('dialog',{name:'Report a walkway problem',exact:true})
   async function report(description){
-   await resident.getByRole('button',{name:'Choose report points on map',exact:true}).click()
-   for(const id of ['MAIN-GATE','INNER-GATE']){await resident.locator(`[data-campus-node-id="${id}"]`).focus();await resident.keyboard.press('Enter');await resident.getByRole('button',{name:'Close point photo panel',exact:true}).click()}
-   await resident.getByRole('button',{name:'Report selected route',exact:true}).click();await resident.getByLabel('Describe the problem',{exact:true}).fill(description)
+   await resident.getByRole('button',{name:'Select path on map',exact:true}).click()
+   for(const id of ['MAIN-GATE','INNER-GATE']){await resident.locator(`[data-campus-node-id="${id}"]`).focus();await resident.keyboard.press('Enter')}
+   await modal().waitFor();await resident.getByRole('button',{name:'Continue to describe →',exact:true}).click();await resident.getByLabel('Describe the problem',{exact:true}).fill(description)
   }
   async function attach(){await resident.getByLabel('Optional report photo',{exact:true}).setInputFiles('public/point-photos/corridor-v1.jpg');await modal().locator('.report-reference-photo img').waitFor();await modal().locator('.report-reference-photo img').evaluate(img=>img.decode())}
-  async function submit(){await resident.getByRole('button',{name:'Submit route report',exact:true}).click();await modal().waitFor({state:'hidden'})}
+  async function submit(){if(await resident.getByRole('button',{name:'Review report →',exact:true}).count())await resident.getByRole('button',{name:'Review report →',exact:true}).click();await resident.getByRole('button',{name:'Submit route report →',exact:true}).click();await modal().waitFor({state:'hidden'});await resident.getByRole('button',{name:/Back to map/}).click()}
   async function inbox(){await developer.getByRole('tab',{name:/Resident reports/}).click()}
   const record=id=>developer.locator(`[data-report-id="${id}"]`)
   await enter(resident,'Resident');await enter(developer,'Developer')
   await report('Synthetic text-only report, with optional attachment removed.')
   for(const file of [{name:'unsupported.svg',mimeType:'image/svg+xml',buffer:Buffer.from('<svg/>')},{name:'corrupt.jpg',mimeType:'image/jpeg',buffer:Buffer.from('not a JPEG')},{name:'large.jpg',mimeType:'image/jpeg',buffer:Buffer.alloc(11*1024*1024)}]){
-   await resident.getByLabel('Optional report photo',{exact:true}).setInputFiles(file);await modal().getByRole('alert').waitFor();assert.equal(await resident.getByRole('button',{name:'Submit route report',exact:true}).isEnabled(),false);await resident.getByRole('button',{name:'Continue without photo',exact:true}).click()
+   await resident.getByLabel('Optional report photo',{exact:true}).setInputFiles(file);await modal().getByRole('alert').waitFor();assert.equal(await resident.getByRole('button',{name:'Review report →',exact:true}).isEnabled(),false);await resident.getByRole('button',{name:'Continue without photo',exact:true}).click()
   }
   await attach();await resident.getByRole('button',{name:'Remove report photo',exact:true}).click();await submit()
   const textOnly=(await stored()).reports[0];assert.equal(textOnly.reference_photo,undefined)
@@ -32,7 +32,7 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
   await resident.screenshot({path:path.join(out,'01-resident-optional-photo.png')})
   // A quota failure must not close the form, lose its attachment, or create a partial report.
   await resident.evaluate(k=>{window.reportOriginalSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key===k)throw new DOMException('Synthetic report-photo quota failure','QuotaExceededError');return window.reportOriginalSet.call(this,key,value)}},key)
-  await resident.getByRole('button',{name:'Submit route report',exact:true}).click();await modal().getByRole('alert').filter({hasText:'No report was submitted.'}).waitFor();assert.deepEqual(await stored(),beforeAttachment);assert.equal(await modal().locator('.report-reference-photo img').count(),1)
+  await resident.getByRole('button',{name:'Review report →',exact:true}).click();await resident.getByRole('button',{name:'Submit route report →',exact:true}).click();await modal().getByRole('alert').filter({hasText:'No report was submitted.'}).waitFor();assert.deepEqual(await stored(),beforeAttachment);await resident.getByRole('button',{name:'← Edit details',exact:true}).click();assert.equal(await modal().locator('.report-reference-photo img').count(),1)
   await resident.evaluate(()=>{Storage.prototype.setItem=window.reportOriginalSet});await submit()
   const sent=await stored(),photoReport=sent.reports.at(-1),photo=photoReport.reference_photo
   assert.ok(photo.data_url.startsWith('data:image/jpeg;base64,/9j/'));assert.ok(photo.data_url.length<=300000);assert.equal(photo.capture_time,null);assert.equal(photo.source,'resident_upload')

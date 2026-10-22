@@ -20,27 +20,28 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
   async function position(){return {current:await panel().getAttribute('data-walk-current'),next:await panel().getAttribute('data-walk-next')}}
   async function assertMapPoint(){const p=await position();assert.equal(await resident.locator('[data-walk-point="current"]').getAttribute('data-campus-node-id'),p.current);if(p.next)assert.equal(await resident.locator('[data-walk-point="next"]').getAttribute('data-campus-node-id'),p.next);else assert.equal(await resident.locator('[data-walk-point="next"]').count(),0)}
   await enter(resident,'Resident')
-  assert.equal(await resident.getByRole('button',{name:'Start selected route',exact:true}).count(),0)
-  await resident.getByLabel('Starting point',{exact:true}).selectOption('PA9-SPUR');await resident.getByLabel('Destination',{exact:true}).selectOption('MAIN-GATE');assert.equal(await resident.getByRole('button',{name:'Start selected route',exact:true}).count(),0)
+  assert.equal(await resident.getByRole('button',{name:'Start selected route',exact:true}).isDisabled(),true)
+  await resident.getByLabel('Starting point',{exact:true}).selectOption('PA9-SPUR');await resident.getByLabel('Destination',{exact:true}).selectOption('MAIN-GATE');assert.equal(await resident.getByRole('button',{name:'Start selected route',exact:true}).isDisabled(),true)
   const route=await plan('MAIN-GATE','KLINIK-UTM')
-  assert.equal(await resident.getByRole('link',{name:'Walk progress',exact:true}).getAttribute('href'),'#resident-walk-progress')
-  assert.deepEqual(await overlays(),route);assert.equal(await resident.getByLabel('Starting point',{exact:true}).isDisabled(),true);assert.equal(await resident.getByLabel('Destination',{exact:true}).isDisabled(),true)
+  assert.equal(await resident.locator('.resident-map-caption').count(),1)
+  assert.deepEqual(await overlays(),route);assert.equal(await resident.getByLabel('Starting point',{exact:true}).count(),0);assert.equal(await resident.getByLabel('Destination',{exact:true}).count(),0)
   assert.equal(await resident.locator('[data-route-objective]').count(),0);await assertMapPoint()
   const first=await position();assert.equal(first.current,'MAIN-GATE');assert.notEqual(first.next,'MAIN-GATE');await panel().getByText('No reference photo is published for this point. Use its map label to identify it.',{exact:true}).waitFor()
   await resident.locator('[data-campus-node-id="REAR-GATE"]').focus();await resident.keyboard.press('Enter')
-  assert.deepEqual(await position(),first);assert.deepEqual(await overlays(),route);assert.equal(await resident.getByLabel('Starting point',{exact:true}).inputValue(),'MAIN-GATE')
+  assert.deepEqual(await position(),first);assert.deepEqual(await overlays(),route)
   await resident.getByRole('button',{name:'Close point photo panel',exact:true}).click()
-  await resident.getByRole('button',{name:'Next',exact:true}).click();await resident.getByRole('button',{name:'Previous point',exact:true}).click();assert.deepEqual(await position(),first)
+  await resident.getByRole('button',{name:'Next point →',exact:true}).click();await resident.getByRole('button',{name:'← Previous point',exact:true}).click();assert.deepEqual(await position(),first)
   const reached=[first.current],photoSteps=[]
-  while((await position()).next){
+  while(await panel().count()){
    const p=await position();await assertMapPoint();assert.deepEqual(await overlays(),route)
    if(await panel().locator('img').count()){await panel().locator('img').evaluate(img=>img.decode());photoSteps.push({node:p.next,src:await panel().locator('img').getAttribute('src')});if(p.next==='J-TENNIS')await resident.screenshot({path:path.join(out,'01-resident-next-photo.png')})}
-   reached.push(p.next);await resident.getByRole('button',{name:'Next',exact:true}).click()
+   reached.push(p.next);await resident.getByRole('button',{name:'Next point →',exact:true}).click()
   }
   assert.equal(reached.length,route.length+1);assert.equal(new Set(reached).size,reached.length);assert.equal(reached.at(-1),'KLINIK-UTM')
-  await panel().getByRole('heading',{name:'Destination reached',exact:true}).waitFor();await assertMapPoint();assert.equal(await resident.getByRole('button',{name:'Next',exact:true}).count(),0)
-  assert.equal(await panel().getByRole('link',{name:'View destination on map',exact:true}).getAttribute('href'),'#resident-campus-map')
-  await resident.screenshot({path:path.join(out,'02-destination-reached.png')});await resident.getByRole('button',{name:'Previous point',exact:true}).click();assert.equal((await position()).next,'KLINIK-UTM');await resident.getByRole('button',{name:'Next',exact:true}).click();await resident.getByRole('button',{name:'Finish walk',exact:true}).click()
+  await resident.getByRole('heading',{name:'Beautifully done.',exact:true}).waitFor();await resident.getByRole('button',{name:'Review completed walkthrough',exact:true}).click()
+  await panel().getByRole('heading',{name:'Destination reached',exact:true}).waitFor();await assertMapPoint();assert.equal(await resident.getByRole('button',{name:'Next point →',exact:true}).count(),0)
+  assert.equal(await panel().getByRole('link',{name:'View destination on map ↗',exact:true}).getAttribute('href'),'#resident-campus-map')
+  await resident.screenshot({path:path.join(out,'02-destination-reached.png')});await resident.getByRole('button',{name:'← Previous point',exact:true}).click();assert.equal((await position()).next,'KLINIK-UTM');await resident.getByRole('button',{name:'Next point →',exact:true}).click();await resident.getByRole('button',{name:'Back to route selection',exact:true}).click()
   assert.equal(await resident.getByLabel('Starting point',{exact:true}).isEnabled(),true)
   // Most-shaded route must stay fixed across a publication that changes its optimum.
   const locked=await plan('NORTH-WEST','L1-ACCESS','exposure'),lockedVersion=await panel().getAttribute('data-walk-version'),lockedPosition=await position()
@@ -50,14 +51,14 @@ const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resol
   await panel().getByText('A newer map is published. This walk keeps your selected route and map version. Exit to compare routes using the latest map.',{exact:true}).waitFor()
   assert.deepEqual(await overlays(),locked);assert.deepEqual(await position(),lockedPosition);assert.equal(await panel().getAttribute('data-walk-version'),lockedVersion)
   for(const id of locked)assert.equal(await resident.locator(`[data-route-overlay-id="${id}"]`).getAttribute('data-route-version'),lockedVersion)
-  await resident.screenshot({path:path.join(out,'03-published-map-route-lock.png')});await resident.getByRole('button',{name:'Exit walk / change route',exact:true}).click()
+  await resident.screenshot({path:path.join(out,'03-published-map-route-lock.png')});await resident.getByRole('button',{name:'Exit walk',exact:true}).click()
   const recalculated=(await card('exposure').getAttribute('data-route-segments')).split(',');assert.notDeepEqual(recalculated,locked);assert.notEqual(await card('exposure').getAttribute('data-route-version'),lockedVersion)
   // Reverse route and single-link completion on phone; photo belongs to the next point.
   await resident.setViewportSize({width:390,height:844});const mobileRoute=await plan('KLINIK-UTM','MAIN-GATE')
   await panel().scrollIntoViewIfNeeded();assert.equal(await resident.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await resident.screenshot({path:path.join(out,'04-mobile-walk.png')})
-  await resident.getByRole('button',{name:'Next',exact:true}).click();assert.deepEqual(await overlays(),mobileRoute)
-  await resident.getByRole('button',{name:'Exit walk / change route',exact:true}).click()
-  await plan('INNER-GATE','MAIN-GATE');assert.ok((await panel().locator('img').getAttribute('src')).endsWith('/main-gate.jpg'));await resident.getByRole('button',{name:'Next',exact:true}).click();await resident.getByRole('button',{name:'Finish walk',exact:true}).click()
+  await resident.getByRole('button',{name:'Next point →',exact:true}).click();assert.deepEqual(await overlays(),mobileRoute)
+  await resident.getByRole('button',{name:'Exit walk',exact:true}).click()
+  await plan('INNER-GATE','MAIN-GATE');assert.ok((await panel().locator('img').getAttribute('src')).endsWith('/main-gate.jpg'));await resident.getByRole('button',{name:'Next point →',exact:true}).click();await resident.getByRole('button',{name:'Back to route selection',exact:true}).click()
   // Leaving/reloading is an explicit session boundary; persistent report/shade data survives.
   const stored=await resident.evaluate(k=>localStorage.getItem(k),key);await plan('MAIN-GATE','INNER-GATE');await enter(resident,'Resident');assert.equal(await panel().count(),0);assert.equal(await resident.evaluate(k=>localStorage.getItem(k),key),stored)
   assert.deepEqual(errors,[])

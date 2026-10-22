@@ -8,7 +8,7 @@ Phase 0B adds an approved cinematic Home screen with a genuine Three.js 360° or
 
 ## Run locally
 
-Prerequisite: Node.js 20+.
+Prerequisite: Node.js 24 LTS (the Vercel deployment also uses Node 24).
 
 ```powershell
 npm install
@@ -23,6 +23,10 @@ npm test
 ```
 
 On Home, use the chapter controls to inspect three camera views, click **360° tour** for a ten-second full camera revolution, drag the uncovered 3D world to orbit, pause motion, or choose High, Balanced or Fallback quality. The static fallback keeps both mode portals usable if WebGL is unavailable. Reduced-motion settings pause the camera and animated button surfaces on first load, and disable the automatic orbit tour.
+
+## Public hosting
+
+The Vercel configuration builds with Node.js 24 and publishes only `dist/`, with a restrictive content security policy and browser security headers. Never expose the Vite development/preview server publicly. See [deployment instructions, security checks and limitations](docs/DEPLOYMENT_SECURITY.md). This remains a browser-local DEMO: Developer actions and reports do not synchronize between different visitors.
 
 ## Scope and data status
 
