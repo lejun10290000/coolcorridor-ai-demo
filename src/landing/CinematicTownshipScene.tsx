@@ -11,11 +11,7 @@ interface Props {
   onUnavailable: () => void
 }
 
-const views = [
-  { radius: 37, elevation: 20, target: new THREE.Vector3(1, 1, 0), fov: 45, yawOffset: 0 },
-  { radius: 27, elevation: 6.5, target: new THREE.Vector3(-4, 1, -1), fov: 48, yawOffset: 2.53 },
-  { radius: 32, elevation: 28, target: new THREE.Vector3(1, 0.5, 0), fov: 43, yawOffset: 0 },
-] as const
+const cameraView = { radius: 37, elevation: 20, target: new THREE.Vector3(1, 1, 0), fov: 45 }
 
 export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToken, onUnavailable }: Props) {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -56,7 +52,7 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
     world.setQuality(qualityRef.current)
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 130)
     camera.position.set(25, 20, 27)
-    camera.lookAt(views[0].target)
+    camera.lookAt(cameraView.target)
     const size = () => {
       if (!mount.isConnected) return
       const width = Math.max(1, mount.clientWidth)
@@ -95,11 +91,6 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
     renderer.domElement.addEventListener('pointerup', pointerUp)
     renderer.domElement.addEventListener('pointercancel', pointerUp)
     renderer.domElement.addEventListener('webglcontextlost', contextLost)
-    const currentTarget = views[0].target.clone()
-    let currentRadius = views[0].radius
-    let currentElevation = views[0].elevation
-    let currentFov = views[0].fov
-    let currentYawOffset = 0
     let qualityLast: LandingQuality = qualityRef.current
     let hasRendered = false
     const animate = (now: number) => {
@@ -129,17 +120,9 @@ export function CinematicTownshipScene({ chapter, paused, quality, orbitTourToke
           } else orbitAngle += delta * 0.081 // ambient 360° orbit takes about 78 seconds
         }
       }
-      const view = views[chapterRef.current]
-      const blend = 1 - Math.exp(-delta * 1.55)
-      currentRadius += (view.radius - currentRadius) * blend
-      currentElevation += (view.elevation - currentElevation) * blend
-      currentFov += (view.fov - currentFov) * blend
-      currentYawOffset += (view.yawOffset - currentYawOffset) * blend
-      currentTarget.lerp(view.target, blend)
-      camera.fov = currentFov
-      camera.updateProjectionMatrix()
-      camera.position.set(currentTarget.x + Math.cos(orbitAngle + currentYawOffset) * currentRadius, currentElevation, currentTarget.z + Math.sin(orbitAngle + currentYawOffset) * currentRadius)
-      camera.lookAt(currentTarget)
+      // Explanation tabs never change the camera. Only drag, tour and ambient motion orbit it.
+      camera.position.set(cameraView.target.x + Math.cos(orbitAngle) * cameraView.radius, cameraView.elevation, cameraView.target.z + Math.sin(orbitAngle) * cameraView.radius)
+      camera.lookAt(cameraView.target)
       sky.update(reducedMotion.matches ? 0 : sceneSeconds, camera)
       world.update(sceneSeconds, chapterRef.current)
       renderer.render(world.scene, camera)

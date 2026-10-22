@@ -75,7 +75,7 @@
 .ultimate-resident button.resident-primary:hover:not(:disabled){box-shadow:inset 0 1px #fff,0 0 0 2px #f3bfff,0 0 38px #d373ffe0,0 15px 31px #2c0453d9}
 .ultimate-resident button.resident-primary:disabled{background:#513178;border-color:#805aa2;color:#c7b7d3;text-shadow:none;animation:none;box-shadow:none}
 .ultimate-resident button.resident-primary:disabled::after{display:none}
-.ultimate-resident .find-routes,.ultimate-resident .resident-start-walk{min-height:55px;font-size:.99rem}
+.ultimate-resident .resident-start-walk{min-height:55px;font-size:.99rem}
 @keyframes ultimate-liquid{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
 @keyframes ultimate-button-sheet{0%,13%{transform:translateX(-210%) skewX(-23deg);opacity:0}21%{opacity:.27}60%{transform:translateX(370%) skewX(-23deg);opacity:.27}73%,100%{transform:translateX(420%) skewX(-23deg);opacity:0}}
 

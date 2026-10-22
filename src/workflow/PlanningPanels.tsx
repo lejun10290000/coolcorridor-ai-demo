@@ -11,7 +11,8 @@ export function PlanningPanels({state,commit,plan,error,scenario,selection,previ
   function candidate(id:string,field:'cost'|'benefit',value:string){update(p=>({...p,candidates:{...p.candidates,[id]:{...p.candidates[id],[field]:value}}}))}
   return <div className={panel==='all'?'wf-two-col':'wf-single-panel'}>
     {(panel==='all'||panel==='budget')&&<section className="wf-panel" aria-label="Budget optimisation"><h2>Budget optimiser</h2>
-      <label>Available budget (whole RM)<input type="number" min="0" max="1000000000" step="1" value={workspace.budget} onChange={e=>update(p=>({...p,budget:e.target.value}))} aria-invalid={parseBudget(workspace.budget)===null}/></label>
+      <label>Available budget (whole RM)<input type="number" min="0" max="1000000000" step="1" value={workspace.budget} aria-describedby="manual-budget-help" onChange={e=>update(p=>({...p,budget:e.target.value}))} aria-invalid={parseBudget(workspace.budget)===null}/></label>
+      {parseBudget(workspace.budget)===null&&<p id="manual-budget-help" className="warning" role="alert">Use a whole RM budget from 0 to 1,000,000,000.</p>}
       <p>Whole RM only, from 0 to 1,000,000,000. Default RM20,000. After the first calculation, changing budget, eligibility, costs, scores or linked paths automatically recalculates the portfolio.</p>
       <h3>Candidates eligible for optimisation</h3><p>Checked candidates may be selected by the optimiser; they are not automatically selected.</p>
       <p>Select paths on the current Baseline map, then use a candidate’s “Use selected map paths” button to place that proposal. Defaults are illustrative map proxies. This only changes planning inputs.</p>

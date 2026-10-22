@@ -216,7 +216,7 @@ export function CampusImageMap({ segments, selected, onSelect, routeIds = [], ro
     </div>
     {mapLegend}
     {compactDetails?<>
-      <details className="campus-map-details"><summary>Map information and source</summary>{mapInformation}</details>
+      <details className="campus-map-details"><summary><span className="disclosure-title">Map information and source</span><small>Map key, data sources and what is still unverified</small></summary>{mapInformation}</details>
     </>:mapInformation}
   </section>
 }

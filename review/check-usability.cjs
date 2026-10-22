@@ -1,0 +1,82 @@
+// Local usability preview acceptance. Synthetic inputs, fresh browser storage, no remote writes.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
+const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path')
+const base=process.env.ALIGNMENT_APP_URL||'http://127.0.0.1:4183',out=path.resolve(process.env.USABILITY_OUTPUT_DIR||'outputs/usability-preview'),key='coolcorridor-shade-workflow-v1'
+;(async()=>{
+ await fs.mkdir(out,{recursive:true})
+ const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})})
+ try{
+  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'}),errors=[],violations=[]
+  await context.exposeBinding('recordPolicyViolation',(_,value)=>violations.push(value))
+  await context.addInitScript(()=>document.addEventListener('securitypolicyviolation',e=>window.recordPolicyViolation(e.effectiveDirective)))
+  context.on('page',p=>{p.setDefaultTimeout(15000);p.on('pageerror',e=>errors.push(e.message))})
+  const resident=await context.newPage(),developer=await context.newPage()
+  async function enter(page,role){await page.goto(base+'/');await page.getByLabel('Visual quality').selectOption('fallback');await page.getByRole('button',{name:`Enter ${role} Mode`,exact:true}).click();await page.locator('.campus-map-overlay').waitFor()}
+  const search=()=>resident.getByRole('button',{name:'⌕ Search campus places',exact:true})
+  const query=()=>resident.getByLabel('Find a place by name',{exact:true})
+  const stored=()=>resident.evaluate(k=>JSON.parse(localStorage.getItem(k)),key)
+  async function find(text){await search().click();await query().fill(text)}
+  await enter(resident,'Resident')
+  assert.equal(await resident.getByRole('button',{name:'Clear route',exact:true}).isDisabled(),true)
+  await find('somewhere that does not exist');await resident.getByText(/No matching places/).waitFor()
+  await query().press('Escape');assert.equal(await search().getAttribute('aria-expanded'),'false');assert.equal(await search().evaluate(e=>e===document.activeElement),true)
+  await find('Main Gate');await resident.getByRole('button',{name:'Set Pintu Masuk Utama as start',exact:true}).click()
+  assert.equal(await resident.getByLabel('Starting point',{exact:true}).inputValue(),'MAIN-GATE')
+  await resident.waitForFunction(()=>document.getElementById('resident-destination')===document.activeElement)
+  assert.equal(await resident.getByLabel('Destination',{exact:true}).evaluate(e=>e===document.activeElement),true)
+  await find('clinic');assert.equal(await resident.locator('[data-place-id="KLINIK-UTM"]').count(),1)
+  await resident.screenshot({path:path.join(out,'after-place-search.png'),fullPage:true})
+  await resident.locator('[data-place-id="KLINIK-UTM"]').getByRole('button',{name:/as destination/}).click()
+  assert.equal(await resident.getByLabel('Destination',{exact:true}).inputValue(),'KLINIK-UTM')
+  assert.equal(await resident.locator('[data-route-objective="shortest"]').count(),1);assert.equal(await resident.getByRole('button',{name:'Find routes',exact:true}).count(),0)
+  await resident.getByRole('link',{name:'View route options →',exact:true}).click();assert.equal(await resident.locator('#resident-route-options').evaluate(e=>e===document.activeElement),true)
+  await resident.evaluate(()=>scrollTo(0,0));await resident.screenshot({path:path.join(out,'after-resident.png'),fullPage:true})
+  await resident.getByRole('button',{name:'Clear route',exact:true}).click()
+  assert.equal(await resident.getByLabel('Starting point',{exact:true}).inputValue(),'');assert.equal(await resident.getByLabel('Destination',{exact:true}).inputValue(),'')
+  assert.equal(await resident.getByRole('link',{name:'View route options →',exact:true}).count(),0)
+  for(const [from,to,message] of [['MAIN-GATE','MAIN-GATE','Choose a different destination'],['PA9-SPUR','MAIN-GATE','no connected illustrative route']]){
+   await resident.getByLabel('Starting point',{exact:true}).selectOption(from);await resident.getByLabel('Destination',{exact:true}).selectOption(to)
+   assert.equal(await resident.getByRole('link',{name:'View route options →',exact:true}).count(),0);assert.ok((await resident.locator('.route-next-step').innerText()).includes(message))
+  }
+  await resident.getByLabel('Starting point',{exact:true}).selectOption('MAIN-GATE');await resident.getByLabel('Destination',{exact:true}).selectOption('INNER-GATE')
+  await resident.getByRole('button',{name:'Select path on map',exact:true}).click()
+  for(const id of ['MAIN-GATE','INNER-GATE']){await resident.locator(`[data-campus-node-id="${id}"]`).focus();await resident.keyboard.press('Enter')}
+  const modal=()=>resident.getByRole('dialog',{name:'Report a walkway problem',exact:true})
+  await resident.getByRole('button',{name:'Continue to describe →',exact:true}).click()
+  await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic preview: broken canopy near the Main Gate.')
+  await resident.getByLabel('Optional report photo',{exact:true}).setInputFiles('public/point-photos/corridor-v1.jpg');await modal().locator('.report-reference-photo img').waitFor()
+  await modal().locator('form').dispatchEvent('submit');assert.equal((await stored())?.reports?.length??0,0)
+  await resident.getByRole('button',{name:'Review report →',exact:true}).click();assert.equal(await modal().locator('.report-reference-photo img').count(),1)
+  await resident.screenshot({path:path.join(out,'after-report-review.png'),fullPage:true})
+  async function submit(){await resident.getByRole('button',{name:'Submit route report →',exact:true}).click();await resident.getByRole('button',{name:/Back to map/}).click()}
+  await submit()
+  const savedReportPoints=await resident.getByTestId('report-map-selection').innerText()
+  await resident.getByRole('button',{name:'Clear route',exact:true}).click();assert.equal(await resident.getByTestId('report-map-selection').innerText(),savedReportPoints)
+  await resident.getByRole('button',{name:'Select path on map',exact:true}).click();for(const id of ['MAIN-GATE','INNER-GATE']){await resident.locator(`[data-campus-node-id="${id}"]`).focus();await resident.keyboard.press('Enter')}await resident.getByRole('button',{name:'Continue to describe →',exact:true}).click();await resident.getByLabel('Describe the problem',{exact:true}).fill('Synthetic preview: blocked path needs a review.');await resident.getByRole('button',{name:'Review report →',exact:true}).click();await submit()
+  await enter(developer,'Developer');await developer.getByRole('tab',{name:/Resident reports/}).click()
+  const reports=(await stored()).reports,first=developer.locator(`[data-report-id="${reports[0].report_id}"]`),second=developer.locator(`[data-report-id="${reports[1].report_id}"]`)
+  const reviewNote=first.getByLabel(`Report review note — ${reports[0].report_id}`,{exact:true})
+  await reviewNote.fill('Unsubmitted review note must survive filtering.')
+  await developer.getByRole('button',{name:'Pending · 2',exact:true}).click();assert.equal(await developer.locator('[data-report-id]:visible').count(),2)
+  await developer.getByLabel('Search Resident reports',{exact:true}).fill('blocked path');assert.equal(await developer.locator('[data-report-id]:visible').count(),1)
+  await developer.getByRole('button',{name:'Rejected · 0',exact:true}).click();await developer.getByText('No reports match these filters.',{exact:true}).waitFor()
+  await developer.getByRole('button',{name:'Clear report filters',exact:true}).click();assert.equal(await reviewNote.inputValue(),'Unsubmitted review note must survive filtering.')
+  await second.getByLabel(`Report review note — ${reports[1].report_id}`,{exact:true}).fill('Synthetic rejection for the local preview.');await second.getByRole('button',{name:'Reject report',exact:true}).click()
+  await developer.getByRole('button',{name:'Pending · 1',exact:true}).click();assert.equal(await developer.locator('[data-report-id]:visible').count(),1)
+  assert.equal(await reviewNote.inputValue(),'Unsubmitted review note must survive filtering.')
+  await developer.evaluate(()=>scrollTo(0,0));await developer.screenshot({path:path.join(out,'after-developer.png'),fullPage:true})
+  for(const page of [resident,developer]){
+   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
+   const nav=page.getByRole('navigation',{name:page===resident?'Resident workspace shortcuts':'Developer workspace shortcuts'})
+   await nav.getByRole('link',{name:page===resident?'Report an issue':'Planning tools',exact:true}).click()
+   const target=page.locator(page===resident?'#resident-report-area':'#developer-controls')
+   await page.waitForFunction(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return r.bottom>0&&r.top<innerHeight},page===resident?'#resident-report-area':'#developer-controls')
+   assert.ok(await target.count())
+   await page.screenshot({path:path.join(out,page===resident?'after-resident-mobile.png':'after-developer-mobile.png'),fullPage:true})
+  }
+  await resident.getByRole('navigation',{name:'Resident workspace shortcuts'}).getByRole('link',{name:'Map & places',exact:true}).click();await find('clinic');assert.equal(await resident.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
+  assert.deepEqual(errors,[]);assert.deepEqual(violations,[])
+  const result={status:'passed',base,checks:['place aliases and no-match feedback','keyboard Escape/focus recovery','search selects actual graph endpoints and focuses next control','clear route resets routing without erasing report selection','same-point/disconnected routes keep actions disabled','automatic route results and view-options focus','explicit review required before report submission','photo visible in final report review','report status/query filters and empty-state reset','unsaved reviewer notes survive filtering','resident/developer mobile shortcuts and no horizontal overflow','existing CSP permits all normal usability flows'],pageErrors:errors,cspViolations:violations}
+  await fs.writeFile(path.join(out,'browser-results.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2))
+ }finally{await browser.close()}
+})().catch(error=>{console.error(error);process.exit(1)})
